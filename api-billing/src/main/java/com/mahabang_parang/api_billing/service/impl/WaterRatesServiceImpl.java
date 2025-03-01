@@ -2,10 +2,13 @@ package com.mahabang_parang.api_billing.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mahabang_parang.api_billing.model.dto.WaterRatesDto;
@@ -17,7 +20,7 @@ import com.mahabang_parang.api_billing.repository.WaterRatesResidentialRepositor
 import com.mahabang_parang.api_billing.service.WaterRatesService;
 
 
-
+@Service
 @Transactional
 public class WaterRatesServiceImpl implements WaterRatesService {
 
@@ -32,7 +35,8 @@ public class WaterRatesServiceImpl implements WaterRatesService {
      @Override
      public List<WaterRatesDto> getActiveWaterRatesCommercial() {
           List<WaterRatesCommercialEntity> entities = new ArrayList<WaterRatesCommercialEntity>();
-          entities = this.commercialRepo.findByActive(true);
+          Order order = new Order(Sort.Direction.ASC,"hierarchy");
+          entities = this.commercialRepo.findByIsActive(true, Sort.by(order));
 
           return mapper.toCommercialRateDtoList(entities);
      }
@@ -40,7 +44,8 @@ public class WaterRatesServiceImpl implements WaterRatesService {
      @Override
      public List<WaterRatesDto> getActiveWaterRatesResidentials() {
           List<WaterRatesResidentialEntity> entities = new ArrayList<WaterRatesResidentialEntity>();
-          entities = this.residentialRepo.findByActive(true);
+          Order order = new Order(Sort.Direction.ASC,"hierarchy");
+          entities = this.residentialRepo.findByIsActive(true, Sort.by(order));
 
           return mapper.toResidentialRateDtoList(entities);
      }
@@ -62,10 +67,13 @@ public class WaterRatesServiceImpl implements WaterRatesService {
 
      @Override
      public List<WaterRatesDto> setActiveWaterRatesCommercial(String groupRatingId, Boolean isActive) {
-          List<WaterRatesCommercialEntity> entities = this.commercialRepo.findByGroupRatingId(groupRatingId);
+
+          Order order = new Order(Sort.Direction.ASC,"hierarchy");
+
+          List<WaterRatesCommercialEntity> entities = this.commercialRepo.findByGroupRatingId(groupRatingId, Sort.by(order));
 
           for (WaterRatesCommercialEntity entity : entities) {
-               entity.setActive(isActive);
+               entity.setIsActive(isActive);
           }
 
           return mapper.toCommercialRateDtoList(this.commercialRepo.saveAll(entities));
@@ -73,10 +81,11 @@ public class WaterRatesServiceImpl implements WaterRatesService {
 
      @Override
      public List<WaterRatesDto> setActiveWaterRatesResidential(String groupRatingId, Boolean isActive) {
-          List<WaterRatesResidentialEntity> entities = this.residentialRepo.findByGroupRatingId(groupRatingId);
+          Order order = new Order(Sort.Direction.ASC,"hierarchy");
+          List<WaterRatesResidentialEntity> entities = this.residentialRepo.findByGroupRatingId(groupRatingId, Sort.by(order));
 
           for (WaterRatesResidentialEntity entity : entities) {
-               entity.setActive(isActive);
+               entity.setIsActive(isActive);
           }
 
           return mapper.toResidentialRateDtoList(this.residentialRepo.saveAll(entities));
@@ -87,6 +96,13 @@ public class WaterRatesServiceImpl implements WaterRatesService {
           
           List<WaterRatesCommercialEntity> entities = new ArrayList<WaterRatesCommercialEntity>();
           entities = mapper.toCommercialEntityList(payload);
+          
+          String groupId = UUID.randomUUID().toString();
+          
+          for(WaterRatesCommercialEntity ent : entities) {
+               ent.setGroupRatingId(groupId);
+          }
+          
           List<WaterRatesDto> result = mapper.toCommercialRateDtoList(this.commercialRepo.saveAll(entities));
 
           return result;
@@ -97,6 +113,13 @@ public class WaterRatesServiceImpl implements WaterRatesService {
 
           List<WaterRatesResidentialEntity> entities = new ArrayList<WaterRatesResidentialEntity>();
           entities = mapper.toResidentialEntityList(payload);
+          
+          String groupId = UUID.randomUUID().toString();
+          
+          for(WaterRatesResidentialEntity ent : entities) {
+               ent.setGroupRatingId(groupId);
+          }
+          
           List<WaterRatesDto> result = mapper.toResidentialRateDtoList(this.residentialRepo.saveAll(entities));
 
           return result;
@@ -105,13 +128,15 @@ public class WaterRatesServiceImpl implements WaterRatesService {
      
      @Override
      public List<WaterRatesDto> getWaterRatesCommercialByGroupId(String groupId) {
-          List<WaterRatesCommercialEntity> entities = this.commercialRepo.findByGroupRatingId(groupId);
+          Order order = new Order(Sort.Direction.ASC,"hierarchy");
+          List<WaterRatesCommercialEntity> entities = this.commercialRepo.findByGroupRatingId(groupId, Sort.by(order));
           return mapper.toCommercialRateDtoList(entities);
      }
 
      @Override
      public List<WaterRatesDto> getWaterRatesResidentialByGroupId(String groupId) {
-          List<WaterRatesResidentialEntity> entities = this.residentialRepo.findByGroupRatingId(groupId);
+          Order order = new Order(Sort.Direction.ASC,"hierarchy");
+          List<WaterRatesResidentialEntity> entities = this.residentialRepo.findByGroupRatingId(groupId, Sort.by(order));
           return mapper.toResidentialRateDtoList(entities);
      }
 

@@ -45,7 +45,6 @@ public class BillingController {
                response.setMessage("Internal Server Error: " + e.getMessage());
                
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-
           }
 
      }
