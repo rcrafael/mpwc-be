@@ -34,6 +34,8 @@ public class BillingDto {
 
      private Integer m3Used;
 
+     private double rating;
+
      private double readingAmount;
 
      private double parts;
