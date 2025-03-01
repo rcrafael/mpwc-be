@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.mahabang_parang.api_user.model.Customer;
+import com.mahabang_parang.api_user.model.entity.CustomerEntity;
 import com.mahabang_parang.api_user.repository.CustomerRepository;
 
 @Service
@@ -17,19 +17,19 @@ public class CustomerServiceImpl implements CustomerService{
      private CustomerRepository custRepository;
      
      @Override
-     public List<Customer> getCustomers(int pageNo, int pageSize){
+     public List<CustomerEntity> getCustomers(int pageNo, int pageSize){
           Pageable pageable = PageRequest.of(pageNo, pageSize);
           return custRepository.findAll(pageable).get().toList();
      }
 
      @Override
-     public Customer getCustomer(Long id) {
+     public CustomerEntity getCustomer(Long id) {
           System.out.println("customerId:" + id);
           return custRepository.findById(id).get();
      }
 
      @Override
-     public List<Customer> getCustomersByFirstName(String firstName) {
+     public List<CustomerEntity> getCustomersByFirstName(String firstName) {
           return custRepository.findByFirstNameContaining(firstName);
      }
 

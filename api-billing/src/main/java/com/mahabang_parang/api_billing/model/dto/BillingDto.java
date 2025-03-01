@@ -13,12 +13,16 @@ import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class BillingDto {
+
+     private String id;
 
      private String custId;
 
@@ -51,6 +55,8 @@ public class BillingDto {
      private Date dateTo;
 
      private Date dueDate;
+
+     private Integer status;
 
      private String createdBy;
 

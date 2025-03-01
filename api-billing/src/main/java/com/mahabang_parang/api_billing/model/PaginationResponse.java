@@ -13,17 +13,12 @@ import lombok.Setter;
 public class PaginationResponse<T> {
 
      private List<?> data;
-     private long totalRecordCount;
-     private int pageNumber;
-     private int pageSize;
-     private int totalPages;
+     private Paginator paginator;
 
      public PaginationResponse(List<?> data, int pageNumber, int pageSize, int totalPages, long totalRecordCount) {
           this.data = data;
-          this.pageNumber = pageNumber;
-          this.pageSize = pageSize;
-          this.totalPages = totalPages;
-          this.totalRecordCount = totalRecordCount;
+          this.paginator = new Paginator(pageNumber, pageSize, totalPages, totalRecordCount);
      }
 
 }
+
