@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.mahabang_parang.api_billing.model.PaginationRequest;
 import com.mahabang_parang.api_billing.model.PaginationResponse;
+import com.mahabang_parang.api_billing.model.Paginator;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
 import com.mahabang_parang.api_billing.model.entity.BillingEntity;
 import com.mahabang_parang.api_billing.model.mapper.BillingMapper;
@@ -62,13 +63,18 @@ public class BillingServiceImpl implements BillingService  {
           System.out.println("BILLING CONTENT: " + billing.getContent());
           System.out.println("-------------------------------------------------------------------------------");
 
-          return new PaginationResponse<>(
-               billing.getContent(),
+          Paginator paginator = new Paginator(
                billing.getNumber(),
                billing.getSize(),
                billing.getTotalPages(),
                billing.getTotalElements()
           );
+
+          PaginationResponse<BillingDto> pageResponse = new PaginationResponse<BillingDto>();
+          pageResponse.setData(billing.getContent());
+          pageResponse.setPaginator(paginator);
+
+          return pageResponse;
      }
 
      public BillingDto getBillingById(String billingId) throws Exception { 
@@ -78,4 +84,14 @@ public class BillingServiceImpl implements BillingService  {
           return mapper.toDto(bill);
      }
 
+
+     public BillingDto create(BillingDto billing) throws Exception {
+          BillingEntity billingEntity = mapper.toEntity(billing);
+          billingEntity = billingRepo.save(billingEntity);
+          System.out.println("-------------------------------------------------------------------------------");
+          System.out.println("BILLING CONTENT CREATED: " + billing);
+          System.out.println("-------------------------------------------------------------------------------");
+
+          return mapper.toDto(billingEntity);
+     }
 }

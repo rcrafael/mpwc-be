@@ -16,6 +16,8 @@ import com.mahabang_parang.api_billing.model.PaginationRequest;
 import com.mahabang_parang.api_billing.model.PaginationResponse;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
 import com.mahabang_parang.api_billing.service.BillingService;
+import org.springframework.web.bind.annotation.PostMapping;
+
 
 @RestController
 @RequestMapping("api/billing")
@@ -86,6 +88,24 @@ public class BillingController {
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
 
+     }
+
+     
+     @PostMapping()
+     public ResponseEntity<ApiResponse> createBilling(@RequestBody BillingDto billing) throws Exception {
+          ApiResponse response = new ApiResponse();
+          try {
+               BillingDto bill = billingSvc.create(billing);
+               response.setStatusCode(HttpStatus.CREATED);
+               response.setMessage("success");
+               response.setResult(bill );
+               return ResponseEntity.status(HttpStatus.CREATED).body(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
      }
 
 }

@@ -15,23 +15,27 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name="reading")
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class BillingEntity {
 
      @Id
      @GeneratedValue(strategy = GenerationType.UUID)
-     @Column(length = 32, unique = true)
+     @Column(length = 36, unique = true)
      private String id;
 
-     @Column(length = 32)
+     @Column(length = 36)
      private String custId;
 
      @Column(length =  50)
@@ -69,20 +73,23 @@ public class BillingEntity {
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      private Date dueDate;
 
-     @Column(length = 50)
+     private Integer status;
+
+     @Column(length = 36)
      private String createdBy;
 
-     @JsonIgnore
-     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      @CreationTimestamp
+     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+     @Column(nullable = false, updatable = false)
      private LocalDateTime createdDate;
 
-     @Column(length = 50)
+     @Column(length = 36)
      private String updatedBy;
 
-     @JsonIgnore
+     // @UpdateTimestamp
+     @Temporal(TemporalType.TIMESTAMP)
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-     @UpdateTimestamp
+     @Column(nullable = true)
      private LocalDateTime dateUpdated;
 
 

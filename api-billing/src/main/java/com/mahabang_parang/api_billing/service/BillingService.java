@@ -14,6 +14,6 @@ public interface BillingService {
      public PaginationResponse<BillingDto> getBilling(int pageNumber, int pageSize) throws Exception;
      public PaginationResponse<BillingDto> getBillingByCustId(String customerId, int pageNumber, int pageSize) throws Exception;
      public BillingDto getBillingById(String billingId) throws Exception;
-
+     public BillingDto create(BillingDto billing) throws Exception;
 
 }

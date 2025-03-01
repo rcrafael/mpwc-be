@@ -1,4 +1,4 @@
-package com.mahabang_parang.api_user.model;
+package com.mahabang_parang.api_user.model.entity;
 
 import java.util.Date;
 import java.util.UUID;
@@ -24,7 +24,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @NoArgsConstructor
-public class Customer {
+public class CustomerEntity {
 
      // public Customer() {}
 
@@ -94,7 +94,7 @@ public class Customer {
 
      private Integer userId;
 
-     public Customer(String nationalId, String meterNo, String alias, String firstName, String middleName,
+     public CustomerEntity(String nationalId, String meterNo, String alias, String firstName, String middleName,
                String lastName,
                int branchCode, String address, int gender, String civilStatus, Date dateOfBirth,
                String occupation, int numberOfDependent, String religion, float annualIncome, Integer updatedBy, 
