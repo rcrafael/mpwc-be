@@ -28,10 +28,13 @@ public class WaterRatesCommercialEntity {
      private String groupRatingId;
 
      @Column(nullable = false)
-     private Integer order;
+     private Integer hierarchy;
 
-     @Column(nullable = false)
-     private String operator;
+     @Column(name = "from_m3", nullable = false)
+     private Integer from;
+
+     @Column(name = "to_m3")
+     private Integer to;
 
      @Column(nullable = false)
      private Double ratingValue;
@@ -40,9 +43,9 @@ public class WaterRatesCommercialEntity {
      private String description;
 
      @Column
-     private boolean isBaseAmount;
+     private Boolean isBaseAmount;
 
      @Column(nullable = false)
-     private boolean isActive;
+     private Boolean isActive;
 
 }
