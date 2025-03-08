@@ -15,23 +15,25 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
+@Entity
+@Table(name = "customer")
 @Getter
 @Setter
-@Entity
 @NoArgsConstructor
 public class CustomerEntity {
 
      // public Customer() {}
 
      @Id
-     @GeneratedValue(strategy = GenerationType.AUTO)
-     @Column(length = 32, unique = true)
-     private Long id;
+     @GeneratedValue(strategy = GenerationType.UUID)
+     @Column(length = 36, unique = true)
+     private String id;
 
      @Column(length = 12)
      private String nationalId;
@@ -84,21 +86,21 @@ public class CustomerEntity {
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      private Date dateUpdated;
 
-     @Nullable
-     private Integer updatedBy;
+     @Column(length = 36, nullable = true)
+     private String updatedBy;
      private int customerType;
      private int phase;
 
      @Column(length = 20)
      private String accountNo;
 
-     private Integer userId;
+     private String userId;
 
      public CustomerEntity(String nationalId, String meterNo, String alias, String firstName, String middleName,
                String lastName,
                int branchCode, String address, int gender, String civilStatus, Date dateOfBirth,
-               String occupation, int numberOfDependent, String religion, float annualIncome, Integer updatedBy, 
-               int customerType, int phase, String accountNo, Integer userId) {
+               String occupation, int numberOfDependent, String religion, float annualIncome, String updatedBy, 
+               int customerType, int phase, String accountNo, String userId) {
           this.nationalId = nationalId;
           this.meterNo = meterNo;
           this.alias = alias;
