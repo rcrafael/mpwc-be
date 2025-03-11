@@ -24,7 +24,9 @@ public class BillingDto {
 
      private String id;
 
-     private String custId;
+     private String readingNo;
+
+     private String customerId;
 
      private String meterNo; 
 

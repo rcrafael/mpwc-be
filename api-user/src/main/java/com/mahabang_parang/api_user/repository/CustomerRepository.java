@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.mahabang_parang.api_user.model.entity.CustomerEntity;
 
-public interface CustomerRepository extends JpaRepository<CustomerEntity, Long>{
+public interface CustomerRepository extends JpaRepository<CustomerEntity, String>{
      List<CustomerEntity> findByFirstNameContaining(String firstName);
 }
