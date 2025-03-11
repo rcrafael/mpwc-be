@@ -1,5 +1,7 @@
 package com.mahabang_parang.api_billing.service.impl;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,7 +58,7 @@ public class BillingServiceImpl implements BillingService  {
      public PaginationResponse<BillingDto> getBillingByCustId(String customerId, int pageNumber, int pageSize) throws Exception {
           PageRequest pageable = PageRequest.of(pageNumber, pageSize);
           
-          Page<BillingEntity> billing = billingRepo.findByCustId(customerId, pageable);
+          Page<BillingEntity> billing = billingRepo.findByCustomerId(customerId, pageable);
 
 
           System.out.println("-------------------------------------------------------------------------------");
@@ -87,11 +89,27 @@ public class BillingServiceImpl implements BillingService  {
 
      public BillingDto create(BillingDto billing) throws Exception {
           BillingEntity billingEntity = mapper.toEntity(billing);
+
+
+          billing.setReadingNo(generateControlNumber());
           billingEntity = billingRepo.save(billingEntity);
           System.out.println("-------------------------------------------------------------------------------");
           System.out.println("BILLING CONTENT CREATED: " + billing);
           System.out.println("-------------------------------------------------------------------------------");
 
           return mapper.toDto(billingEntity);
+     }
+
+     private String generateControlNumber() {
+          String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+          String lastReadingNo = billingRepo.findLastReadingNo(datePrefix);
+
+          int sequence = 1;
+          if(lastReadingNo != null) {
+               int lastSequence = Integer.parseInt(lastReadingNo.substring(8));
+               sequence = lastSequence + 1;
+          }
+
+          return datePrefix + String.format("%05d", sequence);
      }
 }

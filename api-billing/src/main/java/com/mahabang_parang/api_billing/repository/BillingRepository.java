@@ -3,12 +3,17 @@ package com.mahabang_parang.api_billing.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.mahabang_parang.api_billing.model.entity.BillingEntity;
 
 public interface BillingRepository extends JpaRepository<BillingEntity, String> {
 
+     @Query("SELECT b.readingNo FROM BillingEntity b WHERE b.readingNo LIKE :datePrefix% ORDER BY b.readingNo DESC LIMIT 1")
+     String findLastReadingNo(@Param("datePrefix") String datePrefix);
+
      Page<BillingEntity> findAll(Pageable pageable);
-     Page<BillingEntity> findByCustId(String custId, Pageable pageable);
+     Page<BillingEntity> findByCustomerId(String custId, Pageable pageable);
      
 }

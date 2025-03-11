@@ -19,6 +19,8 @@ public class CustomerMeterDto {
      private String customerId;
      private String meterNo;
      private String alias;
+     private Integer previous;
+     private Integer present;
      private Integer status;
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      private Date dateCreated;

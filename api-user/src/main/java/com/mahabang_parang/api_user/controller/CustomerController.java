@@ -136,12 +136,12 @@ public class CustomerController {
      }
      
      @GetMapping("meter")
-     public ResponseEntity<ApiResponse> getMeterbyCustomer(@RequestParam String CustomerId) {
+     public ResponseEntity<ApiResponse> getMeterbyCustomer(@RequestParam String customerId) {
          
           ApiResponse response = new ApiResponse();
 
           try {
-               List<CustomerMeterDto> customers = this.meterService.getCustomerMetersByCustomerId(CustomerId);
+               List<CustomerMeterDto> customers = this.meterService.getCustomerMetersByCustomerId(customerId);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(customers);
@@ -154,4 +154,44 @@ public class CustomerController {
           }
      }
      
+     @GetMapping("meter/{meterNo}")
+     public ResponseEntity<ApiResponse> getMeterByMeterNo(@PathVariable String meterNo) {
+         
+          ApiResponse response = new ApiResponse();
+
+          try {
+               CustomerMeterDto customerMeter = this.meterService.getCustomerMeterByMeterNo(meterNo);
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(customerMeter);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+
+     @PostMapping("meter/single-update")
+     public ResponseEntity<ApiResponse> updateMeterNo(@RequestBody CustomerMeterDto meter){
+          
+          ApiResponse response = new ApiResponse();
+
+          try {
+               CustomerMeterDto mtr = meterService.updateCustomerMeter(meter);
+
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(mtr);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+
+
 }

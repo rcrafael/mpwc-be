@@ -43,7 +43,8 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
           
           custMeter.setAlias(customerMeter.getAlias());
           custMeter.setStatus(customerMeter.getStatus());
-
+          custMeter.setPrevious(customerMeter.getPrevious());
+          custMeter.setPresent(customerMeter.getPresent());
           CustomerMeterDto newMeter = mapper.toDto(custMeterRepo.save(custMeter));
 
           return newMeter;
@@ -53,6 +54,7 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
      @Override
      public CustomerMeterDto getCustomerMeterByMeterNo(String meterNo) {
           CustomerMeterEntity custMeter = custMeterRepo.findByMeterNo(meterNo);
+          // custMeter.setPrevious(getPreviousUsage(meterNo));
           return mapper.toDto(custMeter);
      }
 
@@ -66,6 +68,11 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
      public List<CustomerMeterDto> getCustomerMetersByCustomerId(String customerId) {
           List<CustomerMeterEntity> meters = custMeterRepo.findByCustomerId(customerId);
           return mapper.toDtoList(meters);
+     }
+
+     private Integer getPreviousUsage(String meterNo) {
+          Integer previousUsage = custMeterRepo.findPresentById(meterNo);
+          return previousUsage == null ? 0 : previousUsage;
      }
 
 }

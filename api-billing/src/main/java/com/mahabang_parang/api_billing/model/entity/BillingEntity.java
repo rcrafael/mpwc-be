@@ -35,8 +35,11 @@ public class BillingEntity {
      @Column(length = 36, unique = true)
      private String id;
 
+     @Column(unique = true)
+     private String readingNo;
+
      @Column(length = 36)
-     private String custId;
+     private String customerId;
 
      @Column(length =  50)
      private String meterNo; 

@@ -41,6 +41,10 @@ public class CustomerMeterEntity {
      @Column(nullable = true)
      private String alias;
      
+     private Integer previous;
+
+     private Integer present;
+
      private Integer status;
 
      @JsonIgnore
