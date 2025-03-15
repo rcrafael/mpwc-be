@@ -1,5 +1,7 @@
 package com.mahabang_parang.api_billing.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -106,5 +108,62 @@ public class BillingController {
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
+
+     @GetMapping("new-reading-number")
+     public ResponseEntity<ApiResponse> genrateReadingNo() {
+          ApiResponse response = new ApiResponse();
+
+          try {
+               String accountNo = billingSvc.generateReadingNo();
+
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(accountNo);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+     
+     @GetMapping("get-recent-billings")
+     public ResponseEntity<ApiResponse> getRecentBillings(@RequestParam() String customerId) {
+          ApiResponse response = new ApiResponse();
+          try {
+               List<BillingDto> billing = billingSvc.getRecentBillingByCustomerId(customerId);
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(billing);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+
+     @GetMapping("get-unpaid-bills")
+     public ResponseEntity<ApiResponse> getUnpaidBillingByCustomerId(@RequestParam String customerId) {
+          ApiResponse response = new ApiResponse();
+          try {
+               List<BillingDto> billing = billingSvc.getUnpaidBillingByCustomerId(customerId);
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(billing);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+     
+
+
+
 
 }

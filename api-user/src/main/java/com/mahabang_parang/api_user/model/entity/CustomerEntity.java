@@ -38,16 +38,16 @@ public class CustomerEntity {
      @Column(length = 12)
      private String nationalId;
 
-     @Column(length = 20)
+     @Column(length = 20, nullable = false)
      private String meterNo;
 
-     @Column(length = 100)
+     @Column(length = 100, nullable = false)
      private String alias;
 
      @Column(length = 50)
      private String firstName;
 
-     @Column(length = 50)
+     @Column(length = 50, nullable = true)
      private String middleName;
 
      @Column(length = 50)
@@ -66,14 +66,19 @@ public class CustomerEntity {
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      private Date dateOfBirth;
 
-     @Column(length = 50)
+     @Column(length = 50, nullable = true)
      private String occupation;
 
+     @Column(length = 100, nullable = true)
+     private String educationalLevel;
+     
+     @Column(nullable = true)
      private int numberOfDependent;
 
-     @Column(length = 100)
+     @Column(length = 100, nullable = true)
      private String religion;
 
+     @Column(nullable = false)
      private float annualIncome;
 
      @JsonIgnore
@@ -94,13 +99,16 @@ public class CustomerEntity {
      @Column(length = 20)
      private String accountNo;
 
+     @Column(length = 36, nullable = true)
      private String userId;
 
-     public CustomerEntity(String nationalId, String meterNo, String alias, String firstName, String middleName,
-               String lastName,
-               int branchCode, String address, int gender, String civilStatus, Date dateOfBirth,
-               String occupation, int numberOfDependent, String religion, float annualIncome, String updatedBy, 
-               int customerType, int phase, String accountNo, String userId) {
+
+     public CustomerEntity(String id, String nationalId, String meterNo, String alias, String firstName,
+               String middleName, String lastName, int branchCode, String address, int gender, String civilStatus,
+               Date dateOfBirth, String occupation, String educationalLevel, int numberOfDependent, String religion,
+               float annualIncome, Date dateAccepted, Date dateUpdated, String updatedBy, int customerType, int phase,
+               String accountNo, String userId) {
+          this.id = id;
           this.nationalId = nationalId;
           this.meterNo = meterNo;
           this.alias = alias;
@@ -113,9 +121,12 @@ public class CustomerEntity {
           this.civilStatus = civilStatus;
           this.dateOfBirth = dateOfBirth;
           this.occupation = occupation;
+          this.educationalLevel = educationalLevel;
           this.numberOfDependent = numberOfDependent;
           this.religion = religion;
           this.annualIncome = annualIncome;
+          this.dateAccepted = dateAccepted;
+          this.dateUpdated = dateUpdated;
           this.updatedBy = updatedBy;
           this.customerType = customerType;
           this.phase = phase;

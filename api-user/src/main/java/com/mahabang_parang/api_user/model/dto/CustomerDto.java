@@ -29,6 +29,7 @@ public class CustomerDto {
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      private Date dateOfBirth;
      private String occupation;
+     private String educationalLevel;
      private int numberOfDependent;
      private String religion;
      private float annualIncome;

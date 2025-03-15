@@ -74,5 +74,5 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
           Integer previousUsage = custMeterRepo.findPresentById(meterNo);
           return previousUsage == null ? 0 : previousUsage;
      }
-
+     
 }
