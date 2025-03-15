@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mahabang_parang.api_user.model.ApiResponse;
+import com.mahabang_parang.api_user.model.PaginationRequest;
+import com.mahabang_parang.api_user.model.PaginationResponse;
 import com.mahabang_parang.api_user.model.dto.CustomerDto;
 import com.mahabang_parang.api_user.model.dto.CustomerMeterDto;
 import com.mahabang_parang.api_user.service.CustomerMeterService;
@@ -37,10 +39,7 @@ public class CustomerController {
           ApiResponse response = new ApiResponse();
 
           try {
-               List<CustomerDto> customers = this.custService.getCustomers(pageNo,pageSize);
-               System.out.println("----------------------------------------------------------------");
-               System.out.println("CUSTOMER COUNT: " + customers.size());
-               System.out.println("----------------------------------------------------------------");
+               PaginationResponse<CustomerDto> customers = this.custService.getCustomers(pageNo,pageSize);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(customers);
@@ -92,6 +91,47 @@ public class CustomerController {
           }
      }
      
+     @PostMapping()
+     public ResponseEntity<ApiResponse> addCustomer(@RequestBody CustomerDto customer) {
+          
+          ApiResponse response = new ApiResponse();
+
+          try {
+               CustomerDto customers = custService.addCustomer(customer);
+
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(customers);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+         
+     }
+     
+     @GetMapping("new-account-number")
+     public ResponseEntity<ApiResponse> generateAccountNo() {
+          ApiResponse response = new ApiResponse();
+
+          try {
+               String accountNo = custService.generateAccountNo();
+
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(accountNo);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+     
+
      @PostMapping("meter")
      public ResponseEntity<ApiResponse> addMeter(@RequestBody CustomerMeterDto payload) {
           

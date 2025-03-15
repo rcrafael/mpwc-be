@@ -1,6 +1,7 @@
 package com.mahabang_parang.api_billing.service;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -13,7 +14,9 @@ public interface BillingService {
      
      public PaginationResponse<BillingDto> getBilling(int pageNumber, int pageSize) throws Exception;
      public PaginationResponse<BillingDto> getBillingByCustId(String customerId, int pageNumber, int pageSize) throws Exception;
-     public BillingDto getBillingById(String billingId) throws Exception;
+     public List<BillingDto> getRecentBillingByCustomerId(String customerId) throws Exception;
+     public BillingDto getBillingById(String billingId) throws Exception; 
      public BillingDto create(BillingDto billing) throws Exception;
-
+     public String generateReadingNo() throws Exception;
+     public List<BillingDto> getUnpaidBillingByCustomerId(String customerId) throws Exception;
 }

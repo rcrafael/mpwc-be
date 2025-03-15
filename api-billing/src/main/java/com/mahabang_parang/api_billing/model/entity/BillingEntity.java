@@ -35,7 +35,7 @@ public class BillingEntity {
      @Column(length = 36, unique = true)
      private String id;
 
-     @Column(unique = true)
+     @Column(name="reading_no")
      private String readingNo;
 
      @Column(length = 36)

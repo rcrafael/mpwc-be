@@ -8,9 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ApiResponse {
-     
      private HttpStatus statusCode;
      private String message;
      private Object result;
-
 }
