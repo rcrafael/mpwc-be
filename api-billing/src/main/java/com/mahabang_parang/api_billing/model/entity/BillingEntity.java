@@ -47,6 +47,7 @@ public class BillingEntity {
      private Integer previous;
 
      private Integer present;
+     
      @Column(name = "m3_used")
      private Integer m3Used;
 
