@@ -29,4 +29,5 @@ public class OfficialReceiptDetailsDto {
      private Double septageFee;
      private Double totalAmount;
      private String remarks;
+     private Integer billingStatus;
 }

@@ -8,6 +8,7 @@ import org.mapstruct.MappingConstants;
 import com.mahabang_parang.api_user.model.dto.CustomerDto;
 import com.mahabang_parang.api_user.model.entity.CustomerEntity;
 
+
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CustomerMapper {
 

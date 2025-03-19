@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mahabang_parang.api_payment.model.ApiResponse;
 import com.mahabang_parang.api_payment.model.PaginationResponse;
+import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
-import com.mahabang_parang.api_payment.model.payload.CreateOfficiaReceiptPayload;
+import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -88,14 +88,13 @@ public class OfficialReceiptController {
 
 
      @PostMapping()
-     public ResponseEntity<ApiResponse> create(@RequestBody CreateOfficiaReceiptPayload payload) {
-
+     public ResponseEntity<ApiResponse> create(@RequestBody OfficiaReceiptPayload payload) {
          
           ApiResponse response = new ApiResponse();
 
           try {
 
-               OfficialReceiptHeaderDto orHeader =  orService.createOfficialReceipt(payload.getHeader(), payload.getDetails());
+               OfficialReceiptDto orHeader =  orService.createOfficialReceipt(payload);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(orHeader);

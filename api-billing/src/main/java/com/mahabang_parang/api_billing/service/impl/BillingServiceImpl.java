@@ -115,6 +115,12 @@ public class BillingServiceImpl implements BillingService  {
           return generateControlNumber();
      }
 
+     @Override
+     public Integer updateBillingStatus(String readingNo, Integer newStatus) throws Exception {
+          Integer bill = billingRepo.updateBillingStatus(newStatus, readingNo);
+          return bill;
+     }
+
      private String generateControlNumber() {
           String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
           String lastReadingNo = billingRepo.findLastReadingNo("R"+datePrefix);
