@@ -69,6 +69,12 @@ public class CustomerServiceImpl implements CustomerService{
           return generateControlNumber();
      }
 
+     @Override
+     public List<CustomerDto> getCustomerByIds(List<String> idsList) {
+          List<CustomerEntity> customers = custRepository.findByIds(idsList);
+          return mapper.toDtoList(customers);
+     }
+
      private String generateControlNumber() {
           String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
           String lastAccoutNo = custRepository.findLastAccoutNo("C"+datePrefix);

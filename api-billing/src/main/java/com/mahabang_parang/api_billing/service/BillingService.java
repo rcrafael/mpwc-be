@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.mahabang_parang.api_billing.model.PaginationRequest;
 import com.mahabang_parang.api_billing.model.PaginationResponse;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
+import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
 
 @Service
 public interface BillingService {
@@ -17,7 +18,7 @@ public interface BillingService {
      public PaginationResponse<BillingDto> getBilling(int pageNumber, int pageSize) throws Exception;
      public PaginationResponse<BillingDto> getBillingByCustId(String customerId, int pageNumber, int pageSize) throws Exception;
      public List<BillingDto> getRecentBillingByCustomerId(String customerId) throws Exception;
-     public BillingDto getBillingById(String billingId) throws Exception; 
+     public BillingWithCustomerInfoDto getBillingById(String billingId) throws Exception; 
      public BillingDto create(BillingDto billing) throws Exception;
      public String generateReadingNo() throws Exception;
      public List<BillingDto> getUnpaidBillingByCustomerId(String customerId) throws Exception;

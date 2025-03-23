@@ -2,6 +2,7 @@ package com.mahabang_parang.api_payment.service.Impl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import com.mahabang_parang.api_payment.model.PaginationResponse;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDetailsDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
+import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.entity.OfficialReceiptDetailsEntity;
 import com.mahabang_parang.api_payment.model.entity.OfficialReceiptHeaderEntity;
 import com.mahabang_parang.api_payment.model.entity.ShareCapitalEntity;
@@ -34,6 +36,8 @@ import com.mahabang_parang.api_payment.repository.ShareCapitalRepository;
 import com.mahabang_parang.api_payment.repository.ShareCbuRepository;
 import com.mahabang_parang.api_payment.repository.ShareSavingsRepository;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
+import com.mahabang_parang.api_user.model.dto.CustomerDto;
+import com.mahabang_parang.api_user.service.CustomerService;
 
 @Transactional
 @Service
@@ -52,6 +56,8 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
 
      @Autowired
      private BillingService billingService;
+     @Autowired
+     private CustomerService customerService;
 
      @Autowired 
      private OfficialReceiptHeaderMapper orHeaderMapper;
@@ -154,6 +160,56 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      @Override
      public String generateOfficialReceiptNo() throws Exception {
           return generateControlNumber();
+     }
+
+     @Override
+     public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOfficialReceiptWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception {
+          Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
+
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findAll(pageable);
+
+          List<String> ids = new ArrayList<String>();
+          for(OfficialReceiptHeaderEntity orh : orHeaders) {
+               ids.add(orh.getCustomerId());
+          }
+
+          List<CustomerDto> customers = customerService.getCustomerByIds(ids);
+
+          List<OfficialReceiptHeaderWithCustomerDto> orWithCust = new ArrayList<OfficialReceiptHeaderWithCustomerDto>();
+
+          for(OfficialReceiptHeaderEntity orh : orHeaders) {
+               OfficialReceiptHeaderWithCustomerDto orc = new OfficialReceiptHeaderWithCustomerDto();
+               CustomerDto c = customers.stream().filter(cc -> cc.getId().equals(orh.getCustomerId())).findFirst().orElse(null);
+
+               orc.setId(orh.getId());
+               orc.setOrNo(orh.getOrNo());
+               orc.setCustomerId(orh.getCustomerId());
+               orc.setCustomer(c);
+               orc.setOrDate(orh.getOrDate());
+               orc.setTotalBillingAmount(orh.getTotalBillingAmount());
+               orc.setTotalShareAmount(orh.getTotalShareAmount());
+               orc.setTotalAmountPay(orh.getTotalAmountPay());
+               orc.setSeniorDiscount(orh.getSeniorDiscount());
+               orc.setEntryDate(orh.getEntryDate());
+               orc.setCreatedBy(orh.getCreatedBy());
+               orc.setCheckNo(orh.getCheckNo());
+               orc.setCheckBank(orh.getCheckBank());
+               orc.setCheckDate(orh.getCheckDate());
+               orc.setStatus(orh.getStatus());
+               orc.setIsPartSale(orh.getIsPartSale());
+               orc.setIsOutsideCollection(orh.getIsOutsideCollection());
+               orc.setOutsideCustomerName(orh.getOutsideCustomerName());
+               orWithCust.add(orc);
+          }
+
+
+          return new PaginationResponse<>(
+               orWithCust,
+               orHeaders.getNumber(),
+               orHeaders.getSize(),
+               orHeaders.getTotalPages(),
+               orHeaders.getTotalElements()
+          );
      }
 
       private String generateControlNumber() {
