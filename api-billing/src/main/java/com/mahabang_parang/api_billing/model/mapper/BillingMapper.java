@@ -3,6 +3,7 @@ package com.mahabang_parang.api_billing.model.mapper;
 import java.util.List;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 import com.mahabang_parang.api_billing.model.dto.BillingDto;

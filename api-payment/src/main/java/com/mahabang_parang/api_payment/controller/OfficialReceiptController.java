@@ -10,6 +10,7 @@ import com.mahabang_parang.api_payment.model.ApiResponse;
 import com.mahabang_parang.api_payment.model.PaginationResponse;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
+import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +35,27 @@ public class OfficialReceiptController {
 
           try {
                PaginationResponse<OfficialReceiptHeaderDto> orHeader =  orService.getOfficialReceiptAll(pageNo, pageSize, "orDate");
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(orHeader);
+               return ResponseEntity.ok(response);
+
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+
+     }
+
+     @GetMapping("with-cust-info/{pageNo}/{pageSize}")
+     public ResponseEntity<ApiResponse> getAllORWithCustInfo(@PathVariable int pageNo, @PathVariable int pageSize) {
+         
+          ApiResponse response = new ApiResponse();
+
+          try {
+               PaginationResponse<OfficialReceiptHeaderWithCustomerDto> orHeader =  orService.getOfficialReceiptWithCustomer(pageNo, pageSize, "orDate");
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(orHeader);

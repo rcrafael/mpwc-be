@@ -17,6 +17,7 @@ import com.mahabang_parang.api_billing.model.ApiResponse;
 import com.mahabang_parang.api_billing.model.PaginationRequest;
 import com.mahabang_parang.api_billing.model.PaginationResponse;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
+import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
 import com.mahabang_parang.api_billing.service.BillingService;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -77,7 +78,7 @@ public class BillingController {
           
           ApiResponse response = new ApiResponse();
           try {
-               BillingDto billing = billingSvc.getBillingById(billingId);
+               BillingWithCustomerInfoDto billing = billingSvc.getBillingById(billingId);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(billing);
