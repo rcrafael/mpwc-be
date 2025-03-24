@@ -12,6 +12,7 @@ import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
+import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +35,7 @@ public class OfficialReceiptController {
           ApiResponse response = new ApiResponse();
 
           try {
-               PaginationResponse<OfficialReceiptHeaderDto> orHeader =  orService.getOfficialReceiptAll(pageNo, pageSize, "orDate");
+               PaginationResponse<OfficialReceiptHeaderDto> orHeader =  orService.getOfficialReceiptAll(pageNo, pageSize, "entryDate");
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(orHeader);
@@ -55,7 +56,28 @@ public class OfficialReceiptController {
           ApiResponse response = new ApiResponse();
 
           try {
-               PaginationResponse<OfficialReceiptHeaderWithCustomerDto> orHeader =  orService.getOfficialReceiptWithCustomer(pageNo, pageSize, "orDate");
+               PaginationResponse<OfficialReceiptHeaderWithCustomerDto> orHeader =  orService.getOfficialReceiptWithCustomer(pageNo, pageSize, "entryDate");
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(orHeader);
+               return ResponseEntity.ok(response);
+
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+
+     }
+
+     @GetMapping("with-cust-info/{id}")
+     public ResponseEntity<ApiResponse> getORWithCustInfo(@PathVariable String id) {
+         
+          ApiResponse response = new ApiResponse();
+
+          try {
+               OfficialReceiptResponse orHeader =  orService.getOfficialReceiptWithDetailsById(id);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(orHeader);

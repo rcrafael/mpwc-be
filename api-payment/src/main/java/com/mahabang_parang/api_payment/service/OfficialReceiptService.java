@@ -7,6 +7,7 @@ import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
+import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
 
 public interface OfficialReceiptService {
      public PaginationResponse<OfficialReceiptHeaderDto> getOfficialReceiptAll(int pageNo, int pageSize, String sortColumn) throws Exception;
@@ -14,4 +15,5 @@ public interface OfficialReceiptService {
      public OfficialReceiptDto createOfficialReceipt(OfficiaReceiptPayload payload) throws Exception;
      public String generateOfficialReceiptNo() throws Exception;
      public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOfficialReceiptWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception;
+     public OfficialReceiptResponse getOfficialReceiptWithDetailsById(String orhId) throws Exception;
 }
