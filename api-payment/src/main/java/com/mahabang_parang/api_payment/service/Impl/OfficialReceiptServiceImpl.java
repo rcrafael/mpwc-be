@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,9 @@ import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDetailsDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustomerDto;
+import com.mahabang_parang.api_payment.model.dto.ShareCapitalDto;
+import com.mahabang_parang.api_payment.model.dto.ShareCbuDto;
+import com.mahabang_parang.api_payment.model.dto.ShareSavingsDto;
 import com.mahabang_parang.api_payment.model.entity.OfficialReceiptDetailsEntity;
 import com.mahabang_parang.api_payment.model.entity.OfficialReceiptHeaderEntity;
 import com.mahabang_parang.api_payment.model.entity.ShareCapitalEntity;
@@ -30,6 +34,7 @@ import com.mahabang_parang.api_payment.model.mapper.ShareCapitalMapper;
 import com.mahabang_parang.api_payment.model.mapper.ShareCbuMapper;
 import com.mahabang_parang.api_payment.model.mapper.ShareSavingsMapper;
 import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
+import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
 import com.mahabang_parang.api_payment.repository.OfficialReceiptDetailsRepository;
 import com.mahabang_parang.api_payment.repository.OfficialReceiptHeaderRepository;
 import com.mahabang_parang.api_payment.repository.ShareCapitalRepository;
@@ -211,6 +216,47 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
                orHeaders.getTotalElements()
           );
      }
+
+     @Override
+     public OfficialReceiptResponse getOfficialReceiptWithDetailsById(String id) throws Exception {
+          OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(id).orElseThrow();
+          
+          String orNo = orHeader.getOrNo();
+
+          CustomerDto customer = customerService.getCustomer(orHeader.getCustomerId());
+          List<OfficialReceiptDetailsDto> orDetails = orDetailsMapper.toDtoList(orDetailsRepo.findByOrNo(orNo));
+          ShareCapitalDto shareCap = shareCapMapper.toDto(shareCapRepo.findByOrNo(orNo));
+          ShareCbuDto cbu = cbuMapper.toDto(cbuRepo.findByOrNo(orNo));
+          ShareSavingsDto savings = savingsMapper.toDto(savingsRepo.findByOrNo(orNo));
+          OfficialReceiptHeaderWithCustomerDto orc = new OfficialReceiptHeaderWithCustomerDto();
+          orc.setId(orHeader.getId());
+          orc.setOrNo(orHeader.getOrNo());
+          orc.setCustomerId(orHeader.getCustomerId());
+          orc.setCustomer(customer);
+          orc.setOrDate(orHeader.getOrDate());
+          orc.setTotalBillingAmount(orHeader.getTotalBillingAmount());
+          orc.setTotalShareAmount(orHeader.getTotalShareAmount());
+          orc.setTotalAmountPay(orHeader.getTotalAmountPay());
+          orc.setSeniorDiscount(orHeader.getSeniorDiscount());
+          orc.setEntryDate(orHeader.getEntryDate());
+          orc.setCreatedBy(orHeader.getCreatedBy());
+          orc.setCheckNo(orHeader.getCheckNo());
+          orc.setCheckBank(orHeader.getCheckBank());
+          orc.setCheckDate(orHeader.getCheckDate());
+          orc.setStatus(orHeader.getStatus());
+          orc.setIsPartSale(orHeader.getIsPartSale());
+          orc.setIsOutsideCollection(orHeader.getIsOutsideCollection());
+          orc.setOutsideCustomerName(orHeader.getOutsideCustomerName());
+
+          OfficialReceiptResponse or = new OfficialReceiptResponse();
+          or.setHeader(orc);
+          or.setDetails(orDetails);
+          or.setShareCapital(shareCap);
+          or.setCbu(cbu);
+          or.setSavings(savings);
+          return or;
+     }
+
 
       private String generateControlNumber() {
           String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));

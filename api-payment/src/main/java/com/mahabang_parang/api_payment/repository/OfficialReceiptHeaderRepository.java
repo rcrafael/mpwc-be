@@ -14,5 +14,4 @@ public interface OfficialReceiptHeaderRepository extends JpaRepository<OfficialR
      String findLastOrNo(@Param("datePrefix") String datePrefix);
 
      Page<OfficialReceiptHeaderEntity> findByCustomerId(String customerId, Pageable pageable);
-
 }
