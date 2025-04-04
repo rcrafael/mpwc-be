@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.mahabang_parang.api_user.ApiUserApplication;
 import com.mahabang_parang.api_user.model.PaginationResponse;
@@ -33,9 +34,9 @@ public class CustomerServiceImpl implements CustomerService{
 
      @Override
      public PaginationResponse<CustomerDto> getCustomers(int pageNo, int pageSize){
-          PageRequest pageable = PageRequest.of(pageNo, pageSize);
+          PageRequest pageable = PageRequest.of(pageNo, pageSize, Sort.by("dateAccepted").descending());
 
-          Page<CustomerEntity> customer =custRepository.findAll(pageable);
+          Page<CustomerEntity> customer = custRepository.findAll(pageable);
           
           return new PaginationResponse<>(
                mapper.toDtoList(customer.getContent()),

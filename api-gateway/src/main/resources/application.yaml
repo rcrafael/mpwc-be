@@ -13,6 +13,10 @@ spring:
                       uri: http://localhost:8081
                       predicates:
                          - Path=/api/customer/**
+                    - id: auth-service-route
+                      uri: http://localhost:8081
+                      predicates:
+                         - Path=/api/auth/**
                     - id: payment-service-route
                       uri: http://localhost:8082
                       predicates:
@@ -27,4 +31,6 @@ spring:
                               allowedOrigins: "*"
                               allowedMethods: "*"
                               allowedHeaders: "*"
-                              allowCredentials: "false"
+                              allowCredentials: false
+                              exposed-headers: "Authorization"
+                              max-age: 3600
