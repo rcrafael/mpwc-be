@@ -1,6 +1,12 @@
 package com.mahabang_parang.api_user.model.entity;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,19 +16,24 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-public class UserEntity {
+@Table(name = "user")
+@NoArgsConstructor
+public class UserEntity implements UserDetails {
      
      @Id
      @GeneratedValue(strategy = GenerationType.UUID)
      
      @Column(length = 36, nullable = false)
      private String id;
+     private String username;
      private String email;
      private String password;
 
@@ -30,5 +41,29 @@ public class UserEntity {
      @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
      private RoleEntity role;
 
+     @Override
+     public Collection<? extends GrantedAuthority> getAuthorities() {
+         return List.of(new SimpleGrantedAuthority(role.getRole()));
+     }
+
+     @Override
+     public String getUsername() {
+         return this.email;
+     }
+
+     @Override
+     public boolean isAccountNonExpired() {
+         return true;
+     }
+ 
+     @Override
+     public boolean isAccountNonLocked() {
+         return true;
+     }
+ 
+     @Override
+     public boolean isCredentialsNonExpired() {
+         return true;
+     }
 
 }

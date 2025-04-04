@@ -165,6 +165,7 @@ public class CustomerController {
                response.setResult(customers);
                return ResponseEntity.ok(response);
           } catch (Exception e) {
+               System.out.println(e.getMessage() + " : " + e.getLocalizedMessage() + " : " + e.getCause() );
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
                
