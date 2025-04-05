@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,8 @@ public class CustomerMeterDto {
      private String customerId;
      private String meterNo;
      private String alias;
+     private Integer branchCode;
+     private String location;
      private Integer previous;
      private Integer present;
      private Integer status;

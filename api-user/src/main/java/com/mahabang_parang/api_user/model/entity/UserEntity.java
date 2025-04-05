@@ -39,7 +39,7 @@ public class UserEntity implements UserDetails {
      private String mname;
 
      @OneToOne
-     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
+     @JoinColumn(name = "role", referencedColumnName = "id", nullable = false)
      private RoleEntity role;
 
      @Override

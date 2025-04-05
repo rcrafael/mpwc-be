@@ -40,6 +40,12 @@ public class CustomerMeterEntity {
      
      @Column(nullable = true)
      private String alias;
+
+     @Column(nullable = false)
+     private Integer branchCode;
+
+     @Column(nullable = true)
+     private String location;
      
      private Integer previous;
 
