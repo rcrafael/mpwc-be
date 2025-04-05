@@ -42,4 +42,5 @@ public class CustomerDto {
      private int phase;
      private String accountNo;
      private String userId;
+     private String tin;
 }

@@ -12,4 +12,5 @@ public interface CustomerService {
      public CustomerDto addCustomer(CustomerDto customer);
      public String generateAccountNo();
      public List<CustomerDto> getCustomerByIds(List<String> idsList);
+     public CustomerDto updateCustomer(CustomerDto customer);
 }

@@ -22,5 +22,11 @@ public class UserServiceImpl implements UserService{
           UserDto user = mapper.toDto(userRepository.findByEmail(email));
           return user;
      }
+
+     @Override
+     public UserDto findById(String id) {
+          UserDto user = mapper.toDto(userRepository.findById(id).orElseThrow());
+          return user;
+     }
      
 }

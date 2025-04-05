@@ -100,12 +100,15 @@ public class CustomerEntity {
      @Column(length = 36, nullable = true)
      private String userId;
 
+     @Column(length = 20, nullable = true)
+     private String tin;
+
 
      public CustomerEntity(String id, String nationalId, String meterNo, String alias, String firstName,
                String middleName, String lastName, int branchCode, String address, int gender, String civilStatus,
                Date dateOfBirth, String occupation, String educationalLevel, int numberOfDependent, String religion,
                float annualIncome, Date dateAccepted, Date dateUpdated, String updatedBy, int customerType, int phase,
-               String accountNo, String userId) {
+               String accountNo, String userId, String tin) {
           this.id = id;
           this.nationalId = nationalId;
           this.meterNo = meterNo;
@@ -130,6 +133,7 @@ public class CustomerEntity {
           this.phase = phase;
           this.accountNo = accountNo;
           this.userId = userId;
+          this.tin = tin;
      }
 
 }

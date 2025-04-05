@@ -19,6 +19,8 @@ import com.mahabang_parang.api_user.service.CustomerService;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 
@@ -110,6 +112,25 @@ public class CustomerController {
          
      }
      
+     @PutMapping()
+     public ResponseEntity<ApiResponse> updateCustomer(@RequestBody CustomerDto customer) {
+          ApiResponse response = new ApiResponse();
+
+          try {
+               CustomerDto customers = custService.updateCustomer(customer);
+
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(customers);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+
      @GetMapping("new-account-number")
      public ResponseEntity<ApiResponse> generateAccountNo() {
           ApiResponse response = new ApiResponse();
