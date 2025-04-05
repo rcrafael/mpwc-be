@@ -1,6 +1,5 @@
 package com.mahabang_parang.api_user.model.entity;
 
-import jakarta.annotation.Generated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

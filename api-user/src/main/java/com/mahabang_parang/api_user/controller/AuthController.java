@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mahabang_parang.api_user.model.ApiResponse;
-import com.mahabang_parang.api_user.model.PaginationResponse;
-import com.mahabang_parang.api_user.model.dto.CustomerDto;
 import com.mahabang_parang.api_user.model.payload.LoginPayload;
 import com.mahabang_parang.api_user.service.AuthService;
 
