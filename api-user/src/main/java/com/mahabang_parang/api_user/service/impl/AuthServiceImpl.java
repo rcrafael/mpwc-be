@@ -34,8 +34,6 @@ public class AuthServiceImpl implements AuthService {
 
           authManager.authenticate(new UsernamePasswordAuthenticationToken(payload.getEmail(), payload.getPassword()));
           System.out.println("AUTHENTICATED! ");
-          // UserDetails userDetails = customUserDetailsService.loadUserByUsername(payload.getEmail());
-          // return jwtUtils.generateToken(userDetails.getUsername());
           UserDto user = userService.findByEmail(payload.getEmail());
 
           System.out.println("USER: " + user.toString());

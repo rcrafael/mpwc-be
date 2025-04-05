@@ -31,7 +31,7 @@ public class CustomUserDetailsImpl implements UserDetailsService {
           }
 
           
-          return User.withUsername(user.getEmail())
+          return User.withUsername(user.getEmail()) //used email as a username
                     .password(user.getPassword())
                     .roles("ADMIN")
                     .build();

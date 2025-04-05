@@ -29,8 +29,12 @@ public class JwtUtil {
      public String generateToken(UserEntity userDetails) {
           return Jwts.builder()
                          .subject(userDetails.getEmail())
+                         .claim("id",userDetails.getId())
                          .claim("email", userDetails.getEmail())
                          .claim("username", userDetails.getUsername())
+                         .claim("fname", userDetails.getFname())
+                         .claim("lname", userDetails.getLname())
+                         .claim("mname", userDetails.getMname())
                          .issuedAt(new Date(System.currentTimeMillis()))
                          .expiration(Date.from(Instant.now().plus(Duration.of(12, ChronoUnit.HOURS))))
                          .signWith(getSigningKey(), Jwts.SIG.HS256)

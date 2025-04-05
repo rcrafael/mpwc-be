@@ -34,6 +34,9 @@ public class UserEntity implements UserDetails {
      private String username;
      private String email;
      private String password;
+     private String fname;
+     private String lname;
+     private String mname;
 
      @OneToOne
      @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
@@ -46,9 +49,10 @@ public class UserEntity implements UserDetails {
 
      @Override
      public String getUsername() {
-         return this.email;
+         return this.username;
      }
 
+    
      @Override
      public boolean isAccountNonExpired() {
          return true;

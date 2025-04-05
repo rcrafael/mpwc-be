@@ -76,6 +76,30 @@ public class CustomerServiceImpl implements CustomerService{
           return mapper.toDtoList(customers);
      }
 
+     @Override
+     public CustomerDto updateCustomer(CustomerDto customer) {
+          CustomerEntity custEntity = custRepository.findById(customer.getId()).orElseThrow();
+
+          custEntity.setLastName(customer.getLastName());
+          custEntity.setFirstName(customer.getFirstName());
+          custEntity.setMiddleName(customer.getMiddleName());
+          custEntity.setDateOfBirth(customer.getDateOfBirth());
+          custEntity.setGender(customer.getGender());
+          custEntity.setAddress(customer.getAddress());
+          custEntity.setNationalId(customer.getNationalId());
+          custEntity.setTin(customer.getTin());
+          custEntity.setOccupation(customer.getOccupation());
+          custEntity.setCivilStatus(customer.getCivilStatus());
+          custEntity.setEducationalLevel(customer.getEducationalLevel());
+          custEntity.setReligion(customer.getReligion());
+          custEntity.setNumberOfDependent(customer.getNumberOfDependent());
+          custEntity.setAnnualIncome(customer.getAnnualIncome());
+          custEntity.setCustomerType(customer.getCustomerType());
+          custEntity.setPhase(customer.getPhase());
+          custEntity.setUpdatedBy(customer.getUpdatedBy());
+          return mapper.toDto(custRepository.save(custEntity));
+     }
+
      private String generateControlNumber() {
           String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
           String lastAccoutNo = custRepository.findLastAccoutNo("C"+datePrefix);

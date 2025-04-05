@@ -19,6 +19,12 @@ public class UserDto {
      
      private String email;
 
+     private String username;
+
+     private String fname;
+     private String lname;
+     private String mname;
+
      @JsonIgnore
      private String password;
 
