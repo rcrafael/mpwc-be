@@ -94,7 +94,6 @@ public class CustomerServiceImpl implements CustomerService{
           custEntity.setReligion(customer.getReligion());
           custEntity.setNumberOfDependent(customer.getNumberOfDependent());
           custEntity.setAnnualIncome(customer.getAnnualIncome());
-          custEntity.setCustomerType(customer.getCustomerType());
           custEntity.setPhase(customer.getPhase());
           custEntity.setUpdatedBy(customer.getUpdatedBy());
           return mapper.toDto(custRepository.save(custEntity));

@@ -38,7 +38,6 @@ public class CustomerDto {
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      private Date dateUpdated;
      private String updatedBy;
-     private int customerType;
      private int phase;
      private String accountNo;
      private String userId;
