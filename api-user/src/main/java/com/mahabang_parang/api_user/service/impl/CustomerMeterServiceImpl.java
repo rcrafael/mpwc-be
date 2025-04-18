@@ -27,11 +27,14 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
           
           custMeter.setCustomerId(customerMeter.getCustomerId());
           custMeter.setMeterNo(customerMeter.getMeterNo());
+          custMeter.setSerialNo(customerMeter.getSerialNo());
           custMeter.setAlias(customerMeter.getAlias());
           custMeter.setBranchCode(customerMeter.getBranchCode());
+          custMeter.setCustomerType(customerMeter.getCustomerType());
           custMeter.setLocation(customerMeter.getLocation());
           custMeter.setStatus(customerMeter.getStatus() == null ? 7 : customerMeter.getStatus()); // default to 7 = Deactivated
           custMeter.setCreatedBy(customerMeter.getCreatedBy());
+          custMeter.setCustomerType(customerMeter.getCustomerType()); // 1 - residential; 2 - commercial
           CustomerMeterDto newMeter = mapper.toDto(custMeterRepo.save(custMeter));
 
           return newMeter;
@@ -43,8 +46,10 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
 
           CustomerMeterEntity custMeter = custMeterRepo.findByMeterNo(customerMeter.getMeterNo());
           
+          custMeter.setSerialNo(customerMeter.getSerialNo());
           custMeter.setAlias(customerMeter.getAlias());
           custMeter.setBranchCode(customerMeter.getBranchCode());
+          custMeter.setCustomerType(customerMeter.getCustomerType());
           custMeter.setLocation(customerMeter.getLocation());
           custMeter.setStatus(customerMeter.getStatus());
           custMeter.setPrevious(customerMeter.getPrevious());

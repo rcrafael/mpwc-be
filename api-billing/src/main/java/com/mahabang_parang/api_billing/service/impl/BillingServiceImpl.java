@@ -2,6 +2,7 @@ package com.mahabang_parang.api_billing.service.impl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,9 +21,12 @@ import com.mahabang_parang.api_billing.model.dto.BillingDto;
 import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
 import com.mahabang_parang.api_billing.model.entity.BillingEntity;
 import com.mahabang_parang.api_billing.model.mapper.BillingMapper;
+import com.mahabang_parang.api_billing.model.payload.UpdateBillingPayload;
 import com.mahabang_parang.api_billing.repository.BillingRepository;
 import com.mahabang_parang.api_billing.service.BillingService;
 import com.mahabang_parang.api_user.model.dto.CustomerDto;
+import com.mahabang_parang.api_user.model.dto.CustomerMeterDto;
+import com.mahabang_parang.api_user.service.CustomerMeterService;
 import com.mahabang_parang.api_user.service.CustomerService;
 
 @Service
@@ -34,6 +38,9 @@ public class BillingServiceImpl implements BillingService  {
 
      @Autowired
      private CustomerService custService;
+
+     @Autowired
+     private CustomerMeterService meterService;
 
      @Autowired
      private BillingMapper mapper;
@@ -55,9 +62,6 @@ public class BillingServiceImpl implements BillingService  {
 
           List<CustomerDto> cust = custService.getCustomerByIds(ids);
 
-          System.out.println("CUSTOMER COUNT: " + cust.size());
-
-
           List<BillingWithCustomerInfoDto> billingTable = new ArrayList<BillingWithCustomerInfoDto>();
           
           for(BillingEntity b : billing) {
@@ -68,7 +72,6 @@ public class BillingServiceImpl implements BillingService  {
                     
                     if(cc.getId().equals(b.getCustomerId())) {
                          c = cc;
-                         System.out.println("CUSTOMER: " + cc.toString());
                          break;
                     }
                }
@@ -130,7 +133,7 @@ public class BillingServiceImpl implements BillingService  {
           return pageResponse;
      }
      @Override
-     public BillingWithCustomerInfoDto getBillingById(String billingId) throws Exception { 
+     public BillingWithCustomerInfoDto getBillingWithCustomerInfoById(String billingId) throws Exception { 
 
           BillingEntity bill = billingRepo.findById(billingId).orElseThrow();
           BillingDto billingDto = mapper.toDto(bill);
@@ -138,11 +141,14 @@ public class BillingServiceImpl implements BillingService  {
           CustomerDto customer = custService.getCustomer(billingDto.getCustomerId());
           BillingWithCustomerInfoDto billingWithCustomer = new BillingWithCustomerInfoDto();
 
+          CustomerMeterDto meterInfo = meterService.getCustomerMeterByMeterNo(billingDto.getMeterNo());
+
           billingWithCustomer.setId(billingDto.getId());
           billingWithCustomer.setReadingNo(billingDto.getReadingNo());
           billingWithCustomer.setCustomerId(billingDto.getCustomerId());
           billingWithCustomer.setCustomer(customer);
           billingWithCustomer.setMeterNo(billingDto.getMeterNo());
+          billingWithCustomer.setMeterInfo(meterInfo);
           billingWithCustomer.setPrevious(billingDto.getPrevious());
           billingWithCustomer.setPresent(billingDto.getPresent()); 
           billingWithCustomer.setM3Used(billingDto.getM3Used());
@@ -164,6 +170,15 @@ public class BillingServiceImpl implements BillingService  {
           billingWithCustomer.setDateUpdated(billingDto.getDateUpdated());
 
           return billingWithCustomer;
+     }
+
+     @Override
+     public BillingDto getBillingById(String billingId) throws Exception { 
+
+          BillingEntity bill = billingRepo.findById(billingId).orElseThrow();
+          BillingDto billingDto = mapper.toDto(bill);
+
+          return billingDto;
      }
 
      @Override
@@ -212,6 +227,32 @@ public class BillingServiceImpl implements BillingService  {
           return bill;
      }
 
+     public BillingDto update(UpdateBillingPayload payload) throws Exception {
+
+          BillingDto billing = getBillingById(payload.getId());
+          BillingEntity entity = mapper.toEntity(billing);
+
+          LocalDateTime dateUpdated = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+          entity.setMonthOf(payload.getMonthOf());
+          entity.setDateFrom(payload.getDateFrom());
+          entity.setDateTo(payload.getDateTo());
+          entity.setDueDate(payload.getDueDate());
+          entity.setPrevious(payload.getPrevious());
+          entity.setPresent(payload.getPresent());
+          entity.setM3Used(payload.getM3Used());
+          entity.setReadingAmount(payload.getReadingAmount());
+          entity.setSeptageFee(payload.getSeptageFee());
+          entity.setParts(payload.getParts());
+          entity.setMaintenanceFee(payload.getMaintenanceFee());
+          entity.setTotalAmount(payload.getTotalAmount());
+          entity.setDateUpdated(dateUpdated);
+          BillingDto billingUpdated = mapper.toDto(this.billingRepo.save(entity));
+          
+          return billingUpdated;
+
+     }
+
      private String generateControlNumber() {
           String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
           String lastReadingNo = billingRepo.findLastReadingNo("R"+datePrefix);
@@ -224,5 +265,7 @@ public class BillingServiceImpl implements BillingService  {
 
           return "R" + datePrefix + String.format("%05d", sequence);
      }
+
+
 
 }

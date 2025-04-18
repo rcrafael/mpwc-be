@@ -69,4 +69,8 @@ public class CustomerMeterEntity {
 
      @Column(length = 36, nullable = true)
      private String updatedBy;
+
+     private int customerType;
+
+     private String serialNo;
 }

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,8 +20,11 @@ import com.mahabang_parang.api_billing.model.PaginationRequest;
 import com.mahabang_parang.api_billing.model.PaginationResponse;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
 import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
+import com.mahabang_parang.api_billing.model.payload.UpdateBillingPayload;
 import com.mahabang_parang.api_billing.service.BillingService;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 @RestController
@@ -34,6 +39,7 @@ public class BillingController {
      public ResponseEntity<ApiResponse> getBilling(@PathVariable int pageNo, 
                                                   @PathVariable int pageSize) throws Exception {
           ApiResponse response = new ApiResponse();
+
           try {
 
                PaginationResponse<BillingDto> billing = billingSvc.getBilling(pageNo,pageSize);
@@ -78,7 +84,7 @@ public class BillingController {
           
           ApiResponse response = new ApiResponse();
           try {
-               BillingWithCustomerInfoDto billing = billingSvc.getBillingById(billingId);
+               BillingWithCustomerInfoDto billing = billingSvc.getBillingWithCustomerInfoById(billingId);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(billing);
@@ -163,7 +169,23 @@ public class BillingController {
           }
      }
      
-
+     
+     @PutMapping()
+     public ResponseEntity<ApiResponse> update(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UpdateBillingPayload payload) {
+          ApiResponse response = new ApiResponse();
+          try {
+               BillingDto bill = billingSvc.update(payload);
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(bill );
+               return ResponseEntity.status(HttpStatus.OK).body(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
 
 
 

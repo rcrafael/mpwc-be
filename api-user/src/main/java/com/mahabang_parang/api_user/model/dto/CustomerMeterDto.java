@@ -31,5 +31,6 @@ public class CustomerMeterDto {
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      private Date dateUpdated;
      private String updatedBy;
-
+     private int customerType;
+     private String serialNo;
 }

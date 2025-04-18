@@ -91,7 +91,7 @@ public class CustomerEntity {
 
      @Column(length = 36, nullable = true)
      private String updatedBy;
-     private int customerType;
+     
      private int phase;
 
      @Column(length = 20)
@@ -107,7 +107,7 @@ public class CustomerEntity {
      public CustomerEntity(String id, String nationalId, String meterNo, String alias, String firstName,
                String middleName, String lastName, int branchCode, String address, int gender, String civilStatus,
                Date dateOfBirth, String occupation, String educationalLevel, int numberOfDependent, String religion,
-               float annualIncome, Date dateAccepted, Date dateUpdated, String updatedBy, int customerType, int phase,
+               float annualIncome, Date dateAccepted, Date dateUpdated, String updatedBy, int phase,
                String accountNo, String userId, String tin) {
           this.id = id;
           this.nationalId = nationalId;
@@ -129,7 +129,6 @@ public class CustomerEntity {
           this.dateAccepted = dateAccepted;
           this.dateUpdated = dateUpdated;
           this.updatedBy = updatedBy;
-          this.customerType = customerType;
           this.phase = phase;
           this.accountNo = accountNo;
           this.userId = userId;

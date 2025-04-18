@@ -1,5 +1,5 @@
 spring:
-     applcation:
+     application:
           name: api-user
      jackson:
           deserialization:
