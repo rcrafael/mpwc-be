@@ -23,6 +23,8 @@ import com.mahabang_parang.api_billing.model.mapper.BillingMapper;
 import com.mahabang_parang.api_billing.repository.BillingRepository;
 import com.mahabang_parang.api_billing.service.BillingService;
 import com.mahabang_parang.api_user.model.dto.CustomerDto;
+import com.mahabang_parang.api_user.model.dto.CustomerMeterDto;
+import com.mahabang_parang.api_user.service.CustomerMeterService;
 import com.mahabang_parang.api_user.service.CustomerService;
 
 @Service
@@ -34,6 +36,9 @@ public class BillingServiceImpl implements BillingService  {
 
      @Autowired
      private CustomerService custService;
+
+     @Autowired
+     private CustomerMeterService meterService;
 
      @Autowired
      private BillingMapper mapper;
@@ -138,11 +143,14 @@ public class BillingServiceImpl implements BillingService  {
           CustomerDto customer = custService.getCustomer(billingDto.getCustomerId());
           BillingWithCustomerInfoDto billingWithCustomer = new BillingWithCustomerInfoDto();
 
+          CustomerMeterDto meterInfo = meterService.getCustomerMeterByMeterNo(billingDto.getMeterNo());
+
           billingWithCustomer.setId(billingDto.getId());
           billingWithCustomer.setReadingNo(billingDto.getReadingNo());
           billingWithCustomer.setCustomerId(billingDto.getCustomerId());
           billingWithCustomer.setCustomer(customer);
           billingWithCustomer.setMeterNo(billingDto.getMeterNo());
+          billingWithCustomer.setMeterInfo(meterInfo);
           billingWithCustomer.setPrevious(billingDto.getPrevious());
           billingWithCustomer.setPresent(billingDto.getPresent()); 
           billingWithCustomer.setM3Used(billingDto.getM3Used());

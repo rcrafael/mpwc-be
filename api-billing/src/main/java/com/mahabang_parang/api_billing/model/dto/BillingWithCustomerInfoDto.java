@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Optional;
 
 import com.mahabang_parang.api_user.model.dto.CustomerDto;
+import com.mahabang_parang.api_user.model.dto.CustomerMeterDto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,8 @@ public class BillingWithCustomerInfoDto {
      private CustomerDto customer;
 
      private String meterNo; 
+
+     private CustomerMeterDto meterInfo;
 
      private Integer previous;
 
