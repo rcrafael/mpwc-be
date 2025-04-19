@@ -1,7 +1,15 @@
 server:
      port: 8080
+     address: 0.0.0.0
 
 spring:
+     boot:
+          admin:
+               client:
+                    url: http://localhost:1111
+                    instance:
+                         metadata:
+                              strategy: ${random.uuid}
      cloud:
           gateway:
                routes:
@@ -34,3 +42,10 @@ spring:
                               allowCredentials: false
                               exposed-headers: "Authorization"
                               max-age: 3600
+management:
+     server:
+          port: 8080
+     endpoints:
+          web:
+               exposure:
+                    include: "*"

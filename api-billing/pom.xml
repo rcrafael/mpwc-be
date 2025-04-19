@@ -39,11 +39,11 @@
 
 	<dependencies>
 
-
 		<dependency>
 			<groupId>com.mahabang-parang</groupId>
 			<artifactId>api-user</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -89,6 +89,13 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>de.codecentric</groupId>
+			<artifactId>spring-boot-admin-starter-client</artifactId>
+			<version>3.4.4</version>
+		</dependency>
+		
 	</dependencies>
 
 	<build>
@@ -124,5 +131,25 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>executable</id>
+			<build>
+				<plugins>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<executions>
+						<execution>
+							<goals>
+								<goal>repackage</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>

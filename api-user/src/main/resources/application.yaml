@@ -1,6 +1,13 @@
 spring:
      application:
           name: api-user
+     boot:
+          admin:
+               client:
+                    url: http://localhost:1111
+                    instance:
+                         metadata:
+                              strategy: ${random.uuid}
      jackson:
           deserialization:
                fail-on-unknown-properties: true
@@ -14,6 +21,19 @@ spring:
           hibernate:
                ddl-auto: update
 
+management:
+     server:
+          port: 8081
+     endpoints:
+          web:
+               exposure:
+                    include: "*"
+     endpoint:
+          health:
+               show-details: always  
+     
+
 server:
      port: 8081
+     address: 0.0.0.0
      forward-headers-strategy: framework
