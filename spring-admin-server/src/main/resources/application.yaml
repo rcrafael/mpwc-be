@@ -1,0 +1,21 @@
+spring:
+     application:
+          name: spring-admin-server
+     boot:
+          admin:
+               client:
+                    instance:
+                         service-url: http://localhost:8081
+                         health-url: http://localhost:8081/actuator/health
+                         management-url: http://localhost:8081/actuator
+     
+
+server:
+     port: 1111
+     address: 0.0.0.0
+     
+management:
+     endpoints:
+          web:
+               exposure:
+                    include: "*"

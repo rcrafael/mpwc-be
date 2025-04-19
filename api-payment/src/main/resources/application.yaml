@@ -1,6 +1,13 @@
 spring:
      application:
           name: api-payment
+     boot:
+          admin:
+               client:
+                    url: http://localhost:1111
+                    instance:
+                         metadata:
+                              strategy: ${random.uuid}
      jackson:
           deserialization:
                fail-on-unknown-properties: true
@@ -16,3 +23,16 @@ spring:
 
 server:
      port: 8082
+     address: 0.0.0.0
+     forward-headers-strategy: framework
+
+management:
+     server:
+          port: 8082
+     endpoints:
+          web:
+               exposure:
+                    include: "*"
+     endpoint:
+          health:
+               show-details: always  
