@@ -13,7 +13,6 @@ import com.mahabang_parang.api_billing.model.dto.BillingDto;
 import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
 import com.mahabang_parang.api_billing.model.payload.UpdateBillingPayload;
 
-@Service
 public interface BillingService {
      
      public PaginationResponse<BillingDto> getBilling(int pageNumber, int pageSize) throws Exception;
