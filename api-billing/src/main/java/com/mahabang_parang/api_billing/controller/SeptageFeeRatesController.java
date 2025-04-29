@@ -33,10 +33,10 @@ public class SeptageFeeRatesController {
           try {
                SeptageFeeRateDto septageRates = this.septageService.getRates();
                
-               response.setStatusCode(HttpStatus.CREATED);
+               response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(septageRates);
-               return ResponseEntity.status(HttpStatus.CREATED).body(response);
+               return ResponseEntity.status(HttpStatus.OK).body(response);
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
