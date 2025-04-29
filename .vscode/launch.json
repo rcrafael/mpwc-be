@@ -1,0 +1,35 @@
+{
+     "configurations": [
+          {
+               "type": "java",
+               "name": "Spring Boot-ApiBillingApplication<api-billing>",
+               "request": "launch",
+               "cwd": "${workspaceFolder}",
+               "mainClass": "com.mahabang_parang.api_billing.ApiBillingApplication",
+               "projectName": "api-billing",
+               "args": "",
+               "envFile": "${workspaceFolder}/.env",
+               "vmArgs": " -Dcom.sun.management.jmxremote"
+          },
+          {
+               "type": "java",
+               "name": "Spring Boot-ApiGatewayApplication<api-gateway>",
+               "request": "launch",
+               "cwd": "${workspaceFolder}",
+               "mainClass": "com.mahabang_parang.api_gateway.ApiGatewayApplication",
+               "projectName": "api-gateway",
+               "args": "",
+               "envFile": "${workspaceFolder}/.env"
+          },
+          {
+               "type": "java",
+               "name": "Spring Boot-ApiUserApplication<api-user>",
+               "request": "launch",
+               "cwd": "${workspaceFolder}",
+               "mainClass": "com.mahabang_parang.api_user.ApiUserApplication",
+               "projectName": "api-user",
+               "args": "",
+               "envFile": "${workspaceFolder}/.env"
+          }
+     ]
+}
