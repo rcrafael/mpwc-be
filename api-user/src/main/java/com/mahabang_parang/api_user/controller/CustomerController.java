@@ -90,6 +90,26 @@ public class CustomerController {
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
+
+     @GetMapping("search/{pageNo}/{pageSize}")
+     public ResponseEntity<ApiResponse> getCustomerWithSearch(@RequestParam String searchKeyword, @PathVariable int pageNo, @PathVariable int pageSize) {
+          ApiResponse response = new ApiResponse();
+
+          try {
+               PaginationResponse<CustomerDto> customers = custService.getCustomerWithSearch(searchKeyword, pageNo, pageSize);
+
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(customers);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+     
      
      @PostMapping()
      public ResponseEntity<ApiResponse> addCustomer(@RequestBody CustomerDto customer) {

@@ -99,6 +99,21 @@ public class CustomerServiceImpl implements CustomerService{
           return mapper.toDto(custRepository.save(custEntity));
      }
 
+     @Override
+     public PaginationResponse<CustomerDto> getCustomerWithSearch(String keyword, int pageNo, int pageSize) {
+          PageRequest pageable = PageRequest.of(pageNo, pageSize, Sort.by("lastName").ascending());
+          Page<CustomerEntity> entity = this.custRepository.findByFirstNameContainingIgnoreCaseOrMiddleNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrAccountNoContainingIgnoreCaseOrAddressContainingIgnoreCase(
+               keyword, keyword, keyword, keyword, keyword, pageable   
+          );
+          return new PaginationResponse<>(
+               mapper.toDtoList(entity.getContent()),
+               entity.getNumber(),
+               entity.getSize(),
+               entity.getTotalPages(),
+               entity.getTotalElements()
+          );
+     }
+
      private String generateControlNumber() {
           String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
           String lastAccoutNo = custRepository.findLastAccoutNo("C"+datePrefix);
