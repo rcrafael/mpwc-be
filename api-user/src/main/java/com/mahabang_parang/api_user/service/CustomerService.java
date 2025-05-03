@@ -13,4 +13,5 @@ public interface CustomerService {
      public String generateAccountNo();
      public List<CustomerDto> getCustomerByIds(List<String> idsList);
      public CustomerDto updateCustomer(CustomerDto customer);
+     public PaginationResponse<CustomerDto> getCustomerWithSearch(String keyword, int pageNo, int pageSize);
 }

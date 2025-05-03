@@ -2,6 +2,8 @@ package com.mahabang_parang.api_user.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,5 +19,8 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, String
      List<CustomerEntity> findByIds(@Param("ids") List<String> ids);
 
      List<CustomerEntity> findByFirstNameContaining(String firstName);
+     Page<CustomerEntity> findByFirstNameContainingIgnoreCaseOrMiddleNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrAccountNoContainingIgnoreCaseOrAddressContainingIgnoreCase(
+          String firstName, String middleName, String lastName, String accountNo, String Address, Pageable pageable
+          );
      CustomerEntity findByAccountNo(String accountNo);
 }    
