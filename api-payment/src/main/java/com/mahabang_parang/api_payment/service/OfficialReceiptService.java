@@ -16,4 +16,10 @@ public interface OfficialReceiptService {
      public String generateOfficialReceiptNo() throws Exception;
      public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOfficialReceiptWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception;
      public OfficialReceiptResponse getOfficialReceiptWithDetailsById(String orhId) throws Exception;
+
+
+     public PaginationResponse<OfficialReceiptHeaderDto> getOtherCollectionAll(int pageNo, int pageSize, String sortColumn) throws Exception;
+     public PaginationResponse<OfficialReceiptHeaderDto> getOtherCollectionByCustomerId(int pageNo, int pageSize, String customerId) throws Exception;
+     public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOtherCollectionWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception;
+     public OfficialReceiptResponse getOtherCollectionWithDetailsById(String orhId) throws Exception;
 }

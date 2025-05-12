@@ -112,7 +112,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           
           OfficialReceiptHeaderEntity orHeaderEntity = orHeaderMapper.toEntity(payload.getHeader());
           
-          String newOrNo = this.generateControlNumber();https://app.daily.dev/posts
+          String newOrNo = this.generateControlNumber();
 
           orHeaderEntity.setOrNo(newOrNo);
           List<OfficialReceiptDetailsEntity> detailsList = orDetailsMapper.toEntityList(payload.getDetails());
@@ -257,6 +257,33 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           return or;
      }
 
+     @Override
+      public PaginationResponse<OfficialReceiptHeaderDto> getOtherCollectionAll(int pageNo, int pageSize,
+               String sortColumn) throws Exception {
+          // TODO Auto-generated method stub
+          throw new UnsupportedOperationException("Unimplemented method 'getOtherCollectionAll'");
+      }
+
+      @Override
+      public PaginationResponse<OfficialReceiptHeaderDto> getOtherCollectionByCustomerId(int pageNo, int pageSize,
+               String customerId) throws Exception {
+          // TODO Auto-generated method stub
+          throw new UnsupportedOperationException("Unimplemented method 'getOtherCollectionByCustomerId'");
+      }
+
+
+      @Override
+      public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOtherCollectionWithCustomer(int pageNo,
+               int pageSize, String sortColumn) throws Exception {
+          // TODO Auto-generated method stub
+          throw new UnsupportedOperationException("Unimplemented method 'getOtherCollectionWithCustomer'");
+      }
+
+      @Override
+      public OfficialReceiptResponse getOtherCollectionWithDetailsById(String orhId) throws Exception {
+          // TODO Auto-generated method stub
+          throw new UnsupportedOperationException("Unimplemented method 'getOtherCollectionWithDetailsById'");
+      } 
 
       private String generateControlNumber() {
           String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -270,5 +297,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
 
           return "OR" + datePrefix + String.format("%05d", sequence);
      }
+
+      
 
 }
