@@ -1,5 +1,6 @@
 package com.mahabang_parang.api_settings.service.Impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.mahabang_parang.api_settings.model.PaginationResponse;
 import com.mahabang_parang.api_settings.model.dto.PartDto;
+import com.mahabang_parang.api_settings.model.dto.PartsListingDto;
 import com.mahabang_parang.api_settings.model.entity.PartEntity;
 import com.mahabang_parang.api_settings.model.mapper.PartMapper;
 import com.mahabang_parang.api_settings.repository.PartRepository;
@@ -61,6 +63,23 @@ public class PartServiceImpl implements PartService {
           PartEntity part = this.partRepo.findById(id).orElseThrow();
           return this.mapper.toDto(part);
 
+     }
+
+     public List<PartsListingDto> listParts() throws Exception {
+          List<PartEntity> parts = this.partRepo.findAll(Sort.by(Sort.Direction.ASC, "description"));
+          List<PartDto> partsDto = this.mapper.toDtoList(parts);
+
+          List<PartsListingDto> partsListingDto = new ArrayList<PartsListingDto>();
+
+          for (PartDto partDto : partsDto) {
+               PartsListingDto part = new PartsListingDto();
+               part.setId(partDto.getId());
+               part.setDescription(partDto.getDescription() + " - " + partDto.getMeasurement());
+               part.setSellingPrice(partDto.getSellingPrice());
+               partsListingDto.add(part);
+          }
+
+          return partsListingDto;
      }
      
 }

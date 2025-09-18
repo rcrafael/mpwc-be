@@ -63,5 +63,9 @@ public class OfficialReceiptDetailsEntity {
      @Column(length = 250)
      private String remarks;
 
+     @Column(length = 36, nullable = true)
+     private String partId;
+
+
 
 }

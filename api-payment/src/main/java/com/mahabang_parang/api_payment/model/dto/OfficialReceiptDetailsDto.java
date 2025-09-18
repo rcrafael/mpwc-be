@@ -30,4 +30,5 @@ public class OfficialReceiptDetailsDto {
      private Double totalAmount;
      private String remarks;
      private Integer billingStatus;
+     private String partId;
 }

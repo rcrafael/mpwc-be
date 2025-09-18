@@ -6,7 +6,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mahabang_parang.api_settings.model.ApiResponse;
 import com.mahabang_parang.api_settings.model.PaginationResponse;
 import com.mahabang_parang.api_settings.model.dto.PartDto;
+import com.mahabang_parang.api_settings.model.dto.PartsListingDto;
 import com.mahabang_parang.api_settings.service.PartService;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,6 +38,27 @@ public class PartController {
 
            try {
                PaginationResponse<PartDto> parts =  partService.getAll(pageNo, pageSize);
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(parts);
+               return ResponseEntity.ok(response);
+
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+
+     }
+
+     @GetMapping("list-all")
+     public ResponseEntity<ApiResponse> listParts() {
+         
+          ApiResponse response = new ApiResponse();
+
+           try {
+               List<PartsListingDto> parts =  partService.listParts();
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(parts);

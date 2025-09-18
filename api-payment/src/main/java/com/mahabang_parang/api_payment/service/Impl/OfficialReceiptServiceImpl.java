@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
+import javax.print.attribute.standard.MediaSize.Other;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,10 @@ import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDetailsDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustomerDto;
+import com.mahabang_parang.api_payment.model.dto.OtherPaymentDetailsDto;
+import com.mahabang_parang.api_payment.model.dto.OtherPaymentDto;
+import com.mahabang_parang.api_payment.model.dto.OtherPaymentHeaderDto;
+import com.mahabang_parang.api_payment.model.dto.OtherPaymentHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.dto.ShareCapitalDto;
 import com.mahabang_parang.api_payment.model.dto.ShareCbuDto;
 import com.mahabang_parang.api_payment.model.dto.ShareSavingsDto;
@@ -34,7 +39,9 @@ import com.mahabang_parang.api_payment.model.mapper.ShareCapitalMapper;
 import com.mahabang_parang.api_payment.model.mapper.ShareCbuMapper;
 import com.mahabang_parang.api_payment.model.mapper.ShareSavingsMapper;
 import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
+import com.mahabang_parang.api_payment.model.payload.OtherPaymentPayload;
 import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
+import com.mahabang_parang.api_payment.model.response.OtherPaymentResponse;
 import com.mahabang_parang.api_payment.repository.OfficialReceiptDetailsRepository;
 import com.mahabang_parang.api_payment.repository.OfficialReceiptHeaderRepository;
 import com.mahabang_parang.api_payment.repository.ShareCapitalRepository;
@@ -80,7 +87,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
 
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findAll(pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSale(false, pageable);
 
           return new PaginationResponse<>(
                orHeaderMapper.toDtoList(orHeaders.getContent()),
@@ -96,7 +103,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByCustomerId(customerId, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByCustomerIdAndIsPartSale(customerId,false, pageable);
 
           return new PaginationResponse<>(
                orHeaderMapper.toDtoList(orHeaders.getContent()),
@@ -168,10 +175,56 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      }
 
      @Override
+     public OtherPaymentDto createOtherCollection(OtherPaymentPayload payload) throws Exception {
+          
+          String newOrNo = this.generateControlNumber();
+
+          OtherPaymentHeaderDto header = payload.getHeader();
+          List<OtherPaymentDetailsDto> details = payload.getDetails();
+
+          OfficialReceiptHeaderEntity entity = new OfficialReceiptHeaderEntity();
+          entity.setOrNo(newOrNo);
+          entity.setCustomerId(header.getCustomerId());
+          entity.setOrDate(header.getOrDate());
+          entity.setEntryDate(header.getEntryDate());
+          entity.setCreatedBy(header.getCreatedBy());
+          entity.setTotalBillingAmount(header.getTotalBillingAmount());
+          entity.setTotalAmountPay(header.getTotalAmountPay());
+          entity.setCheckNo(header.getCheckNo());
+          entity.setCheckBank(header.getCheckBank());
+          entity.setCheckDate(header.getCheckDate());
+          entity.setStatus(header.getStatus());
+          entity.setIsPartSale(true);
+          entity.setIsOutsideCollection(header.getIsOutsideCollection());
+          entity.setOutsideCustomerName(header.getOutsideCustomerName());
+
+
+          List<OfficialReceiptDetailsEntity> detailsEntity = new ArrayList<>();
+          for (OtherPaymentDetailsDto d : details) {
+               OfficialReceiptDetailsEntity ent = new OfficialReceiptDetailsEntity();
+               ent.setOrNo(newOrNo);
+               ent.setPartId(d.getPartId());
+               ent.setParts(d.getParts());
+               ent.setTotalAmount(d.getTotalAmount());
+               ent.setRemarks(d.getRemarks());
+               detailsEntity.add(ent);
+          }
+          
+          OfficialReceiptHeaderEntity resultHeader = orHeaderRepo.save(entity);
+          List<OfficialReceiptDetailsEntity> resultDetails = orDetailsRepo.saveAll(detailsEntity);
+
+          OtherPaymentDto result = new OtherPaymentDto();
+          result.setHeader(orHeaderMapper.toDto(resultHeader));
+          result.setDetails(orDetailsMapper.toDtoList(resultDetails));
+
+          return result;
+     }
+
+     @Override
      public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOfficialReceiptWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception {
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findAll(pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSale(false, pageable);
 
           List<String> ids = new ArrayList<String>();
           for(OfficialReceiptHeaderEntity orh : orHeaders) {
@@ -258,31 +311,119 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      }
 
      @Override
-      public PaginationResponse<OfficialReceiptHeaderDto> getOtherCollectionAll(int pageNo, int pageSize,
-               String sortColumn) throws Exception {
-          // TODO Auto-generated method stub
-          throw new UnsupportedOperationException("Unimplemented method 'getOtherCollectionAll'");
+      public PaginationResponse<OtherPaymentHeaderDto> getOtherCollectionAll(int pageNo, int pageSize, String sortColumn) throws Exception {
+     
+          Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
+
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSale(true, pageable);
+
+          return new PaginationResponse<>(
+               orHeaderMapper.toDtoList(orHeaders.getContent()),
+               orHeaders.getNumber(),
+               orHeaders.getSize(),
+               orHeaders.getTotalPages(),
+               orHeaders.getTotalElements()
+          );
+
       }
 
       @Override
-      public PaginationResponse<OfficialReceiptHeaderDto> getOtherCollectionByCustomerId(int pageNo, int pageSize,
-               String customerId) throws Exception {
-          // TODO Auto-generated method stub
-          throw new UnsupportedOperationException("Unimplemented method 'getOtherCollectionByCustomerId'");
+      public PaginationResponse<OtherPaymentHeaderDto> getOtherCollectionByCustomerId(int pageNo, int pageSize, String customerId) throws Exception {
+          
+          Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
+
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByCustomerIdAndIsPartSale(customerId,true, pageable);
+
+          return new PaginationResponse<>(
+               orHeaderMapper.toDtoList(orHeaders.getContent()),
+               orHeaders.getNumber(),
+               orHeaders.getSize(),
+               orHeaders.getTotalPages(),
+               orHeaders.getTotalElements()
+          );
+
       }
 
-
       @Override
-      public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOtherCollectionWithCustomer(int pageNo,
-               int pageSize, String sortColumn) throws Exception {
-          // TODO Auto-generated method stub
-          throw new UnsupportedOperationException("Unimplemented method 'getOtherCollectionWithCustomer'");
+      public PaginationResponse<OtherPaymentHeaderWithCustomerDto> getOtherCollectionWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception {
+          
+          Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
+
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSale(true, pageable);
+
+          List<String> ids = new ArrayList<String>();
+          for(OfficialReceiptHeaderEntity orh : orHeaders) {
+               ids.add(orh.getCustomerId());
+          }
+
+          List<CustomerDto> customers = customerService.getCustomerByIds(ids);
+
+          List<OtherPaymentHeaderWithCustomerDto> orWithCust = new ArrayList<OtherPaymentHeaderWithCustomerDto>();
+
+          for(OfficialReceiptHeaderEntity orh : orHeaders) {
+               OtherPaymentHeaderWithCustomerDto orc = new OtherPaymentHeaderWithCustomerDto();
+               CustomerDto c = customers.stream().filter(cc -> cc.getId().equals(orh.getCustomerId())).findFirst().orElse(null);
+
+               orc.setId(orh.getId());
+               orc.setOrNo(orh.getOrNo());
+               orc.setCustomerId(orh.getCustomerId());
+               orc.setCustomer(c);
+               orc.setOrDate(orh.getOrDate());
+               orc.setTotalBillingAmount(orh.getTotalBillingAmount());
+               orc.setTotalAmountPay(orh.getTotalAmountPay());
+               orc.setEntryDate(orh.getEntryDate());
+               orc.setCreatedBy(orh.getCreatedBy());
+               orc.setCheckNo(orh.getCheckNo());
+               orc.setCheckBank(orh.getCheckBank());
+               orc.setCheckDate(orh.getCheckDate());
+               orc.setStatus(orh.getStatus());
+               orc.setIsPartSale(orh.getIsPartSale());
+               orc.setIsOutsideCollection(orh.getIsOutsideCollection());
+               orc.setOutsideCustomerName(orh.getOutsideCustomerName());
+               orWithCust.add(orc);
+          }
+
+
+          return new PaginationResponse<>(
+               orWithCust,
+               orHeaders.getNumber(),
+               orHeaders.getSize(),
+               orHeaders.getTotalPages(),
+               orHeaders.getTotalElements()
+          );
       }
 
       @Override
-      public OfficialReceiptResponse getOtherCollectionWithDetailsById(String orhId) throws Exception {
-          // TODO Auto-generated method stub
-          throw new UnsupportedOperationException("Unimplemented method 'getOtherCollectionWithDetailsById'");
+      public OtherPaymentResponse getOtherCollectionWithDetailsById(String orhId) throws Exception {
+          OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(orhId).orElseThrow();
+          
+          String orNo = orHeader.getOrNo();
+
+          CustomerDto customer = customerService.getCustomer(orHeader.getCustomerId());
+          List<OfficialReceiptDetailsDto> orDetails = orDetailsMapper.toDtoList(orDetailsRepo.findByOrNo(orNo));
+          
+          OtherPaymentHeaderWithCustomerDto orc = new OtherPaymentHeaderWithCustomerDto();
+          orc.setId(orHeader.getId());
+          orc.setOrNo(orHeader.getOrNo());
+          orc.setCustomerId(orHeader.getCustomerId());
+          orc.setCustomer(customer);
+          orc.setOrDate(orHeader.getOrDate());
+          orc.setTotalBillingAmount(orHeader.getTotalBillingAmount());
+          orc.setTotalAmountPay(orHeader.getTotalAmountPay());
+          orc.setEntryDate(orHeader.getEntryDate());
+          orc.setCreatedBy(orHeader.getCreatedBy());
+          orc.setCheckNo(orHeader.getCheckNo());
+          orc.setCheckBank(orHeader.getCheckBank());
+          orc.setCheckDate(orHeader.getCheckDate());
+          orc.setStatus(orHeader.getStatus());
+          orc.setIsPartSale(orHeader.getIsPartSale());
+          orc.setIsOutsideCollection(orHeader.getIsOutsideCollection());
+          orc.setOutsideCustomerName(orHeader.getOutsideCustomerName());
+
+          OtherPaymentResponse or = new OtherPaymentResponse();
+          or.setHeader(orc);
+          or.setDetails(orDetails);
+          return or;
       } 
 
       private String generateControlNumber() {
@@ -297,7 +438,5 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
 
           return "OR" + datePrefix + String.format("%05d", sequence);
      }
-
-      
 
 }

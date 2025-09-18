@@ -27,5 +27,5 @@ public class PartDto {
 
      private LocalDateTime dateUpdated;
 
-
+     
 }

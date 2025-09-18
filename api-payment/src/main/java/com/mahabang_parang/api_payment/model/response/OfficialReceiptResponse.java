@@ -3,7 +3,6 @@ package com.mahabang_parang.api_payment.model.response;
 import java.util.List;
 
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDetailsDto;
-import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.dto.ShareCapitalDto;
 import com.mahabang_parang.api_payment.model.dto.ShareCbuDto;
