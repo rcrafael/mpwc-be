@@ -13,7 +13,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "official_receipt_details")
+@Table(name = "official_receipt_detail")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -62,6 +62,10 @@ public class OfficialReceiptDetailsEntity {
 
      @Column(length = 250)
      private String remarks;
+
+     @Column(length = 36, nullable = true)
+     private String partId;
+
 
 
 }

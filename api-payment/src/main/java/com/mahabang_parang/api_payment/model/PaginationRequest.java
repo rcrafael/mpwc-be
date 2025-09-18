@@ -1,7 +1,5 @@
 package com.mahabang_parang.api_payment.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Getter;
 import lombok.Setter;
 

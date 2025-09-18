@@ -1,0 +1,34 @@
+spring:
+     application:
+          name: api-settings
+     jackson:
+          deserialization:
+               fail-on-unknown-properties: true
+          date-format: yyyy-MM-dd
+     datasource:
+          url: "jdbc:mysql://localhost:3306/mpwcdb"
+          username: root
+          password: root
+     jpa:
+          show_sql: true
+          hibernate:
+               ddl-auto: update
+     boot:
+          admin:
+               client:
+                    url: http://localhost:1111
+                    instance:
+                         metadata:
+                              strategy: ${random.uuid}
+
+server:
+     port: 8084
+     address: 0.0.0.0
+
+management:
+     server:
+          port: 8084
+     endpoints:
+          web:
+               exposure:
+                    include: "*"

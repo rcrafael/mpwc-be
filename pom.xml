@@ -13,8 +13,8 @@
         <module>api-billing</module>
         <module>api-payment</module>
         <module>api-user</module>
-        <!-- <module>api-reports</module>
-        <module>api-settings</module> -->
+        <!-- <module>api-reports</module> -->
+        <module>api-settings</module>
     </modules>
 
     <dependencyManagement>
