@@ -33,4 +33,5 @@ public class OfficialReceiptHeaderWithCustomerDto {
      private Boolean isOutsideCollection;
      private String outsideCustomerName;
      private String partId;
+     private String outsideCustomerAddress;
 }

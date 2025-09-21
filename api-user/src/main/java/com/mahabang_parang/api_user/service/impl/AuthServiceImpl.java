@@ -3,14 +3,14 @@ package com.mahabang_parang.api_user.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.mahabang_parang.api_user.model.dto.UserDto;
+import com.mahabang_parang.api_user.model.entity.UserEntity;
 import com.mahabang_parang.api_user.model.mapper.UserMapper;
 import com.mahabang_parang.api_user.model.payload.LoginPayload;
+import com.mahabang_parang.api_user.repository.UserRepository;
 import com.mahabang_parang.api_user.security.JwtUtil;
 import com.mahabang_parang.api_user.service.AuthService;
 import com.mahabang_parang.api_user.service.UserService;
@@ -26,6 +26,7 @@ public class AuthServiceImpl implements AuthService {
      private final JwtUtil jwtUtils;
      private final AuthenticationManager authManager;
      private final UserMapper mapper;
+
 
      public String login(LoginPayload payload) throws Exception {
           System.out.println("LOGIN API TRIGGERED!");
@@ -46,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
      public String encodePassword(String password) throws Exception {
           return passwordEncoder.encode(password);
      }
+
 
 
      // public UserDto create(UserDto user) throws Exception {

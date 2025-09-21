@@ -26,6 +26,8 @@ public class OtherPaymentDetailsDto {
 
      private Double parts; //amount for parts
 
+     private String OtherDescription;
+
      private Double totalAmount;
 
      private String remarks;

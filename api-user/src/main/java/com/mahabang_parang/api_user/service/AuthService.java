@@ -7,5 +7,6 @@ public interface AuthService {
      
      public String login(LoginPayload payload) throws Exception;
      public String encodePassword(String password) throws Exception;
+     
      // public UserDto create(UserDto payload) throws Exception;
 }

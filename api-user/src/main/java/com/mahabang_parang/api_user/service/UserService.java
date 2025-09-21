@@ -6,5 +6,5 @@ public interface UserService {
 
      public UserDto findByEmail(String email);
      public UserDto findById(String id);
-
+     public String getUsername(String id) throws Exception;
 }

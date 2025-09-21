@@ -73,4 +73,6 @@ public class OfficialReceiptHeaderEntity {
      @Column(length = 50)
      private String outsideCustomerName;
 
+     @Column(length = 250)
+     private String outsideCustomerAddress;
 }

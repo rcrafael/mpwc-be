@@ -31,4 +31,5 @@ public class OtherPaymentHeaderWithCustomerDto {
      private Boolean isOutsideCollection;
      private String outsideCustomerName;
      private String partId;
+     private String outsideCustomerAddress;
 }
