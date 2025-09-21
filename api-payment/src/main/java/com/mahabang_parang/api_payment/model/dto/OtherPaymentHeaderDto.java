@@ -27,4 +27,5 @@ public class OtherPaymentHeaderDto {
      private Boolean isPartSale;
      private Boolean isOutsideCollection;
      private String outsideCustomerName;
+     private String outsideCustomerAddress;
 }

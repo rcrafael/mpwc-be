@@ -197,7 +197,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           entity.setIsPartSale(true);
           entity.setIsOutsideCollection(header.getIsOutsideCollection());
           entity.setOutsideCustomerName(header.getOutsideCustomerName());
-
+          entity.setOutsideCustomerAddress(header.getOutsideCustomerAddress());
 
           List<OfficialReceiptDetailsEntity> detailsEntity = new ArrayList<>();
           for (OtherPaymentDetailsDto d : details) {
@@ -205,6 +205,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
                ent.setOrNo(newOrNo);
                ent.setPartId(d.getPartId());
                ent.setParts(d.getParts());
+               ent.setOtherDescription(d.getOtherDescription());
                ent.setTotalAmount(d.getTotalAmount());
                ent.setRemarks(d.getRemarks());
                detailsEntity.add(ent);
@@ -399,7 +400,12 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           
           String orNo = orHeader.getOrNo();
 
-          CustomerDto customer = customerService.getCustomer(orHeader.getCustomerId());
+          CustomerDto customer = new CustomerDto();
+
+          if(orHeader.getCustomerId() != null && orHeader.getCustomerId().equals("")){
+               customer = customerService.getCustomer(orHeader.getCustomerId());
+          }
+          
           List<OfficialReceiptDetailsDto> orDetails = orDetailsMapper.toDtoList(orDetailsRepo.findByOrNo(orNo));
           
           OtherPaymentHeaderWithCustomerDto orc = new OtherPaymentHeaderWithCustomerDto();

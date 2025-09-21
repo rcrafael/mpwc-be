@@ -29,4 +29,5 @@ public class OfficialReceiptHeaderDto {
      private Boolean isPartSale;
      private Boolean isOutsideCollection;
      private String outsideCustomerName;
+     private String outsideCustomerAddress;
 }
