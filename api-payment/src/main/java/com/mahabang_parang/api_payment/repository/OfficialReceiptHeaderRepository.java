@@ -13,8 +13,8 @@ public interface OfficialReceiptHeaderRepository extends JpaRepository<OfficialR
      @Query("SELECT o.orNo FROM OfficialReceiptHeaderEntity o WHERE o.orNo LIKE :datePrefix% ORDER BY o.orNo DESC LIMIT 1")
      String findLastOrNo(@Param("datePrefix") String datePrefix);
 
-     Page<OfficialReceiptHeaderEntity> findByCustomerIdAndIsPartSale(String customerId, Boolean isPartSale, Pageable pageable);
+     Page<OfficialReceiptHeaderEntity> findByCustomerIdAndIsPartSaleAndIsDeleted(String customerId, Boolean isPartSale, Boolean isDeleted, Pageable pageable);
 
-     Page<OfficialReceiptHeaderEntity> findByIsPartSale(Boolean isPartSale, Pageable pageable);
+     Page<OfficialReceiptHeaderEntity> findByIsPartSaleAndIsDeleted(Boolean isPartSale, Boolean isDeleted, Pageable pageable);
 
 }

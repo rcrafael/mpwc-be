@@ -2,6 +2,7 @@ package com.mahabang_parang.api_payment.model.entity;
 
 import java.util.Date;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -75,4 +76,7 @@ public class OfficialReceiptHeaderEntity {
 
      @Column(length = 250)
      private String outsideCustomerAddress;
+
+     @ColumnDefault("false")
+     private Boolean isDeleted;
 }

@@ -66,6 +66,4 @@ public class OfficialReceiptDetailsEntity {
      @Column(length = 36, nullable = true)
      private String partId;
 
-
-
 }

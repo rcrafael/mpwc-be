@@ -53,7 +53,6 @@ public class OtherPaymentController {
 
      }
 
-
      @GetMapping("/{pageNo}/{pageSize}")
      public ResponseEntity<ApiResponse> getAllOtherPayment(@PathVariable int pageNo, @PathVariable int pageSize) {
          

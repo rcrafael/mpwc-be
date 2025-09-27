@@ -32,4 +32,5 @@ public class OtherPaymentHeaderWithCustomerDto {
      private String outsideCustomerName;
      private String partId;
      private String outsideCustomerAddress;
+     private Boolean isDeleted;
 }
