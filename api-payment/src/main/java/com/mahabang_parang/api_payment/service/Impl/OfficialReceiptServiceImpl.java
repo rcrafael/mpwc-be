@@ -40,6 +40,7 @@ import com.mahabang_parang.api_payment.model.mapper.ShareCbuMapper;
 import com.mahabang_parang.api_payment.model.mapper.ShareSavingsMapper;
 import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
 import com.mahabang_parang.api_payment.model.payload.OtherPaymentPayload;
+import com.mahabang_parang.api_payment.model.payload.UpdateStatusPayload;
 import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
 import com.mahabang_parang.api_payment.model.response.OtherPaymentResponse;
 import com.mahabang_parang.api_payment.repository.OfficialReceiptDetailsRepository;
@@ -87,7 +88,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
 
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSale(false, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(false,false, pageable);
 
           return new PaginationResponse<>(
                orHeaderMapper.toDtoList(orHeaders.getContent()),
@@ -103,7 +104,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByCustomerIdAndIsPartSale(customerId,false, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByCustomerIdAndIsPartSaleAndIsDeleted(customerId,false,false, pageable);
 
           return new PaginationResponse<>(
                orHeaderMapper.toDtoList(orHeaders.getContent()),
@@ -225,7 +226,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOfficialReceiptWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception {
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSale(false, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(false, false, pageable);
 
           List<String> ids = new ArrayList<String>();
           for(OfficialReceiptHeaderEntity orh : orHeaders) {
@@ -301,6 +302,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           orc.setIsPartSale(orHeader.getIsPartSale());
           orc.setIsOutsideCollection(orHeader.getIsOutsideCollection());
           orc.setOutsideCustomerName(orHeader.getOutsideCustomerName());
+          orc.setIsDeleted(orHeader.getIsDeleted());
 
           OfficialReceiptResponse or = new OfficialReceiptResponse();
           or.setHeader(orc);
@@ -316,7 +318,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSale(true, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(true, false, pageable);
 
           return new PaginationResponse<>(
                orHeaderMapper.toDtoList(orHeaders.getContent()),
@@ -333,7 +335,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByCustomerIdAndIsPartSale(customerId,true, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByCustomerIdAndIsPartSaleAndIsDeleted(customerId,true, false, pageable);
 
           return new PaginationResponse<>(
                orHeaderMapper.toDtoList(orHeaders.getContent()),
@@ -350,7 +352,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSale(true, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(true, false, pageable);
 
           List<String> ids = new ArrayList<String>();
           for(OfficialReceiptHeaderEntity orh : orHeaders) {
@@ -425,12 +427,29 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           orc.setIsPartSale(orHeader.getIsPartSale());
           orc.setIsOutsideCollection(orHeader.getIsOutsideCollection());
           orc.setOutsideCustomerName(orHeader.getOutsideCustomerName());
+          orc.setIsDeleted(orHeader.getIsDeleted());
 
           OtherPaymentResponse or = new OtherPaymentResponse();
           or.setHeader(orc);
           or.setDetails(orDetails);
           return or;
       } 
+
+      @Override
+      public String deleteRecord(String id) throws Exception {
+          OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(id).orElseThrow();
+          orHeader.setIsDeleted(true);
+          orHeaderRepo.save(orHeader);
+          return "Successfully deleted";
+      }
+
+      @Override
+      public OfficialReceiptHeaderDto updateRecordStatus(UpdateStatusPayload payload) throws Exception {
+          OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(payload.getId()).orElseThrow();
+          orHeader.setStatus(payload.getStatus());
+          orHeaderRepo.save(orHeader);
+          return orHeaderMapper.toDto(orHeader);
+      }
 
       private String generateControlNumber() {
           String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));

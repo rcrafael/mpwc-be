@@ -9,6 +9,7 @@ import com.mahabang_parang.api_payment.model.dto.OtherPaymentHeaderDto;
 import com.mahabang_parang.api_payment.model.dto.OtherPaymentHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
 import com.mahabang_parang.api_payment.model.payload.OtherPaymentPayload;
+import com.mahabang_parang.api_payment.model.payload.UpdateStatusPayload;
 import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
 import com.mahabang_parang.api_payment.model.response.OtherPaymentResponse;
 
@@ -20,6 +21,8 @@ public interface OfficialReceiptService {
      public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOfficialReceiptWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception;
      public OfficialReceiptResponse getOfficialReceiptWithDetailsById(String orhId) throws Exception;
 
+     public String deleteRecord(String id) throws Exception; //both OR and Other Collection
+     public OfficialReceiptHeaderDto updateRecordStatus(UpdateStatusPayload payload) throws Exception;
 
      public OtherPaymentDto createOtherCollection(OtherPaymentPayload payload) throws Exception;
      public PaginationResponse<OtherPaymentHeaderDto> getOtherCollectionAll(int pageNo, int pageSize, String sortColumn) throws Exception;

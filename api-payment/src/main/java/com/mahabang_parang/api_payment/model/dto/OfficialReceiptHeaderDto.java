@@ -30,4 +30,5 @@ public class OfficialReceiptHeaderDto {
      private Boolean isOutsideCollection;
      private String outsideCustomerName;
      private String outsideCustomerAddress;
+     private Boolean isDeleted;
 }

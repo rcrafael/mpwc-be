@@ -12,8 +12,11 @@ import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
+import com.mahabang_parang.api_payment.model.payload.UpdateStatusPayload;
 import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -130,7 +133,6 @@ public class OfficialReceiptController {
           }
      }
 
-
      @PostMapping()
      public ResponseEntity<ApiResponse> create(@RequestBody OfficiaReceiptPayload payload) {
          
@@ -152,6 +154,45 @@ public class OfficialReceiptController {
           }
      }
      
+     @DeleteMapping("{id}")
+     public ResponseEntity<ApiResponse> delete(@PathVariable String id) {
+          ApiResponse response = new ApiResponse();
+
+          try {
+               String result = orService.deleteRecord(id);
+               response.setResult(result);
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               return ResponseEntity.ok(response);
+          }
+          catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+
+     @PostMapping("update-status")
+     public ResponseEntity<ApiResponse> updateStatus(@RequestBody UpdateStatusPayload payload) {
+         ApiResponse response = new ApiResponse();
+
+          try {
+
+               OfficialReceiptHeaderDto orHeader =  orService.updateRecordStatus(payload);
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(orHeader);
+               return ResponseEntity.ok(response);
+
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
      
+
 
 }
