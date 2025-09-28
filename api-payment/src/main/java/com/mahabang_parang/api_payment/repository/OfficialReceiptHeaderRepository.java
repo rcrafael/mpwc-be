@@ -17,4 +17,13 @@ public interface OfficialReceiptHeaderRepository extends JpaRepository<OfficialR
 
      Page<OfficialReceiptHeaderEntity> findByIsPartSaleAndIsDeleted(Boolean isPartSale, Boolean isDeleted, Pageable pageable);
 
+     // Page<OfficialReceiptHeaderEntity> findByCustomerIdContainingIgnoreCaseOrOrNoContainingIgnoreCase(String customerId, String orNo, Pageable pageable);
+
+     @Query("SELECT o FROM OfficialReceiptHeaderEntity o WHERE LOWER(o.customerId) LIKE LOWER(CONCAT('%', :customerId, '%')) OR LOWER(o.orNo) LIKE LOWER(CONCAT('%', :orNo, '%')) AND o.isPartSale = :isPartSale AND o.isDeleted = false")
+     Page<OfficialReceiptHeaderEntity> searchByCustomerIdOrOrNo(
+        @Param("customerId") String customerId,
+        @Param("orNo") String orNo,
+        @Param("isPartSale") Boolean isPartSale,
+        Pageable pageable);
+
 }

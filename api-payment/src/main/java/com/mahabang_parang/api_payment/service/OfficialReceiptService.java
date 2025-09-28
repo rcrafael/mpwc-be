@@ -20,6 +20,8 @@ public interface OfficialReceiptService {
      public String generateOfficialReceiptNo() throws Exception;
      public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOfficialReceiptWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception;
      public OfficialReceiptResponse getOfficialReceiptWithDetailsById(String orhId) throws Exception;
+     public PaginationResponse<OfficialReceiptHeaderDto> getOfficialReceiptWithSearch(String keyword, int pageNo, int pageSize) throws Exception;
+
 
      public String deleteRecord(String id) throws Exception; //both OR and Other Collection
      public OfficialReceiptHeaderDto updateRecordStatus(UpdateStatusPayload payload) throws Exception;
@@ -29,4 +31,5 @@ public interface OfficialReceiptService {
      public PaginationResponse<OtherPaymentHeaderDto> getOtherCollectionByCustomerId(int pageNo, int pageSize, String customerId) throws Exception;
      public PaginationResponse<OtherPaymentHeaderWithCustomerDto> getOtherCollectionWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception;
      public OtherPaymentResponse getOtherCollectionWithDetailsById(String orhId) throws Exception;
+     public PaginationResponse<OfficialReceiptHeaderDto> getOtherCollectionAllWithSearch(String keyword, int pageNo, int pageSize) throws Exception;
 }

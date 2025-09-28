@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -136,5 +137,26 @@ public class OtherPaymentController {
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
+
+      @GetMapping("search/{pageNo}/{pageSize}")
+     public ResponseEntity<ApiResponse> getOrWithSearch(@RequestParam String searchKeyword, @PathVariable int pageNo, @PathVariable int pageSize) {
+         ApiResponse response = new ApiResponse();
+
+          try {
+               PaginationResponse<OfficialReceiptHeaderDto> OR = orService.getOtherCollectionAllWithSearch(searchKeyword, pageNo, pageSize);
+
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(OR);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+     
+
 
 }
