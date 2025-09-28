@@ -21,6 +21,7 @@ public interface CustomerRepository extends JpaRepository<CustomerEntity, String
      List<CustomerEntity> findByFirstNameContaining(String firstName);
      Page<CustomerEntity> findByFirstNameContainingIgnoreCaseOrMiddleNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrAccountNoContainingIgnoreCaseOrAddressContainingIgnoreCase(
           String firstName, String middleName, String lastName, String accountNo, String Address, Pageable pageable
-          );
+     );
+
      CustomerEntity findByAccountNo(String accountNo);
 }    

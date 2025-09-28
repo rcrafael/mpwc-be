@@ -15,12 +15,15 @@ import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
 import com.mahabang_parang.api_payment.model.payload.UpdateStatusPayload;
 import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
+import com.mahabang_parang.api_user.model.dto.CustomerDto;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -185,6 +188,25 @@ public class OfficialReceiptController {
                response.setResult(orHeader);
                return ResponseEntity.ok(response);
 
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+     
+     @GetMapping("search/{pageNo}/{pageSize}")
+     public ResponseEntity<ApiResponse> getOrWithSearch(@RequestParam String searchKeyword, @PathVariable int pageNo, @PathVariable int pageSize) {
+         ApiResponse response = new ApiResponse();
+
+          try {
+               PaginationResponse<OfficialReceiptHeaderDto> OR = orService.getOfficialReceiptWithSearch(searchKeyword, pageNo, pageSize);
+
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(OR);
+               return ResponseEntity.ok(response);
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());

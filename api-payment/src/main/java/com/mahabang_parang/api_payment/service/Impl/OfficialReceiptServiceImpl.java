@@ -50,6 +50,7 @@ import com.mahabang_parang.api_payment.repository.ShareCbuRepository;
 import com.mahabang_parang.api_payment.repository.ShareSavingsRepository;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
 import com.mahabang_parang.api_user.model.dto.CustomerDto;
+import com.mahabang_parang.api_user.model.entity.CustomerEntity;
 import com.mahabang_parang.api_user.service.CustomerService;
 
 @Transactional
@@ -167,6 +168,57 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           result.setDetails(orDetailsMapper.toDtoList(resultDetails));
 
           return result;
+
+     }
+
+     @Override
+     public PaginationResponse<OfficialReceiptHeaderDto> getOfficialReceiptWithSearch(String keyword, int pageNo, int pageSize) throws Exception {
+          Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("entryDate").descending());
+
+          Page<OfficialReceiptHeaderEntity> orHeaders = this.orHeaderRepo.searchByCustomerIdOrOrNo(keyword, keyword,false, pageable);
+            
+
+          List<String> ids = new ArrayList<String>();
+          for(OfficialReceiptHeaderEntity orh : orHeaders) {
+               ids.add(orh.getCustomerId());
+          }
+
+          List<CustomerDto> customers = customerService.getCustomerByIds(ids);
+
+          List<OfficialReceiptHeaderWithCustomerDto> orWithCust = new ArrayList<OfficialReceiptHeaderWithCustomerDto>();
+
+          for(OfficialReceiptHeaderEntity orh : orHeaders) {
+               OfficialReceiptHeaderWithCustomerDto orc = new OfficialReceiptHeaderWithCustomerDto();
+               CustomerDto c = customers.stream().filter(cc -> cc.getId().equals(orh.getCustomerId())).findFirst().orElse(null);
+
+               orc.setId(orh.getId());
+               orc.setOrNo(orh.getOrNo());
+               orc.setCustomerId(orh.getCustomerId());
+               orc.setCustomer(c);
+               orc.setOrDate(orh.getOrDate());
+               orc.setTotalBillingAmount(orh.getTotalBillingAmount());
+               orc.setTotalShareAmount(orh.getTotalShareAmount());
+               orc.setTotalAmountPay(orh.getTotalAmountPay());
+               orc.setSeniorDiscount(orh.getSeniorDiscount());
+               orc.setEntryDate(orh.getEntryDate());
+               orc.setCreatedBy(orh.getCreatedBy());
+               orc.setCheckNo(orh.getCheckNo());
+               orc.setCheckBank(orh.getCheckBank());
+               orc.setCheckDate(orh.getCheckDate());
+               orc.setStatus(orh.getStatus());
+               orc.setIsPartSale(orh.getIsPartSale());
+               orc.setIsOutsideCollection(orh.getIsOutsideCollection());
+               orc.setOutsideCustomerName(orh.getOutsideCustomerName());
+               orWithCust.add(orc);
+          }
+
+          return new PaginationResponse<>(
+               orWithCust,
+               orHeaders.getNumber(),
+               orHeaders.getSize(),
+               orHeaders.getTotalPages(),
+               orHeaders.getTotalElements()
+          );
 
      }
 
@@ -434,6 +486,55 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           or.setDetails(orDetails);
           return or;
       } 
+
+      @Override
+     public PaginationResponse<OfficialReceiptHeaderDto> getOtherCollectionAllWithSearch(String keyword, int pageNo, int pageSize) throws Exception {
+          Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("entryDate").descending());
+
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.searchByCustomerIdOrOrNo(keyword, keyword, true, pageable);
+
+          List<String> ids = new ArrayList<String>();
+          for(OfficialReceiptHeaderEntity orh : orHeaders) {
+               ids.add(orh.getCustomerId());
+          }
+
+          List<CustomerDto> customers = customerService.getCustomerByIds(ids);
+
+          List<OtherPaymentHeaderWithCustomerDto> orWithCust = new ArrayList<OtherPaymentHeaderWithCustomerDto>();
+
+          for(OfficialReceiptHeaderEntity orh : orHeaders) {
+               OtherPaymentHeaderWithCustomerDto orc = new OtherPaymentHeaderWithCustomerDto();
+               CustomerDto c = customers.stream().filter(cc -> cc.getId().equals(orh.getCustomerId())).findFirst().orElse(null);
+
+               orc.setId(orh.getId());
+               orc.setOrNo(orh.getOrNo());
+               orc.setCustomerId(orh.getCustomerId());
+               orc.setCustomer(c);
+               orc.setOrDate(orh.getOrDate());
+               orc.setTotalBillingAmount(orh.getTotalBillingAmount());
+               orc.setTotalAmountPay(orh.getTotalAmountPay());
+               orc.setEntryDate(orh.getEntryDate());
+               orc.setCreatedBy(orh.getCreatedBy());
+               orc.setCheckNo(orh.getCheckNo());
+               orc.setCheckBank(orh.getCheckBank());
+               orc.setCheckDate(orh.getCheckDate());
+               orc.setStatus(orh.getStatus());
+               orc.setIsPartSale(orh.getIsPartSale());
+               orc.setIsOutsideCollection(orh.getIsOutsideCollection());
+               orc.setOutsideCustomerName(orh.getOutsideCustomerName());
+               orWithCust.add(orc);
+          }
+
+
+          return new PaginationResponse<>(
+               orWithCust,
+               orHeaders.getNumber(),
+               orHeaders.getSize(),
+               orHeaders.getTotalPages(),
+               orHeaders.getTotalElements()
+          );
+
+     }
 
       @Override
       public String deleteRecord(String id) throws Exception {
