@@ -82,4 +82,16 @@ public class PartServiceImpl implements PartService {
           return partsListingDto;
      }
      
+     @Override
+     public PartDto update(PartDto payload) throws Exception {
+          PartEntity part = this.partRepo.findById(payload.getId()).orElseThrow();
+          part.setDescription(payload.getDescription());
+          part.setMeasurement(payload.getMeasurement());
+          part.setUnitCost(payload.getUnitCost());
+          part.setSellingPrice(payload.getSellingPrice());
+          part.setUpdatedBy(payload.getUpdatedBy());
+          part.setDateUpdated(payload.getDateUpdated());
+          PartEntity result = this.partRepo.save(part);
+          return this.mapper.toDto(result);
+     }
 }
