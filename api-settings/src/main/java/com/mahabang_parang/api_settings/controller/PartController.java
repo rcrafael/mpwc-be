@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 
@@ -112,5 +114,23 @@ public class PartController {
          }
      }
      
+     @PutMapping()
+     public ResponseEntity<ApiResponse> update(@RequestBody PartDto payload) {
+         ApiResponse response = new ApiResponse();
+          
+          try {
+              PartDto part =  partService.update(payload);
+              response.setStatusCode(HttpStatus.CREATED);
+              response.setMessage("success");
+              response.setResult(part);
+              return ResponseEntity.status(HttpStatus.OK).body(response);
+
+         } catch (Exception e) {
+              response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+              response.setMessage("Internal Server Error: " + e.getMessage());
+              
+              return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+         }
+     }
 
 }

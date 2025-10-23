@@ -1,6 +1,6 @@
 package com.mahabang_parang.api_settings.model.entity;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -18,7 +18,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "part")
+@Table(name = "parts")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -46,6 +46,6 @@ public class PartEntity {
      @Temporal(TemporalType.TIMESTAMP)
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      @Column(nullable = true)
-     private LocalDateTime dateUpdated;
+     private Date dateUpdated;
 
 }

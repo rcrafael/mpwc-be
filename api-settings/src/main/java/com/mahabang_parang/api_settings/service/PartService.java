@@ -12,4 +12,5 @@ public interface PartService {
      public PaginationResponse<PartDto> getAll(int pageNo, int pageSize) throws Exception;
      public PartDto findById(String id) throws Exception;
      public List<PartsListingDto> listParts() throws Exception;
+     public PartDto update(PartDto payload) throws Exception;
 }

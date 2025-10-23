@@ -1,6 +1,7 @@
 package com.mahabang_parang.api_settings.model.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.Date;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,6 @@ public class PartDto {
 
      private String updatedBy;
 
-     private LocalDateTime dateUpdated;
-
+     private Date dateUpdated;
      
 }
