@@ -14,15 +14,15 @@ spring:
           gateway:
                routes:
                     - id: user-service-route
-                      uri: http://user-service-production.up.railway.app
+                      uri: http://user-service.railway.internal
                       predicates:
                          - Path=/api/user/**
                     - id: customer-service-route
-                      uri: http://user-service-production.up.railway.app
+                      uri: http://user-service.railway.internal
                       predicates:
                          - Path=/api/customer/**
                     - id: auth-service-route
-                      uri: http://user-service-production.up.railway.app
+                      uri: http://user-service.railway.internal
                       predicates:
                          - Path=/api/auth/**
                     - id: payment-service-route
