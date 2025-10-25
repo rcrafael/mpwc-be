@@ -7,8 +7,6 @@ import com.mahabang_parang.api_billing.model.ApiResponse;
 import com.mahabang_parang.api_billing.model.dto.SeptageFeeRateDto;
 import com.mahabang_parang.api_billing.service.SeptageFeeRateService;
 
-import io.micrometer.core.ipc.http.HttpSender.Response;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

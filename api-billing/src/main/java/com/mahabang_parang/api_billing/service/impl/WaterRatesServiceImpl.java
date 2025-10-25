@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
@@ -142,14 +141,26 @@ public class WaterRatesServiceImpl implements WaterRatesService {
 
      @Override
      public List<WaterRatesDto> updateWaterRatesCommercial(List<WaterRatesDto> payload) {
-          // TODO Auto-generated method stub`
-          return null;
+          for(WaterRatesDto dto : payload) {
+               WaterRatesCommercialEntity entity = this.commercialRepo.findById(dto.getId()).orElseThrow();
+               entity.setRatingValue(dto.getRatingValue());
+               this.commercialRepo.save(entity);
+          }
+          List<WaterRatesDto> result = mapper.toCommercialRateDtoList(this.commercialRepo.findByGroupRatingId(payload.get(0).getGroupRatingId(), Sort.by(Sort.Direction.ASC,"hierarchy")));
+          return result;
      }
 
      @Override
      public List<WaterRatesDto> updateWaterRatesResidentials(List<WaterRatesDto> payload) {
-          // TODO Auto-generated method stub
-          return null;
+        
+          for(WaterRatesDto dto : payload) {
+               WaterRatesResidentialEntity entity = this.residentialRepo.findById(dto.getId()).orElseThrow();
+               entity.setRatingValue(dto.getRatingValue());
+               this.residentialRepo.save(entity);
+          }
+          List<WaterRatesDto> result = mapper.toResidentialRateDtoList(this.residentialRepo.findByGroupRatingId(payload.get(0).getGroupRatingId(), Sort.by(Sort.Direction.ASC,"hierarchy")));
+          return result;
+
      }
      
 

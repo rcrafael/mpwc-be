@@ -2,12 +2,7 @@ package com.mahabang_parang.api_billing.service;
 
 
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
-
-import com.mahabang_parang.api_billing.model.PaginationRequest;
 import com.mahabang_parang.api_billing.model.PaginationResponse;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
 import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
