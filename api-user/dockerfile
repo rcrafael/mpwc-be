@@ -1,19 +1,27 @@
-# Stage 1: Build the specific module
+# ============================
+# Stage 1: Build the JAR file
+# ============================
 FROM maven:3.9.9-eclipse-temurin-17 AS build
-WORKDIR /app
+WORKDIR /build
 
-# Copy the entire repo so Maven can resolve parent + shared modules
+# Copy the entire repository to build context
 COPY . .
 
-# Build only this module and its dependencies
+# Build only the api-user module and its dependencies
 RUN mvn -pl api-user -am clean package -DskipTests
 
-# Stage 2: Run the jar
+# ============================
+# Stage 2: Run the JAR
+# ============================
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
-# Copy the built JAR from the previous stage
-COPY --from=build /app/api-user/target/api-user-0.0.1-SNAPSHOT.jar app.jar
+# Copy only the built JAR from the previous stage
+# Explicit filename to avoid wildcard issue
+COPY --from=build /build/api-user/target/api-user-*.jar app.jar
 
-# Start the app
+# Expose the port your Spring Boot app runs on
+EXPOSE 8080
+
+# Start the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
