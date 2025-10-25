@@ -4,10 +4,10 @@
 FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /build
 
-# Copy the entire repository to build context
+# Copy the entire repository (so Maven can see parent POM + modules)
 COPY . .
 
-# Build only the api-gateway module and its dependencies
+# Build only this module and its dependencies
 RUN mvn -pl api-gateway -am clean package -DskipTests
 
 # ============================
@@ -16,12 +16,12 @@ RUN mvn -pl api-gateway -am clean package -DskipTests
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
-# Copy only the built JAR from the previous stage
-# Explicit filename to avoid wildcard issue
+# Copy the JAR file from the correct path in the build stage
+# (this is the right path for multi-module)
 COPY --from=build /build/api-gateway/target/api-gateway-*.jar app.jar
 
-# Expose the port your Spring Boot app runs on
+# Expose app port
 EXPOSE 8080
 
-# Start the application
+# Run the app
 ENTRYPOINT ["java", "-jar", "app.jar"]
