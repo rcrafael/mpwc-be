@@ -114,7 +114,11 @@
 							<version>1.5.5.Final</version>
 						</path>
 					</annotationProcessorPaths>
-					
+					<archive>
+						<manifest>
+							<mainClass>com.mahabang_parang.api_user</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 			</plugin>
 			<plugin>

@@ -6,6 +6,9 @@ spring:
                fail-on-unknown-properties: true
           date-format: yyyy-MM-dd
      datasource:
+          # url: "jdbc:mysql://ballast.proxy.rlwy.net:58730/mpwcdb"
+          # username: root
+          # password: TOKJpadHCxYWIPBdNBSsLdxqxzwTeuzf
           url: "jdbc:mysql://localhost:3306/mpwcdb"
           username: root
           password: root

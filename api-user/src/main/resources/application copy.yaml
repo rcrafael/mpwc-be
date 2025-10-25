@@ -1,0 +1,42 @@
+spring:
+     application:
+          name: api-user
+     boot:
+          admin:
+               client:
+                    url: http://localhost:1111
+                    instance:
+                         metadata:
+                              strategy: ${random.uuid}
+     jackson:
+          deserialization:
+               fail-on-unknown-properties: true
+          date-format: yyyy-MM-dd
+     datasource:
+          url: "jdbc:mysql://ballast.proxy.rlwy.net:58730/mpwcdb"
+          username: root
+          password: TOKJpadHCxYWIPBdNBSsLdxqxzwTeuzf
+          # url: "jdbc:mysql://localhost:3306/mpwcdb"
+          # username: root
+          # password: root
+     jpa:
+          show_sql: true
+          hibernate:
+               ddl-auto: update
+
+management:
+     server:
+          port: 8081
+     endpoints:
+          web:
+               exposure:
+                    include: "*"
+     endpoint:
+          health:
+               show-details: always  
+     
+
+server:
+     port: 8081
+     address: 0.0.0.0
+     forward-headers-strategy: framework

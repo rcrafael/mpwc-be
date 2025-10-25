@@ -14,15 +14,15 @@ spring:
           gateway:
                routes:
                     - id: user-service-route
-                      uri: http://localhost:8081
+                      uri: http://user-service-production.up.railway.app
                       predicates:
                          - Path=/api/user/**
                     - id: customer-service-route
-                      uri: http://localhost:8081
+                      uri: http://user-service-production.up.railway.app
                       predicates:
                          - Path=/api/customer/**
                     - id: auth-service-route
-                      uri: http://localhost:8081
+                      uri: http://user-service-production.up.railway.app
                       predicates:
                          - Path=/api/auth/**
                     - id: payment-service-route

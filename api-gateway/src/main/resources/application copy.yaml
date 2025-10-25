@@ -1,0 +1,67 @@
+server:
+     port: 8080
+     address: 0.0.0.0
+
+spring:
+     boot:
+          admin:
+               client:
+                    url: http://localhost:1111
+                    instance:
+                         metadata:
+                              strategy: ${random.uuid}
+     cloud:
+          gateway:
+               routes:
+                    - id: user-service-route
+                      uri: http://api-user-service.internal:8081
+                      predicates:
+                         - Path=/api/user/**
+                    - id: customer-service-route
+                      uri: http://api-user-service.internal:8081
+                      predicates:
+                         - Path=/api/customer/**
+                    - id: auth-service-route
+                      uri: http://api-user-service.internal:8081
+                      predicates:
+                         - Path=/api/auth/**
+                    # - id: user-service-route
+                    #   uri: http://localhost:8081
+                    #   predicates:
+                    #      - Path=/api/user/**
+                    # - id: customer-service-route
+                    #   uri: http://localhost:8081
+                    #   predicates:
+                    #      - Path=/api/customer/**
+                    # - id: auth-service-route
+                    #   uri: http://localhost:8081
+                    #   predicates:
+                    #      - Path=/api/auth/**
+                    - id: payment-service-route
+                      uri: http://localhost:8082
+                      predicates:
+                         - Path=/api/payment/**
+                    - id: billing-service-route
+                      uri: http://localhost:8083
+                      predicates:
+                         - Path=/api/billing/**
+                    - id: settings-service-route
+                      uri: http://localhost:8084
+                      predicates:
+                         - Path=/api/settings/**
+               globalcors:
+                    cors-configurations:
+                         '[/**]':
+                              allowedOrigins: "*"
+                              allowedMethods: "*"
+                              allowedHeaders: "*"
+                              allowCredentials: false
+                              exposed-headers: "Authorization"
+                              max-age: 3600
+management:
+     server:
+          port: 8080
+     endpoints:
+          web:
+               exposure:
+                    include: "*"

@@ -75,8 +75,8 @@ public class PartController {
 
      }
 
-     @GetMapping()
-     public ResponseEntity<ApiResponse> findById(@RequestParam String id) {
+     @GetMapping("{id}")
+     public ResponseEntity<ApiResponse> findById(@PathVariable String id) {
           ApiResponse response = new ApiResponse();
 
           try {
