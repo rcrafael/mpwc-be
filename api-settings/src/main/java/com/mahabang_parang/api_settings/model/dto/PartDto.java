@@ -1,6 +1,5 @@
 package com.mahabang_parang.api_settings.model.dto;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 import lombok.Getter;

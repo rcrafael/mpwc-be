@@ -12,13 +12,12 @@ import com.mahabang_parang.api_billing.model.ApiResponse;
 import com.mahabang_parang.api_billing.model.dto.WaterRatesDto;
 import com.mahabang_parang.api_billing.service.WaterRatesService;
 
-import io.micrometer.core.ipc.http.HttpSender.Response;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 

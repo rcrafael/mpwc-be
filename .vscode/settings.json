@@ -1,4 +1,3 @@
 {
-     "java.configuration.updateBuildConfiguration": "interactive",
-     "java.configuration.annotationProcessing.enabled": true
+     "java.configuration.updateBuildConfiguration": "interactive"
 }
