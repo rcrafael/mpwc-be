@@ -8,6 +8,7 @@ spring:
                     instance:
                          metadata:
                               strategy: ${random.uuid}
+                         service-base-url: http://localhost:8082
      jackson:
           deserialization:
                fail-on-unknown-properties: true

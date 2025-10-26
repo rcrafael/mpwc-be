@@ -12,9 +12,13 @@ import com.mahabang_parang.api_billing.model.ApiResponse;
 import com.mahabang_parang.api_billing.model.dto.WaterRatesDto;
 import com.mahabang_parang.api_billing.service.WaterRatesService;
 
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+
+
 
 
 @RestController
@@ -68,6 +72,25 @@ public class WaterRatesController {
           }
 
      }
+
+     @PutMapping("residential")
+     public ResponseEntity<ApiResponse> updateResidentialRates(@RequestBody List<WaterRatesDto> payload) {
+         
+          ApiResponse response = new ApiResponse();
+          try {
+               List<WaterRatesDto> waterRates = this.ratesSvc.updateWaterRatesResidentials(payload);
+               
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(waterRates);
+               return ResponseEntity.status(HttpStatus.OK).body(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
      
      @GetMapping("commercial/active")
      public  ResponseEntity<ApiResponse> getActiveCommercialRates() {
@@ -108,4 +131,24 @@ public class WaterRatesController {
           }
 
      }
+
+     @PutMapping("commercial")
+     public ResponseEntity<ApiResponse> updateCommercialRates(@RequestBody List<WaterRatesDto> payload) {
+         
+          ApiResponse response = new ApiResponse();
+          try {
+               List<WaterRatesDto> waterRates = this.ratesSvc.updateWaterRatesCommercial(payload);
+               
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(waterRates);
+               return ResponseEntity.status(HttpStatus.OK).body(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+
 }
