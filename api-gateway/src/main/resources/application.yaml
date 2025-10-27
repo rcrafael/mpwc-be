@@ -15,15 +15,15 @@ spring:
           gateway:
                routes:
                     - id: user-service-route
-                      uri: http://localhost:8081
+                      uri: ${USER_SERVICE}
                       predicates:
                          - Path=/api/user/**
                     - id: customer-service-route
-                      uri: http://localhost:8081
+                      uri: ${USER_SERVICE}
                       predicates:
                          - Path=/api/customer/**
                     - id: auth-service-route
-                      uri: http://localhost:8081
+                      uri: ${USER_SERVICE}
                       predicates:
                          - Path=/api/auth/**
                     - id: payment-service-route
