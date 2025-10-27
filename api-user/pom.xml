@@ -126,7 +126,7 @@
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
-                                    <mainClass>com.mahabang-parang.ApiUserApplication</mainClass>
+                                    <mainClass>com.mahabang_parang.api_user.ApiUserApplication</mainClass>
                                 </manifest>
                             </archive>
                         </configuration>
