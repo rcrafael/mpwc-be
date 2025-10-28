@@ -1,14 +1,6 @@
 spring:
      application:
           name: api-user
-     boot:
-          admin:
-               client:
-                    url: http://localhost:1111
-                    instance:
-                         metadata:
-                              strategy: ${random.uuid}
-                         service-base-url: http://localhost:8081
      jackson:
           deserialization:
                fail-on-unknown-properties: true
@@ -30,12 +22,11 @@ spring:
                ddl-auto: update
           properties:
                hibernate:
-                    dialect: org.hibernate.dialect.MySQLDialect
                     format-sql: true
      
 management:
      server:
-          port: 8080
+          port: 8081
      endpoints:
           web:
                exposure:
