@@ -7,6 +7,7 @@ import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -560,26 +561,93 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
 
      @Override
      public byte[] printExcelOR(String id) throws Exception {
-          OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(id).orElseThrow();
+          System.out.println("============================================================================");
+          System.out.println("PRINT EXCEL API TRIGGERED!");
+          System.err.println("============================================================================");
 
-          OfficialReceiptDetailsEntity orDetails = new OfficialReceiptDetailsEntity();
+          System.out.println("GETTING OR HEADER WITH ID: " + id);
+          OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(id).orElseThrow();
+          System.out.println("============================================================================");
+          System.out.println("OFFICIAL RECEIPT: " + orHeader.toString());
+          System.out.println("============================================================================");
+
+          List<OfficialReceiptDetailsEntity> orDetails = new ArrayList< OfficialReceiptDetailsEntity>();
           if(orHeader != null) {
-               orDetails = orDetailsRepo.findByOrNo(orHeader.getOrNo()).get(0);
+               System.out.println("GETTING OFFICIAL RECEIPT DETAILS WITH OR NO: " + orHeader.getOrNo());
+               System.out.println("=================================================================");
+               orDetails = orDetailsRepo.findByOrNo(orHeader.getOrNo());
+               System.out.println("OFFICIAL RECEIPT DETAILS: " + orDetails.toString());
+               System.out.println("=================================================================");
           }
 
-          BillingDto billing = billingService.getBillingByReadingNo(orDetails.getReadingNo());
+          double totalReadingAmountPaid = 0;
+          double totalParts = 0;
+          double totalMembership = 0;
+          double totalTapping = 0;
+          double totalCalibration = 0;
+          double totalReconnection = 0;
+          double totalSubReceivable = 0;
+          double totalPenalty = 0;
+          double totalOtherCollection = 0;
+          double totalMaintenanceFee = 0;
+          double totalSeptageFee = 0;
+          double totalSeniorDiscount = 0;
+          double finalTotalAmount = 0;
+
+          List<BillingDto> billing = new ArrayList<BillingDto>();
+
+          if(orDetails.size() > 0) {
+               
+               totalReadingAmountPaid = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getReadingAmountPaid()).orElse(0.0)).sum();
+               totalParts = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getParts()).orElse(0.0)).sum();
+               totalMembership = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getMembership()).orElse(0.0)).sum();
+               totalTapping = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getTapping()).orElse(0.0)).sum();
+               totalCalibration = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getCalibration()).orElse(0.0)).sum();
+               totalReconnection = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getReconnection()).orElse(0.0)).sum();
+               totalSubReceivable = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getSubReceivable()).orElse(0.0)).sum();
+               totalPenalty = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getPenalty()).orElse(0.0)).sum();
+               totalOtherCollection = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getOtherCollection()).orElse(0.0)).sum();
+               totalMaintenanceFee = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getMaintenanceFee()).orElse(0.0)).sum();
+               totalSeptageFee = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getSeptageFee()).orElse(0.0)).sum();
+               totalSeniorDiscount = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getSeniorDiscount()).orElse(0.0)).sum();
+               finalTotalAmount = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getTotalAmount()).orElse(0.0)).sum();
+
+               if(!orHeader.getIsPartSale()) {
+                    for(OfficialReceiptDetailsEntity or : orDetails) {
+                         System.out.println("GETTING BILLING BY READING NO: " + or.getReadingNo());
+                         System.out.println("=================================================================");
+                         BillingDto b = billingService.getBillingByReadingNo(or.getReadingNo());
+                         System.out.println("BILLING: " + b.toString());
+                         System.out.println("=================================================================");
+                         billing.add(b);
+                    }
+               }
+               
+
+          }
+
+          String billingMonths = "";
+          String meterNumbers = "";
+          if(billing.size() > 0) {
+               for(BillingDto b : billing) {
+                    billingMonths = billingMonths + convertIntToMMM(b.getMonthOf()) + ", ";
+                    meterNumbers = meterNumbers + b.getMeterNo() + ", ";
+               }
+               billingMonths = billingMonths.substring(0, billingMonths.length() - 2);
+               meterNumbers = meterNumbers.substring(0, meterNumbers.length() - 2);
+          }
+
+          
 
           CustomerDto customer = new CustomerDto();
           if(orHeader.getCustomerId() != null && !orHeader.getCustomerId().equals("")){
                customer = customerService.getCustomer(orHeader.getCustomerId());
           }
 
-          System.out.println("=================================================================");
-          System.out.println("OFFICIAL RECEIPT: " + orHeader.toString());
-          System.out.println("=================================================================");
-          System.out.println("OFFICIAL RECEIPT DETAILS: " + orDetails.toString());
-          System.out.println("=================================================================");
-          System.out.println("BILLING: " + billing.toString());
+          
+          
+         
+
           System.out.println("=================================================================");
           System.out.println("CUSTOMER: " + customer.toString());
           System.out.println("=================================================================");
@@ -592,27 +660,28 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           receipt.setOutsideCustomerName(orHeader.getOutsideCustomerName());
           receipt.setOutsideCustomerAddress(orHeader.getOutsideCustomerAddress());
           receipt.setOrDate(orHeader.getOrDate());
-          receipt.setMonthOf(convertIntToMMM(billing.getMonthOf()));
+          receipt.setMonthOf(billingMonths);
           receipt.setTotalBillingAmount(orHeader.getTotalBillingAmount());
           receipt.setTotalShareAmount(orHeader.getTotalShareAmount());
           receipt.setTotalAmountPay(orHeader.getTotalAmountPay());
 
-          receipt.setMeterNo(orDetails.getMeterNo());
-          receipt.setReadingAmountPaid(orDetails.getReadingAmountPaid());
-          receipt.setParts(orDetails.getParts());
-          receipt.setMembership(orDetails.getMembership());
-          receipt.setTapping(orDetails.getTapping());
-          receipt.setCalibration(orDetails.getCalibration());
-          receipt.setReconnection(orDetails.getReconnection());
-          receipt.setSubReceivable(orDetails.getSubReceivable());
-          receipt.setPenalty(orDetails.getPenalty());
-          receipt.setOtherCollection(orDetails.getOtherCollection());
-          receipt.setOtherDescription(orDetails.getOtherDescription());
-          receipt.setMaintenanceFee(orDetails.getMaintenanceFee());
-          receipt.setSeptageFee(orDetails.getSeptageFee());
-          receipt.setSeniorDiscount(orDetails.getSeniorDiscount());
-          receipt.setTotalAmount(orDetails.getTotalAmount());
-          receipt.setRemarks(orDetails.getRemarks());
+
+          receipt.setMeterNo(meterNumbers);
+          receipt.setReadingAmountPaid(totalReadingAmountPaid);
+          receipt.setParts(totalParts);
+          receipt.setMembership(totalMembership);
+          receipt.setTapping(totalTapping);
+          receipt.setCalibration(totalCalibration);
+          receipt.setReconnection(totalReconnection);
+          receipt.setSubReceivable(totalSubReceivable);
+          receipt.setPenalty(totalPenalty);
+          receipt.setOtherCollection(totalOtherCollection);
+          receipt.setOtherDescription("");
+          receipt.setMaintenanceFee(totalMaintenanceFee);
+          receipt.setSeptageFee(totalSeptageFee);
+          receipt.setSeniorDiscount(totalSeniorDiscount);
+          receipt.setTotalAmount(finalTotalAmount);
+          receipt.setRemarks("");
 
           return receiptService.generateExcelFromTemplate(receipt);
      }
