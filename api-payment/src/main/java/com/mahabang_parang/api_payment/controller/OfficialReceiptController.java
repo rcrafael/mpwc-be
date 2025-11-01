@@ -1,7 +1,12 @@
 package com.mahabang_parang.api_payment.controller;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +20,6 @@ import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
 import com.mahabang_parang.api_payment.model.payload.UpdateStatusPayload;
 import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
-import com.mahabang_parang.api_user.model.dto.CustomerDto;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +37,6 @@ public class OfficialReceiptController {
 
      @Autowired
      private OfficialReceiptService orService;
-
 
      @GetMapping("/{pageNo}/{pageSize}")
      public ResponseEntity<ApiResponse> getAllOR(@PathVariable int pageNo, @PathVariable int pageSize) {
@@ -214,6 +217,54 @@ public class OfficialReceiptController {
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
+     
+     @GetMapping("receipt/excel/{id}")
+     public ResponseEntity<?> generateExcelReport(@PathVariable String id) throws Exception {
+          try {
+               byte[] excelBytes = orService.printExcelOR(id);
+               
+               HttpHeaders headers = new HttpHeaders();
+               headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+               headers.setContentDisposition(
+                    ContentDisposition.attachment()
+                    .filename("report_" + id + ".xlsx")
+                    .build()
+               );
+               headers.setContentLength(excelBytes.length);
+               
+               return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelBytes);
+          } catch (Exception e) {
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                         .body(e.getMessage());
+          }
+
+     }
+
+     @GetMapping("receipt/pdf/{id}")
+    public ResponseEntity<?> generatePdfReport(@PathVariable() String id) throws Exception {
+        try {
+            byte[] pdfBytes = orService.printPdfOR(id);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(
+                ContentDisposition.attachment()
+                    .filename("report_" + id + ".pdf")
+                    .build()
+            );
+            headers.setContentLength(pdfBytes.length);
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
      
 
 

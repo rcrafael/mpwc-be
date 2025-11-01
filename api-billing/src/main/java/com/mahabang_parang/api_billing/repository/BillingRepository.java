@@ -29,5 +29,5 @@ public interface BillingRepository extends JpaRepository<BillingEntity, String> 
 
      Page<BillingEntity> findAll(Pageable pageable);
      Page<BillingEntity> findByCustomerId(String custId, Pageable pageable);
-     
+     BillingEntity findByReadingNo(String readingNo);
 }

@@ -44,8 +44,6 @@ public class BillingServiceImpl implements BillingService  {
      private BillingMapper mapper;
 
 
-
-
      @Override
      public PaginationResponse<BillingDto> getBilling(int pageNumber, int pageSize) throws Exception {
 
@@ -177,6 +175,12 @@ public class BillingServiceImpl implements BillingService  {
           BillingDto billingDto = mapper.toDto(bill);
 
           return billingDto;
+     }
+
+     @Override
+     public BillingDto getBillingByReadingNo(String readingNo) throws Exception {
+          BillingEntity billingEntity = billingRepo.findByReadingNo(readingNo);
+          return mapper.toDto(billingEntity);
      }
 
      @Override
