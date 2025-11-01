@@ -5,12 +5,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mahabang_parang.api_billing.model.ApiResponse;
 import com.mahabang_parang.api_payment.model.PaginationResponse;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
-import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.dto.OtherPaymentDto;
 import com.mahabang_parang.api_payment.model.dto.OtherPaymentHeaderDto;
 import com.mahabang_parang.api_payment.model.dto.OtherPaymentHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.payload.OtherPaymentPayload;
-import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
 import com.mahabang_parang.api_payment.model.response.OtherPaymentResponse;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
 
