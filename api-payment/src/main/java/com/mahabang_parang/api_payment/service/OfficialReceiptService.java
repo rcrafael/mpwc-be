@@ -32,4 +32,7 @@ public interface OfficialReceiptService {
      public PaginationResponse<OtherPaymentHeaderWithCustomerDto> getOtherCollectionWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception;
      public OtherPaymentResponse getOtherCollectionWithDetailsById(String orhId) throws Exception;
      public PaginationResponse<OfficialReceiptHeaderDto> getOtherCollectionAllWithSearch(String keyword, int pageNo, int pageSize) throws Exception;
+
+     public byte[] printExcelOR(String id) throws Exception;
+     public byte[] printPdfOR(String id) throws Exception;
 }
