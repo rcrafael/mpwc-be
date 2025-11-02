@@ -3,14 +3,6 @@ server:
      address: 0.0.0.0
 
 spring:
-     boot:
-          admin:
-               client:
-                    url: http://localhost:1111
-                    instance:
-                         metadata:
-                              strategy: ${random.uuid}
-                         service-base-url: http://localhost:8080
      cloud:
           gateway:
                routes:
@@ -27,15 +19,15 @@ spring:
                       predicates:
                          - Path=/api/auth/**
                     - id: payment-service-route
-                      uri: http://localhost:8082
+                      uri: ${PAYMENT_SERVICE}
                       predicates:
                          - Path=/api/payment/**
                     - id: billing-service-route
-                      uri: http://localhost:8083
+                      uri: ${BILLING_SERVICE}
                       predicates:
                          - Path=/api/billing/**
                     - id: settings-service-route
-                      uri: http://localhost:8084
+                      uri: ${SETTINGS_SERVICE}
                       predicates:
                          - Path=/api/settings/**
                globalcors:
