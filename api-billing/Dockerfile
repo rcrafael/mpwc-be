@@ -8,7 +8,7 @@ COPY api-payment/pom.xml /app/api-payment/pom.xml
 COPY api-settings/pom.xml /app/api-settings/pom.xml
 
 WORKDIR /app
-RUN mvn dependency:go-offline -B || true
+RUN mvn dependency:go-offline -B
 
 COPY api-user/src /app/api-user/src
 WORKDIR /app/api-user
