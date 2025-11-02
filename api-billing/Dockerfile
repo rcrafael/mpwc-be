@@ -8,10 +8,13 @@ COPY api-payment/pom.xml /app/api-payment/pom.xml
 COPY api-settings/pom.xml /app/api-settings/pom.xml
 
 WORKDIR /app
-RUN mvn dependency:go-offline -B
+RUN mvn dependency:go-offline -B || true
+
+COPY api-user/src /app/api-user/src
+WORKDIR /app/api-user
+RUN mvn clean install -DskipTests
 
 COPY api-billing/src /app/api-billing/src
-
 WORKDIR /app/api-billing
 RUN mvn clean package -DskipTests
 
