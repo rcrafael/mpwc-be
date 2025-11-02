@@ -45,7 +45,6 @@
 			<groupId>com.mahabang-parang</groupId>
 			<artifactId>api-user</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<optional>true</optional>
 		</dependency>
 
 		<dependency>
