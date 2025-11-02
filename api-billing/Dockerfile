@@ -21,7 +21,7 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-COPY --from=build /app/api-billing/target/*.jar app.jar
+COPY --from=build /app/api-billing/target/*-exec.jar app.jar
 
 EXPOSE 8080
 
