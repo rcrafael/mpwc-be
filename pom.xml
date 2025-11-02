@@ -11,6 +11,9 @@
     <modules>
         <module>api-gateway</module>
         <module>api-user</module>
+        <module>api-billing</module>
+        <module>api-payment</module>
+        <module>api-settings</module>
     </modules>
 
     <dependencyManagement>
