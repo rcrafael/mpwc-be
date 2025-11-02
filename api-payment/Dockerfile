@@ -16,7 +16,7 @@ RUN mvn clean install -DskipTests
 
 COPY api-billing/src /app/api-billing/src
 WORKDIR /app/api-billing
-RUN mvn clean package -DskipTests
+RUN mvn clean install -DskipTests
 
 COPY api-payment/src /app/api-payment/src
 WORKDIR /app/api-payment
