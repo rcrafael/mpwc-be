@@ -7,27 +7,27 @@ spring:
           gateway:
                routes:
                     - id: user-service-route
-                      uri: ${USER_SERVICE}
+                      uri: ${USER_SERVICE:http://localhost:8081}
                       predicates:
                          - Path=/api/user/**
                     - id: customer-service-route
-                      uri: ${USER_SERVICE}
+                      uri: ${USER_SERVICE:http://localhost:8081}
                       predicates:
                          - Path=/api/customer/**
                     - id: auth-service-route
-                      uri: ${USER_SERVICE}
+                      uri: ${USER_SERVICE:http://localhost:8081}
                       predicates:
                          - Path=/api/auth/**
                     - id: payment-service-route
-                      uri: ${PAYMENT_SERVICE}
+                      uri: ${PAYMENT_SERVICE:http://localhost:8082}
                       predicates:
                          - Path=/api/payment/**
                     - id: billing-service-route
-                      uri: ${BILLING_SERVICE}
+                      uri: ${BILLING_SERVICE:http://localhost:8083}
                       predicates:
                          - Path=/api/billing/**
                     - id: settings-service-route
-                      uri: ${SETTINGS_SERVICE}
+                      uri: ${SETTINGS_SERVICE:http://localhost:8084}
                       predicates:
                          - Path=/api/settings/**
                globalcors:
