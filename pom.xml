@@ -10,10 +10,9 @@
 
     <modules>
         <module>api-gateway</module>
+        <module>api-user</module>
         <module>api-billing</module>
         <module>api-payment</module>
-        <module>api-user</module>
-        <!-- <module>api-reports</module> -->
         <module>api-settings</module>
     </modules>
 
@@ -28,4 +27,14 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

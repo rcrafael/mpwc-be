@@ -6,22 +6,23 @@ spring:
                fail-on-unknown-properties: true
           date-format: yyyy-MM-dd
      datasource:
-          url: "jdbc:mysql://localhost:3306/mpwcdb"
-          username: root
-          password: root
+          url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABSE:mpwcdb}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+          username: ${MYSQL_USER:root}
+          password: ${MYSQL_PASSWORD:root}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          hikari:
+               maximum-pool-size: 5
+               minimum-idle: 1
+               connection-timeout: 30000
+               idle-timeout: 600000
+               max-lifetime: 1800000
      jpa:
           show_sql: true
           hibernate:
                ddl-auto: update
-     boot:
-          admin:
-               client:
-                    url: http://localhost:1111
-                    instance:
-                         metadata:
-                              strategy: ${random.uuid}
-                         service-base-url: http://localhost:8083
-
+          properties:
+               hibernate:
+                    format-sql: true
 server:
      port: 8083
      address: 0.0.0.0
