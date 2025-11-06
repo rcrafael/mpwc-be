@@ -19,6 +19,7 @@ import com.mahabang_parang.api_billing.model.PaginationResponse;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
 import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
 import com.mahabang_parang.api_billing.model.payload.UpdateBillingPayload;
+import com.mahabang_parang.api_billing.model.response.BillingTableListResponse;
 import com.mahabang_parang.api_billing.service.BillingService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -39,8 +40,10 @@ public class BillingController {
           ApiResponse response = new ApiResponse();
 
           try {
-
-               PaginationResponse<BillingDto> billing = billingSvc.getBilling(pageNo,pageSize);
+               System.out.println("===============================================================================");
+               System.out.println("GET BILLING API TRIGGERED!");
+               System.out.println("===============================================================================");
+               PaginationResponse<BillingTableListResponse> billing = billingSvc.getBilling(pageNo,pageSize);
                
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
@@ -185,6 +188,25 @@ public class BillingController {
           }
      }
 
+     @GetMapping("search/{pageNo}/{pageSize}")
+     public ResponseEntity<ApiResponse> searchBilling(@RequestParam String keyword, @PathVariable int pageNo, @PathVariable int pageSize) {
+         ApiResponse response = new ApiResponse();
+
+          try {
+               PaginationResponse<BillingTableListResponse> billing = billingSvc.searchBilling(keyword, pageNo, pageSize);
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(billing);
+               return ResponseEntity.status(HttpStatus.OK).body(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+
+     }
+     
 
 
 }

@@ -37,6 +37,7 @@ import com.mahabang_parang.api_payment.model.entity.OfficialReceiptHeaderEntity;
 import com.mahabang_parang.api_payment.model.entity.ShareCapitalEntity;
 import com.mahabang_parang.api_payment.model.entity.ShareCbuEntity;
 import com.mahabang_parang.api_payment.model.entity.ShareSavingsEntity;
+import com.mahabang_parang.api_payment.model.interfaces.OfficialReceiptTableListInterfaceProjection;
 import com.mahabang_parang.api_payment.model.mapper.OfficialReceiptDetailsMapper;
 import com.mahabang_parang.api_payment.model.mapper.OfficialReceiptHeaderMapper;
 import com.mahabang_parang.api_payment.model.mapper.ShareCapitalMapper;
@@ -46,6 +47,7 @@ import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
 import com.mahabang_parang.api_payment.model.payload.OtherPaymentPayload;
 import com.mahabang_parang.api_payment.model.payload.UpdateStatusPayload;
 import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
+import com.mahabang_parang.api_payment.model.response.OfficialReceiptTableListResponse;
 import com.mahabang_parang.api_payment.model.response.OtherPaymentResponse;
 import com.mahabang_parang.api_payment.repository.OfficialReceiptDetailsRepository;
 import com.mahabang_parang.api_payment.repository.OfficialReceiptHeaderRepository;
@@ -77,7 +79,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      @Autowired
      private CustomerService customerService;
 
-     @Autowired 
+     @Autowired
      private OfficialReceiptHeaderMapper orHeaderMapper;
      @Autowired
      private OfficialReceiptDetailsMapper orDetailsMapper;
@@ -92,70 +94,72 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      private ReceiptService receiptService;
 
      @Override
-     public PaginationResponse<OfficialReceiptHeaderDto> getOfficialReceiptAll(int pageNo, int pageSize, String sortColumn) throws Exception {
+     public PaginationResponse<OfficialReceiptHeaderDto> getOfficialReceiptAll(int pageNo, int pageSize,
+               String sortColumn) throws Exception {
 
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(false,false, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(false, false,
+                    pageable);
 
           return new PaginationResponse<>(
-               orHeaderMapper.toDtoList(orHeaders.getContent()),
-               orHeaders.getNumber(),
-               orHeaders.getSize(),
-               orHeaders.getTotalPages(),
-               orHeaders.getTotalElements()
-          );
+                    orHeaderMapper.toDtoList(orHeaders.getContent()),
+                    orHeaders.getNumber(),
+                    orHeaders.getSize(),
+                    orHeaders.getTotalPages(),
+                    orHeaders.getTotalElements());
      }
 
      @Override
-     public PaginationResponse<OfficialReceiptHeaderDto> getOfficialReceiptByCustomerId(int pageNo, int pageSize, String customerId) throws Exception {
-     
+     public PaginationResponse<OfficialReceiptHeaderDto> getOfficialReceiptByCustomerId(int pageNo, int pageSize,
+               String customerId) throws Exception {
+
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByCustomerIdAndIsPartSaleAndIsDeleted(customerId,false,false, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo
+                    .findByCustomerIdAndIsPartSaleAndIsDeleted(customerId, false, false, pageable);
 
           return new PaginationResponse<>(
-               orHeaderMapper.toDtoList(orHeaders.getContent()),
-               orHeaders.getNumber(),
-               orHeaders.getSize(),
-               orHeaders.getTotalPages(),
-               orHeaders.getTotalElements()
-          );
+                    orHeaderMapper.toDtoList(orHeaders.getContent()),
+                    orHeaders.getNumber(),
+                    orHeaders.getSize(),
+                    orHeaders.getTotalPages(),
+                    orHeaders.getTotalElements());
      }
 
      @Override
      public OfficialReceiptDto createOfficialReceipt(OfficiaReceiptPayload payload) throws Exception {
-          
+
           OfficialReceiptHeaderEntity orHeaderEntity = orHeaderMapper.toEntity(payload.getHeader());
-          
+
           String newOrNo = this.generateControlNumber();
 
           orHeaderEntity.setOrNo(newOrNo);
           List<OfficialReceiptDetailsEntity> detailsList = orDetailsMapper.toEntityList(payload.getDetails());
-          
+
           // set the orNo for the OR details
           for (OfficialReceiptDetailsEntity d : detailsList) {
                d.setOrNo(newOrNo);
-          } 
+          }
 
           OfficialReceiptDto result = new OfficialReceiptDto();
           OfficialReceiptHeaderEntity resultHeader = orHeaderRepo.save(orHeaderEntity);
           List<OfficialReceiptDetailsEntity> resultDetails = orDetailsRepo.saveAll(detailsList);
 
-          for(OfficialReceiptDetailsDto details: payload.getDetails()) {
-               billingService.updateBillingStatus(details.getReadingNo(),details.getBillingStatus());
+          for (OfficialReceiptDetailsDto details : payload.getDetails()) {
+               billingService.updateBillingStatus(details.getReadingNo(), details.getBillingStatus());
           }
-          
+
           ShareCapitalEntity shareCapitalEntity = new ShareCapitalEntity();
-          if(payload.getShareCapital() != null) {
+          if (payload.getShareCapital() != null) {
                shareCapitalEntity = shareCapMapper.toEntity(payload.getShareCapital());
                shareCapitalEntity.setOrNo(newOrNo);
-               shareCapitalEntity = shareCapRepo.save(shareCapitalEntity); 
+               shareCapitalEntity = shareCapRepo.save(shareCapitalEntity);
                result.setShareCapital(shareCapMapper.toDto(shareCapitalEntity));
           }
 
           ShareCbuEntity cbuEntity = new ShareCbuEntity();
-          if(payload.getCbu() != null) {
+          if (payload.getCbu() != null) {
                cbuEntity = cbuMapper.toEntity(payload.getCbu());
                cbuEntity.setOrNo(newOrNo);
                cbuEntity = cbuRepo.save(cbuEntity);
@@ -163,14 +167,13 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           }
 
           ShareSavingsEntity savingsEntity = new ShareSavingsEntity();
-          if(payload.getSavings() != null) {
+          if (payload.getSavings() != null) {
                savingsEntity = savingsMapper.toEntity(payload.getSavings());
                savingsEntity.setOrNo(newOrNo);
                savingsEntity = savingsRepo.save(savingsEntity);
                result.setSavings(savingsMapper.toDto(savingsEntity));
           }
 
-          
           result.setHeader(orHeaderMapper.toDto(resultHeader));
           result.setDetails(orDetailsMapper.toDtoList(resultDetails));
 
@@ -179,53 +182,22 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      }
 
      @Override
-     public PaginationResponse<OfficialReceiptHeaderDto> getOfficialReceiptWithSearch(String keyword, int pageNo, int pageSize) throws Exception {
+     public PaginationResponse<OfficialReceiptTableListResponse> getOfficialReceiptWithSearch(String keyword,
+               int pageNo, int pageSize) throws Exception {
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("entryDate").descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = this.orHeaderRepo.searchByCustomerIdOrOrNo(keyword, keyword,false, pageable);
-            
+          Page<OfficialReceiptTableListInterfaceProjection> orHeadersProjections = this.orHeaderRepo
+                    .searchByCustomerNameOrAccountNoOrOrNo(keyword, keyword, keyword, false, pageable);
 
-          List<String> ids = new ArrayList<String>();
-          for(OfficialReceiptHeaderEntity orh : orHeaders) {
-               ids.add(orh.getCustomerId());
-          }
+          Page<OfficialReceiptTableListResponse> orResponse = orHeadersProjections
+                    .map(this::convertInterfaceToResponse);
 
-          List<CustomerDto> customers = customerService.getCustomerByIds(ids);
-
-          List<OfficialReceiptHeaderWithCustomerDto> orWithCust = new ArrayList<OfficialReceiptHeaderWithCustomerDto>();
-
-          for(OfficialReceiptHeaderEntity orh : orHeaders) {
-               OfficialReceiptHeaderWithCustomerDto orc = new OfficialReceiptHeaderWithCustomerDto();
-               CustomerDto c = customers.stream().filter(cc -> cc.getId().equals(orh.getCustomerId())).findFirst().orElse(null);
-
-               orc.setId(orh.getId());
-               orc.setOrNo(orh.getOrNo());
-               orc.setCustomerId(orh.getCustomerId());
-               orc.setCustomer(c);
-               orc.setOrDate(orh.getOrDate());
-               orc.setTotalBillingAmount(orh.getTotalBillingAmount());
-               orc.setTotalShareAmount(orh.getTotalShareAmount());
-               orc.setTotalAmountPay(orh.getTotalAmountPay());
-               orc.setSeniorDiscount(orh.getSeniorDiscount());
-               orc.setEntryDate(orh.getEntryDate());
-               orc.setCreatedBy(orh.getCreatedBy());
-               orc.setCheckNo(orh.getCheckNo());
-               orc.setCheckBank(orh.getCheckBank());
-               orc.setCheckDate(orh.getCheckDate());
-               orc.setStatus(orh.getStatus());
-               orc.setIsPartSale(orh.getIsPartSale());
-               orc.setIsOutsideCollection(orh.getIsOutsideCollection());
-               orc.setOutsideCustomerName(orh.getOutsideCustomerName());
-               orWithCust.add(orc);
-          }
-
-          return new PaginationResponse<>(
-               orWithCust,
-               orHeaders.getNumber(),
-               orHeaders.getSize(),
-               orHeaders.getTotalPages(),
-               orHeaders.getTotalElements()
-          );
+          return new PaginationResponse<OfficialReceiptTableListResponse>(
+                    orResponse.getContent(),
+                    orResponse.getNumber(),
+                    orResponse.getSize(),
+                    orResponse.getTotalPages(),
+                    orResponse.getTotalElements());
 
      }
 
@@ -236,7 +208,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
 
      @Override
      public OtherPaymentDto createOtherCollection(OtherPaymentPayload payload) throws Exception {
-          
+
           String newOrNo = this.generateControlNumber();
 
           OtherPaymentHeaderDto header = payload.getHeader();
@@ -258,6 +230,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           entity.setIsOutsideCollection(header.getIsOutsideCollection());
           entity.setOutsideCustomerName(header.getOutsideCustomerName());
           entity.setOutsideCustomerAddress(header.getOutsideCustomerAddress());
+          entity.setIsDeleted(false);
 
           List<OfficialReceiptDetailsEntity> detailsEntity = new ArrayList<>();
           for (OtherPaymentDetailsDto d : details) {
@@ -270,7 +243,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
                ent.setRemarks(d.getRemarks());
                detailsEntity.add(ent);
           }
-          
+
           OfficialReceiptHeaderEntity resultHeader = orHeaderRepo.save(entity);
           List<OfficialReceiptDetailsEntity> resultDetails = orDetailsRepo.saveAll(detailsEntity);
 
@@ -282,28 +255,38 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      }
 
      @Override
-     public PaginationResponse<OfficialReceiptHeaderWithCustomerDto> getOfficialReceiptWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception {
+     public PaginationResponse<OfficialReceiptTableListResponse> getOfficialReceiptWithCustomer(int pageNo,
+               int pageSize, String sortColumn) throws Exception {
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(false, false, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(false, false,
+                    pageable);
 
           List<String> ids = new ArrayList<String>();
-          for(OfficialReceiptHeaderEntity orh : orHeaders) {
+          for (OfficialReceiptHeaderEntity orh : orHeaders) {
                ids.add(orh.getCustomerId());
           }
 
           List<CustomerDto> customers = customerService.getCustomerByIds(ids);
 
-          List<OfficialReceiptHeaderWithCustomerDto> orWithCust = new ArrayList<OfficialReceiptHeaderWithCustomerDto>();
+          List<OfficialReceiptTableListResponse> orWithCust = new ArrayList<OfficialReceiptTableListResponse>();
 
-          for(OfficialReceiptHeaderEntity orh : orHeaders) {
-               OfficialReceiptHeaderWithCustomerDto orc = new OfficialReceiptHeaderWithCustomerDto();
-               CustomerDto c = customers.stream().filter(cc -> cc.getId().equals(orh.getCustomerId())).findFirst().orElse(null);
+          for (OfficialReceiptHeaderEntity orh : orHeaders) {
+               OfficialReceiptTableListResponse orc = new OfficialReceiptTableListResponse();
+               CustomerDto c = customers.stream().filter(cc -> cc.getId().equals(orh.getCustomerId())).findFirst()
+                         .orElse(null);
 
                orc.setId(orh.getId());
                orc.setOrNo(orh.getOrNo());
                orc.setCustomerId(orh.getCustomerId());
-               orc.setCustomer(c);
+               if(c != null) {
+                    orc.setAccountNo(c.getAccountNo());
+                    orc.setFirstName(c.getFirstName());
+                    orc.setMiddleName(c.getMiddleName());
+                    orc.setLastName(c.getLastName());
+                    orc.setAddress(c.getAddress());
+               }
+               
                orc.setOrDate(orh.getOrDate());
                orc.setTotalBillingAmount(orh.getTotalBillingAmount());
                orc.setTotalShareAmount(orh.getTotalShareAmount());
@@ -321,20 +304,18 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
                orWithCust.add(orc);
           }
 
-
           return new PaginationResponse<>(
-               orWithCust,
-               orHeaders.getNumber(),
-               orHeaders.getSize(),
-               orHeaders.getTotalPages(),
-               orHeaders.getTotalElements()
-          );
+                    orWithCust,
+                    orHeaders.getNumber(),
+                    orHeaders.getSize(),
+                    orHeaders.getTotalPages(),
+                    orHeaders.getTotalElements());
      }
 
      @Override
      public OfficialReceiptResponse getOfficialReceiptWithDetailsById(String id) throws Exception {
           OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(id).orElseThrow();
-          
+
           String orNo = orHeader.getOrNo();
 
           CustomerDto customer = customerService.getCustomer(orHeader.getCustomerId());
@@ -373,150 +354,74 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      }
 
      @Override
-     public PaginationResponse<OtherPaymentHeaderDto> getOtherCollectionAll(int pageNo, int pageSize, String sortColumn) throws Exception {
-     
+     public PaginationResponse<OtherPaymentHeaderDto> getOtherCollectionAll(int pageNo, int pageSize, String sortColumn)
+               throws Exception {
+
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
 
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(true, false, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(true, false,
+                    pageable);
 
           return new PaginationResponse<>(
-               orHeaderMapper.toDtoList(orHeaders.getContent()),
-               orHeaders.getNumber(),
-               orHeaders.getSize(),
-               orHeaders.getTotalPages(),
-               orHeaders.getTotalElements()
-          );
-
-      }
-
-     @Override
-     public PaginationResponse<OtherPaymentHeaderDto> getOtherCollectionByCustomerId(int pageNo, int pageSize, String customerId) throws Exception {
-     
-     Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
-
-     Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByCustomerIdAndIsPartSaleAndIsDeleted(customerId,true, false, pageable);
-
-     return new PaginationResponse<>(
-          orHeaderMapper.toDtoList(orHeaders.getContent()),
-          orHeaders.getNumber(),
-          orHeaders.getSize(),
-          orHeaders.getTotalPages(),
-          orHeaders.getTotalElements()
-     );
+                    orHeaderMapper.toDtoList(orHeaders.getContent()),
+                    orHeaders.getNumber(),
+                    orHeaders.getSize(),
+                    orHeaders.getTotalPages(),
+                    orHeaders.getTotalElements());
 
      }
 
      @Override
-     public PaginationResponse<OtherPaymentHeaderWithCustomerDto> getOtherCollectionWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception {
-     
-     Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
+     public PaginationResponse<OtherPaymentHeaderDto> getOtherCollectionByCustomerId(int pageNo, int pageSize,
+               String customerId) throws Exception {
 
-     Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(true, false, pageable);
+          Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
 
-     List<String> ids = new ArrayList<String>();
-     for(OfficialReceiptHeaderEntity orh : orHeaders) {
-          ids.add(orh.getCustomerId());
-     }
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo
+                    .findByCustomerIdAndIsPartSaleAndIsDeleted(customerId, true, false, pageable);
 
-     List<CustomerDto> customers = customerService.getCustomerByIds(ids);
+          return new PaginationResponse<>(
+                    orHeaderMapper.toDtoList(orHeaders.getContent()),
+                    orHeaders.getNumber(),
+                    orHeaders.getSize(),
+                    orHeaders.getTotalPages(),
+                    orHeaders.getTotalElements());
 
-     List<OtherPaymentHeaderWithCustomerDto> orWithCust = new ArrayList<OtherPaymentHeaderWithCustomerDto>();
-
-     for(OfficialReceiptHeaderEntity orh : orHeaders) {
-          OtherPaymentHeaderWithCustomerDto orc = new OtherPaymentHeaderWithCustomerDto();
-          CustomerDto c = customers.stream().filter(cc -> cc.getId().equals(orh.getCustomerId())).findFirst().orElse(null);
-
-          orc.setId(orh.getId());
-          orc.setOrNo(orh.getOrNo());
-          orc.setCustomerId(orh.getCustomerId());
-          orc.setCustomer(c);
-          orc.setOrDate(orh.getOrDate());
-          orc.setTotalBillingAmount(orh.getTotalBillingAmount());
-          orc.setTotalAmountPay(orh.getTotalAmountPay());
-          orc.setEntryDate(orh.getEntryDate());
-          orc.setCreatedBy(orh.getCreatedBy());
-          orc.setCheckNo(orh.getCheckNo());
-          orc.setCheckBank(orh.getCheckBank());
-          orc.setCheckDate(orh.getCheckDate());
-          orc.setStatus(orh.getStatus());
-          orc.setIsPartSale(orh.getIsPartSale());
-          orc.setIsOutsideCollection(orh.getIsOutsideCollection());
-          orc.setOutsideCustomerName(orh.getOutsideCustomerName());
-          orWithCust.add(orc);
-     }
-
-
-     return new PaginationResponse<>(
-          orWithCust,
-          orHeaders.getNumber(),
-          orHeaders.getSize(),
-          orHeaders.getTotalPages(),
-          orHeaders.getTotalElements()
-     );
      }
 
      @Override
-     public OtherPaymentResponse getOtherCollectionWithDetailsById(String orhId) throws Exception {
-     OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(orhId).orElseThrow();
-     
-     String orNo = orHeader.getOrNo();
+     public PaginationResponse<OfficialReceiptTableListResponse> getOtherCollectionWithCustomer(int pageNo,
+               int pageSize, String sortColumn) throws Exception {
 
-     CustomerDto customer = new CustomerDto();
+          Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortColumn).descending());
 
-     if(orHeader.getCustomerId() != null && orHeader.getCustomerId().equals("")){
-          customer = customerService.getCustomer(orHeader.getCustomerId());
-     }
-     
-     List<OfficialReceiptDetailsDto> orDetails = orDetailsMapper.toDtoList(orDetailsRepo.findByOrNo(orNo));
-     
-     OtherPaymentHeaderWithCustomerDto orc = new OtherPaymentHeaderWithCustomerDto();
-     orc.setId(orHeader.getId());
-     orc.setOrNo(orHeader.getOrNo());
-     orc.setCustomerId(orHeader.getCustomerId());
-     orc.setCustomer(customer);
-     orc.setOrDate(orHeader.getOrDate());
-     orc.setTotalBillingAmount(orHeader.getTotalBillingAmount());
-     orc.setTotalAmountPay(orHeader.getTotalAmountPay());
-     orc.setEntryDate(orHeader.getEntryDate());
-     orc.setCreatedBy(orHeader.getCreatedBy());
-     orc.setCheckNo(orHeader.getCheckNo());
-     orc.setCheckBank(orHeader.getCheckBank());
-     orc.setCheckDate(orHeader.getCheckDate());
-     orc.setStatus(orHeader.getStatus());
-     orc.setIsPartSale(orHeader.getIsPartSale());
-     orc.setIsOutsideCollection(orHeader.getIsOutsideCollection());
-     orc.setOutsideCustomerName(orHeader.getOutsideCustomerName());
-     orc.setIsDeleted(orHeader.getIsDeleted());
-
-     OtherPaymentResponse or = new OtherPaymentResponse();
-     or.setHeader(orc);
-     or.setDetails(orDetails);
-     return or;
-     } 
-
-     @Override
-     public PaginationResponse<OfficialReceiptHeaderDto> getOtherCollectionAllWithSearch(String keyword, int pageNo, int pageSize) throws Exception {
-          Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("entryDate").descending());
-
-          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.searchByCustomerIdOrOrNo(keyword, keyword, true, pageable);
+          Page<OfficialReceiptHeaderEntity> orHeaders = orHeaderRepo.findByIsPartSaleAndIsDeleted(true, false,
+                    pageable);
 
           List<String> ids = new ArrayList<String>();
-          for(OfficialReceiptHeaderEntity orh : orHeaders) {
+          for (OfficialReceiptHeaderEntity orh : orHeaders) {
                ids.add(orh.getCustomerId());
           }
 
           List<CustomerDto> customers = customerService.getCustomerByIds(ids);
 
-          List<OtherPaymentHeaderWithCustomerDto> orWithCust = new ArrayList<OtherPaymentHeaderWithCustomerDto>();
+          List<OfficialReceiptTableListResponse> orWithCust = new ArrayList<OfficialReceiptTableListResponse>();
 
-          for(OfficialReceiptHeaderEntity orh : orHeaders) {
-               OtherPaymentHeaderWithCustomerDto orc = new OtherPaymentHeaderWithCustomerDto();
-               CustomerDto c = customers.stream().filter(cc -> cc.getId().equals(orh.getCustomerId())).findFirst().orElse(null);
+          for (OfficialReceiptHeaderEntity orh : orHeaders) {
+               OfficialReceiptTableListResponse orc = new OfficialReceiptTableListResponse();
+               CustomerDto c = customers.stream().filter(cc -> cc.getId().equals(orh.getCustomerId())).findFirst()
+                         .orElse(null);
 
                orc.setId(orh.getId());
                orc.setOrNo(orh.getOrNo());
                orc.setCustomerId(orh.getCustomerId());
-               orc.setCustomer(c);
+               if(c != null) {
+                    orc.setAccountNo(c.getAccountNo());
+                    orc.setFirstName(c.getFirstName());
+                    orc.setMiddleName(c.getMiddleName());
+                    orc.setLastName(c.getLastName());
+                    orc.setAddress(c.getAddress());
+               }
                orc.setOrDate(orh.getOrDate());
                orc.setTotalBillingAmount(orh.getTotalBillingAmount());
                orc.setTotalAmountPay(orh.getTotalAmountPay());
@@ -532,31 +437,93 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
                orWithCust.add(orc);
           }
 
-
           return new PaginationResponse<>(
-               orWithCust,
-               orHeaders.getNumber(),
-               orHeaders.getSize(),
-               orHeaders.getTotalPages(),
-               orHeaders.getTotalElements()
-          );
+                    orWithCust,
+                    orHeaders.getNumber(),
+                    orHeaders.getSize(),
+                    orHeaders.getTotalPages(),
+                    orHeaders.getTotalElements());
+     }
 
+     @Override
+     public OtherPaymentResponse getOtherCollectionWithDetailsById(String orhId) throws Exception {
+          OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(orhId).orElseThrow();
+
+          String orNo = orHeader.getOrNo();
+
+          CustomerDto customer = new CustomerDto();
+
+
+          System.out.println("============================================================================");
+          System.out.println("CUSTOMER ID: " + orHeader.getCustomerId());
+          System.out.println("============================================================================");
+
+          if (orHeader.getCustomerId() != null && !orHeader.getCustomerId().equals("")) {
+               customer = customerService.getCustomer(orHeader.getCustomerId());
+               System.out.println("CUSTOMER INFO: " + customer.toString());
+               System.out.println("============================================================================");
+          }
+
+          List<OfficialReceiptDetailsDto> orDetails = orDetailsMapper.toDtoList(orDetailsRepo.findByOrNo(orNo));
+
+          OtherPaymentHeaderWithCustomerDto orc = new OtherPaymentHeaderWithCustomerDto();
+          orc.setId(orHeader.getId());
+          orc.setOrNo(orHeader.getOrNo());
+          orc.setCustomerId(orHeader.getCustomerId());
+          orc.setCustomer(customer);
+          orc.setOrDate(orHeader.getOrDate());
+          orc.setTotalBillingAmount(orHeader.getTotalBillingAmount());
+          orc.setTotalAmountPay(orHeader.getTotalAmountPay());
+          orc.setEntryDate(orHeader.getEntryDate());
+          orc.setCreatedBy(orHeader.getCreatedBy());
+          orc.setCheckNo(orHeader.getCheckNo());
+          orc.setCheckBank(orHeader.getCheckBank());
+          orc.setCheckDate(orHeader.getCheckDate());
+          orc.setStatus(orHeader.getStatus());
+          orc.setIsPartSale(orHeader.getIsPartSale());
+          orc.setIsOutsideCollection(orHeader.getIsOutsideCollection());
+          orc.setOutsideCustomerName(orHeader.getOutsideCustomerName());
+          orc.setIsDeleted(orHeader.getIsDeleted());
+
+          OtherPaymentResponse or = new OtherPaymentResponse();
+          or.setHeader(orc);
+          or.setDetails(orDetails);
+          return or;
+     }
+
+     @Override
+     public PaginationResponse<OfficialReceiptTableListResponse> getOtherCollectionAllWithSearch(String keyword,
+               int pageNo, int pageSize) throws Exception {
+          Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("entryDate").descending());
+
+          Page<OfficialReceiptTableListInterfaceProjection> orHeadersProjections = this.orHeaderRepo
+                    .searchByCustomerNameOrAccountNoOrOrNo(keyword, keyword, keyword, true, pageable);
+
+          Page<OfficialReceiptTableListResponse> orResponse = orHeadersProjections
+                    .map(this::convertInterfaceToResponse);
+
+          return new PaginationResponse<OfficialReceiptTableListResponse>(
+                    orResponse.getContent(),
+                    orResponse.getNumber(),
+                    orResponse.getSize(),
+                    orResponse.getTotalPages(),
+                    orResponse.getTotalElements());
      }
 
      @Override
      public String deleteRecord(String id) throws Exception {
-     OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(id).orElseThrow();
-     orHeader.setIsDeleted(true);
-     orHeaderRepo.save(orHeader);
-     return "Successfully deleted";
+          OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(id).orElseThrow();
+          orHeader.setIsDeleted(true);
+          orHeaderRepo.save(orHeader);
+          return "Successfully deleted";
      }
 
      @Override
      public OfficialReceiptHeaderDto updateRecordStatus(UpdateStatusPayload payload) throws Exception {
-     OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(payload.getId()).orElseThrow();
-     orHeader.setStatus(payload.getStatus());
-     orHeaderRepo.save(orHeader);
-     return orHeaderMapper.toDto(orHeader);
+          OfficialReceiptHeaderEntity orHeader = orHeaderRepo.findById(payload.getId()).orElseThrow();
+          orHeader.setStatus(payload.getStatus());
+          orHeaderRepo.save(orHeader);
+          return orHeaderMapper.toDto(orHeader);
      }
 
      @Override
@@ -571,8 +538,8 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           System.out.println("OFFICIAL RECEIPT: " + orHeader.toString());
           System.out.println("============================================================================");
 
-          List<OfficialReceiptDetailsEntity> orDetails = new ArrayList< OfficialReceiptDetailsEntity>();
-          if(orHeader != null) {
+          List<OfficialReceiptDetailsEntity> orDetails = new ArrayList<OfficialReceiptDetailsEntity>();
+          if (orHeader != null) {
                System.out.println("GETTING OFFICIAL RECEIPT DETAILS WITH OR NO: " + orHeader.getOrNo());
                System.out.println("=================================================================");
                orDetails = orDetailsRepo.findByOrNo(orHeader.getOrNo());
@@ -596,24 +563,36 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
 
           List<BillingDto> billing = new ArrayList<BillingDto>();
 
-          if(orDetails.size() > 0) {
-               
-               totalReadingAmountPaid = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getReadingAmountPaid()).orElse(0.0)).sum();
-               totalParts = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getParts()).orElse(0.0)).sum();
-               totalMembership = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getMembership()).orElse(0.0)).sum();
-               totalTapping = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getTapping()).orElse(0.0)).sum();
-               totalCalibration = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getCalibration()).orElse(0.0)).sum();
-               totalReconnection = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getReconnection()).orElse(0.0)).sum();
-               totalSubReceivable = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getSubReceivable()).orElse(0.0)).sum();
-               totalPenalty = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getPenalty()).orElse(0.0)).sum();
-               totalOtherCollection = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getOtherCollection()).orElse(0.0)).sum();
-               totalMaintenanceFee = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getMaintenanceFee()).orElse(0.0)).sum();
-               totalSeptageFee = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getSeptageFee()).orElse(0.0)).sum();
-               totalSeniorDiscount = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getSeniorDiscount()).orElse(0.0)).sum();
-               finalTotalAmount = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getTotalAmount()).orElse(0.0)).sum();
+          if (orDetails.size() > 0) {
 
-               if(!orHeader.getIsPartSale()) {
-                    for(OfficialReceiptDetailsEntity or : orDetails) {
+               totalReadingAmountPaid = orDetails.stream()
+                         .mapToDouble(or -> Optional.ofNullable(or.getReadingAmountPaid()).orElse(0.0)).sum();
+               totalParts = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getParts()).orElse(0.0)).sum();
+               totalMembership = orDetails.stream()
+                         .mapToDouble(or -> Optional.ofNullable(or.getMembership()).orElse(0.0)).sum();
+               totalTapping = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getTapping()).orElse(0.0))
+                         .sum();
+               totalCalibration = orDetails.stream()
+                         .mapToDouble(or -> Optional.ofNullable(or.getCalibration()).orElse(0.0)).sum();
+               totalReconnection = orDetails.stream()
+                         .mapToDouble(or -> Optional.ofNullable(or.getReconnection()).orElse(0.0)).sum();
+               totalSubReceivable = orDetails.stream()
+                         .mapToDouble(or -> Optional.ofNullable(or.getSubReceivable()).orElse(0.0)).sum();
+               totalPenalty = orDetails.stream().mapToDouble(or -> Optional.ofNullable(or.getPenalty()).orElse(0.0))
+                         .sum();
+               totalOtherCollection = orDetails.stream()
+                         .mapToDouble(or -> Optional.ofNullable(or.getOtherCollection()).orElse(0.0)).sum();
+               totalMaintenanceFee = orDetails.stream()
+                         .mapToDouble(or -> Optional.ofNullable(or.getMaintenanceFee()).orElse(0.0)).sum();
+               totalSeptageFee = orDetails.stream()
+                         .mapToDouble(or -> Optional.ofNullable(or.getSeptageFee()).orElse(0.0)).sum();
+               totalSeniorDiscount = orDetails.stream()
+                         .mapToDouble(or -> Optional.ofNullable(or.getSeniorDiscount()).orElse(0.0)).sum();
+               finalTotalAmount = orDetails.stream()
+                         .mapToDouble(or -> Optional.ofNullable(or.getTotalAmount()).orElse(0.0)).sum();
+
+               if (!orHeader.getIsPartSale()) {
+                    for (OfficialReceiptDetailsEntity or : orDetails) {
                          System.out.println("GETTING BILLING BY READING NO: " + or.getReadingNo());
                          System.out.println("=================================================================");
                          BillingDto b = billingService.getBillingByReadingNo(or.getReadingNo());
@@ -622,14 +601,13 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
                          billing.add(b);
                     }
                }
-               
 
           }
 
           String billingMonths = "";
           String meterNumbers = "";
-          if(billing.size() > 0) {
-               for(BillingDto b : billing) {
+          if (billing.size() > 0) {
+               for (BillingDto b : billing) {
                     billingMonths = billingMonths + convertIntToMMM(b.getMonthOf()) + ", ";
                     meterNumbers = meterNumbers + b.getMeterNo() + ", ";
                }
@@ -637,16 +615,10 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
                meterNumbers = meterNumbers.substring(0, meterNumbers.length() - 2);
           }
 
-          
-
           CustomerDto customer = new CustomerDto();
-          if(orHeader.getCustomerId() != null && !orHeader.getCustomerId().equals("")){
+          if (orHeader.getCustomerId() != null && !orHeader.getCustomerId().equals("")) {
                customer = customerService.getCustomer(orHeader.getCustomerId());
           }
-
-          
-          
-         
 
           System.out.println("=================================================================");
           System.out.println("CUSTOMER: " + customer.toString());
@@ -664,7 +636,6 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           receipt.setTotalBillingAmount(orHeader.getTotalBillingAmount());
           receipt.setTotalShareAmount(orHeader.getTotalShareAmount());
           receipt.setTotalAmountPay(orHeader.getTotalAmountPay());
-
 
           receipt.setMeterNo(meterNumbers);
           receipt.setReadingAmountPaid(totalReadingAmountPaid);
@@ -686,20 +657,50 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           return receiptService.generateExcelFromTemplate(receipt);
      }
 
+     @Override
      public byte[] printPdfOR(String id) throws Exception {
-        // First generate Excel
-        byte[] excelBytes = printExcelOR(id);
-        
-        // Then convert to PDF
-        return receiptService.convertExcelToPdf(excelBytes);
-    }
+          // First generate Excel
+          byte[] excelBytes = printExcelOR(id);
 
-      private String generateControlNumber() {
-          String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-          String lastReadingNo = orHeaderRepo.findLastOrNo("OR"+datePrefix);
+          // Then convert to PDF
+          return receiptService.convertExcelToPdf(excelBytes);
+     }
+
+     private OfficialReceiptTableListResponse convertInterfaceToResponse(
+               OfficialReceiptTableListInterfaceProjection orInterface) {
+          OfficialReceiptTableListResponse orResponse = new OfficialReceiptTableListResponse();
+          orResponse.setId(orInterface.getId());
+          orResponse.setOrNo(orInterface.getOrNo());
+          orResponse.setCustomerId(orInterface.getCustomerId());
+          orResponse.setFirstName(orInterface.getFirstName());
+          orResponse.setLastName(orInterface.getLastName());
+          orResponse.setMiddleName(orInterface.getMiddleName());
+          orResponse.setAddress(orInterface.getAddress());
+          orResponse.setOrDate(orInterface.getOrDate());
+          orResponse.setTotalBillingAmount(orInterface.getTotalBillingAmount());
+          orResponse.setTotalShareAmount(orInterface.getTotalShareAmount());
+          orResponse.setTotalAmountPay(orInterface.getTotalAmountPay());
+          orResponse.setSeniorDiscount(orInterface.getSeniorDiscount());
+          orResponse.setEntryDate(orInterface.getEntryDate());
+          orResponse.setCreatedBy(orInterface.getCreatedBy());
+          orResponse.setCheckNo(orInterface.getCheckNo());
+          orResponse.setCheckBank(orInterface.getCheckBank());
+          orResponse.setCheckDate(orInterface.getCheckDate());
+          orResponse.setStatus(orInterface.getStatus());
+          orResponse.setIsPartSale(orInterface.getIsPartSale());
+          orResponse.setIsOutsideCollection(orInterface.getIsOutsideCollection());
+          orResponse.setOutsideCustomerName(orInterface.getOutsideCustomerName());
+          orResponse.setOutsideCustomerAddress(orInterface.getOutsideCustomerAddress());
+          orResponse.setIsDeleted(orInterface.getIsDeleted());
+          return orResponse;
+     }
+
+     private String generateControlNumber() {
+          String datePrefix = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+          String lastReadingNo = orHeaderRepo.findLastOrNo("OR" + datePrefix);
 
           int sequence = 1;
-          if(lastReadingNo != null) {
+          if (lastReadingNo != null) {
                int lastSequence = Integer.parseInt(lastReadingNo.substring(10));
                sequence = lastSequence + 1;
           }
@@ -708,11 +709,11 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      }
 
      private String convertIntToMMM(int monthNumber) {
-        if (monthNumber < 1 || monthNumber > 12) {
-            throw new IllegalArgumentException("Month number must be between 1 and 12.");
-        }
-        Month month = Month.of(monthNumber);
-        return month.getDisplayName(TextStyle.SHORT, Locale.ENGLISH); // Or your desired locale
-    }
+          if (monthNumber < 1 || monthNumber > 12) {
+               throw new IllegalArgumentException("Month number must be between 1 and 12.");
+          }
+          Month month = Month.of(monthNumber);
+          return month.getDisplayName(TextStyle.SHORT, Locale.ENGLISH); // Or your desired locale
+     }
 
 }

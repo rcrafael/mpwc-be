@@ -19,6 +19,7 @@ import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustom
 import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
 import com.mahabang_parang.api_payment.model.payload.UpdateStatusPayload;
 import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;
+import com.mahabang_parang.api_payment.model.response.OfficialReceiptTableListResponse;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -65,7 +66,7 @@ public class OfficialReceiptController {
           ApiResponse response = new ApiResponse();
 
           try {
-               PaginationResponse<OfficialReceiptHeaderWithCustomerDto> orHeader =  orService.getOfficialReceiptWithCustomer(pageNo, pageSize, "entryDate");
+               PaginationResponse<OfficialReceiptTableListResponse> orHeader =  orService.getOfficialReceiptWithCustomer(pageNo, pageSize, "entryDate");
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(orHeader);
@@ -204,7 +205,7 @@ public class OfficialReceiptController {
          ApiResponse response = new ApiResponse();
 
           try {
-               PaginationResponse<OfficialReceiptHeaderDto> OR = orService.getOfficialReceiptWithSearch(searchKeyword, pageNo, pageSize);
+               PaginationResponse<OfficialReceiptTableListResponse> OR = orService.getOfficialReceiptWithSearch(searchKeyword, pageNo, pageSize);
 
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");

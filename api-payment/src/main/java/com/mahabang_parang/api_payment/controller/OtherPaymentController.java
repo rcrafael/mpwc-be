@@ -2,13 +2,12 @@ package com.mahabang_parang.api_payment.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mahabang_parang.api_billing.model.ApiResponse;
+import com.mahabang_parang.api_payment.model.ApiResponse;
 import com.mahabang_parang.api_payment.model.PaginationResponse;
-import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
 import com.mahabang_parang.api_payment.model.dto.OtherPaymentDto;
 import com.mahabang_parang.api_payment.model.dto.OtherPaymentHeaderDto;
-import com.mahabang_parang.api_payment.model.dto.OtherPaymentHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.payload.OtherPaymentPayload;
+import com.mahabang_parang.api_payment.model.response.OfficialReceiptTableListResponse;
 import com.mahabang_parang.api_payment.model.response.OtherPaymentResponse;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
 
@@ -79,7 +78,7 @@ public class OtherPaymentController {
           ApiResponse response = new ApiResponse();
 
           try {
-               PaginationResponse<OtherPaymentHeaderWithCustomerDto> orHeader =  orService.getOtherCollectionWithCustomer(pageNo, pageSize, "entryDate");
+               PaginationResponse<OfficialReceiptTableListResponse> orHeader =  orService.getOtherCollectionWithCustomer(pageNo, pageSize, "entryDate");
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(orHeader);
@@ -141,7 +140,7 @@ public class OtherPaymentController {
          ApiResponse response = new ApiResponse();
 
           try {
-               PaginationResponse<OfficialReceiptHeaderDto> OR = orService.getOtherCollectionAllWithSearch(searchKeyword, pageNo, pageSize);
+               PaginationResponse<OfficialReceiptTableListResponse> OR = orService.getOtherCollectionAllWithSearch(searchKeyword, pageNo, pageSize);
 
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");

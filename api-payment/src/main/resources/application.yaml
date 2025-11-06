@@ -23,6 +23,14 @@ spring:
           properties:
                hibernate:
                     format-sql: true
+logging:
+     level:
+          hibernate:
+               SQL: DEBUG
+               type:
+                    descriptor:
+                         sql:
+                              BasicBinder: TRACE
 
 server:
      port: 8082
