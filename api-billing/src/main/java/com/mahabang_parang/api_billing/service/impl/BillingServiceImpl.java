@@ -18,8 +18,10 @@ import com.mahabang_parang.api_billing.model.Paginator;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
 import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
 import com.mahabang_parang.api_billing.model.entity.BillingEntity;
+import com.mahabang_parang.api_billing.model.interfaces.BillingTableListInterfaceProjection;
 import com.mahabang_parang.api_billing.model.mapper.BillingMapper;
 import com.mahabang_parang.api_billing.model.payload.UpdateBillingPayload;
+import com.mahabang_parang.api_billing.model.response.BillingTableListResponse;
 import com.mahabang_parang.api_billing.repository.BillingRepository;
 import com.mahabang_parang.api_billing.service.BillingService;
 import com.mahabang_parang.api_user.model.dto.CustomerDto;
@@ -45,66 +47,20 @@ public class BillingServiceImpl implements BillingService  {
 
 
      @Override
-     public PaginationResponse<BillingDto> getBilling(int pageNumber, int pageSize) throws Exception {
+     public PaginationResponse<BillingTableListResponse> getBilling(int pageNumber, int pageSize) throws Exception {
 
           PageRequest pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
           
-          Page<BillingEntity> billing = billingRepo.findAll(pageable);
+          Page<BillingTableListInterfaceProjection> billingProjection = billingRepo.findAllBilling(pageable);
 
-          List<String> ids = new ArrayList<String>();
-          for(BillingEntity b : billing) {
-               ids.add(b.getCustomerId());
-          }
-
-          List<CustomerDto> cust = custService.getCustomerByIds(ids);
-
-          List<BillingWithCustomerInfoDto> billingTable = new ArrayList<BillingWithCustomerInfoDto>();
-          
-          for(BillingEntity b : billing) {
-               BillingWithCustomerInfoDto bill = new BillingWithCustomerInfoDto();
-               CustomerDto c = new CustomerDto();
-
-               for(CustomerDto cc : cust) { 
-                    
-                    if(cc.getId().equals(b.getCustomerId())) {
-                         c = cc;
-                         break;
-                    }
-               }
-
-               bill.setId(b.getId());
-               bill.setReadingNo(b.getReadingNo());
-               bill.setCustomerId(b.getCustomerId());
-               bill.setCustomer(c);
-               bill.setMeterNo(b.getMeterNo());
-               bill.setPrevious(b.getPrevious());
-               bill.setPresent(b.getPresent()); 
-               bill.setM3Used(b.getM3Used());
-               bill.setReadingAmount(b.getReadingAmount());
-               bill.setParts(b.getParts());      
-               bill.setTotalAmount(b.getTotalAmount());
-               bill.setMaintenanceFee(b.getMaintenanceFee());
-               bill.setLessAmount(b.getLessAmount());
-               bill.setSeptageFee(b.getSeptageFee());
-               bill.setRemarks(b.getRemarks());
-               bill.setMonthOf(b.getMonthOf());
-               bill.setDateFrom(b.getDateFrom());
-               bill.setDateTo(b.getDateTo());
-               bill.setDueDate(b.getDueDate());
-               bill.setStatus(b.getStatus());
-               bill.setCreatedBy(b.getCreatedBy());
-               bill.setCreatedDate(b.getCreatedDate());
-               bill.setUpdatedBy(b.getUpdatedBy());
-               bill.setDateUpdated(b.getDateUpdated());
-               billingTable.add(bill);
-          }
+          Page<BillingTableListResponse> billingResponse = billingProjection.map(this::convertProjectionToDto);
 
           return new PaginationResponse<>(
-               billingTable,
-               billing.getNumber(),
-               billing.getSize(),
-               billing.getTotalPages(),
-               billing.getTotalElements()
+               billingResponse.getContent(),
+               billingResponse.getNumber(),
+               billingResponse.getSize(),
+               billingResponse.getTotalPages(),
+               billingResponse.getTotalElements()
           );
               
      }
@@ -229,6 +185,7 @@ public class BillingServiceImpl implements BillingService  {
           return bill;
      }
 
+     @Override
      public BillingDto update(UpdateBillingPayload payload) throws Exception {
 
           BillingDto billing = getBillingById(payload.getId());
@@ -255,6 +212,26 @@ public class BillingServiceImpl implements BillingService  {
 
      }
 
+
+     @Override
+     public PaginationResponse<BillingTableListResponse> searchBilling(String keyword, int pageNumber, int pageSize) throws Exception {
+          PageRequest pageable = PageRequest.of(pageNumber, pageSize);
+          
+          Page<BillingTableListInterfaceProjection> billingProjection = billingRepo.search(keyword, keyword, keyword, keyword, pageable);
+          
+          Page<BillingTableListResponse> billingResponse = billingProjection.map(this::convertProjectionToDto);
+
+
+          return new PaginationResponse<BillingTableListResponse>(
+               billingResponse.getContent(),
+               billingResponse.getNumber(),
+               billingResponse.getSize(),
+               billingResponse.getTotalPages(),
+               billingResponse.getTotalElements()
+          );
+          
+     }
+
      private String generateControlNumber() {
           String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
           String lastReadingNo = billingRepo.findLastReadingNo("R"+datePrefix);
@@ -268,6 +245,44 @@ public class BillingServiceImpl implements BillingService  {
           return "R" + datePrefix + String.format("%05d", sequence);
      }
 
+     private BillingTableListResponse convertProjectionToDto(BillingTableListInterfaceProjection projection) {
+          
+          BillingTableListResponse billing = new BillingTableListResponse();
 
+          billing.setId(projection.getId());
+          billing.setReadingNo(projection.getReadingNo());
+          billing.setCustomerId(projection.getCustomerId());
+          billing.setAccountNo(projection.getAccountNo());
+          billing.setFirstName(projection.getFirstName());
+          billing.setLastName(projection.getLastName());
+          billing.setMiddleName(projection.getMiddleName());
+          billing.setAddress(projection.getAddress());
+          billing.setMeterNo(projection.getMeterNo());
+          billing.setAlias(projection.getAlias());
+          billing.setBranchCode(projection.getBranchCode());
+          billing.setPrevious(projection.getPrevious());
+          billing.setPresent(projection.getPresent());
+          billing.setM3Used(projection.getM3Used());
+          billing.setRating(projection.getRating());
+          billing.setReadingAmount(projection.getReadingAmount());
+          billing.setParts(projection.getParts());
+          billing.setTotalAmount(projection.getTotalAmount());
+          billing.setMaintenanceFee(projection.getMaintenanceFee());
+          billing.setLessAmount(projection.getLessAmount());
+          billing.setSeptageFee(projection.getSeptageFee());
+          billing.setRemarks(projection.getRemarks());
+          billing.setMonthOf(projection.getMonthOf());
+          billing.setDateFrom(projection.getDateFrom());
+          billing.setDateTo(projection.getDateTo());
+          billing.setDueDate(projection.getDueDate());
+          billing.setStatus(projection.getStatus());
+          billing.setCreatedBy(projection.getCreatedBy());
+          billing.setCreatedDate(projection.getCreatedDate());
+          billing.setUpdatedBy(projection.getUpdatedBy());
+          billing.setDateUpdated(projection.getDateUpdated());
+
+          return billing;
+
+     }
 
 }

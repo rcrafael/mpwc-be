@@ -2,6 +2,7 @@ package com.mahabang_parang.api_billing.repository;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.atn.SemanticContext.OR;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +10,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.mahabang_parang.api_billing.model.entity.BillingEntity;
+import com.mahabang_parang.api_billing.model.interfaces.BillingTableListInterfaceProjection;
 
 public interface BillingRepository extends JpaRepository<BillingEntity, String> {
 
@@ -27,7 +30,121 @@ public interface BillingRepository extends JpaRepository<BillingEntity, String> 
      @Query("UPDATE BillingEntity b SET b.status = :newStatus WHERE b.readingNo = :readingNo")
      Integer updateBillingStatus(@Param("newStatus") Integer newStatus, @Param("readingNo")  String readingNo);
 
+     @Query(value = "SELECT DISTINCT b.id, " +
+                         "b.reading_no AS readingNo, " +
+                         "b.meter_no AS meterNo, " +
+                         "b.previous AS previous, " +
+                         "b.present AS present, " +
+                         "b.m3_used AS m3Used, " +
+                         "b.rating AS rating, " +
+                         "b.reading_amount AS readingAmount, " +
+                         "b.parts AS parts, " +
+                         "b.maintenance_fee AS maintenanceFee, " +
+                         "b.septage_fee AS septageFee, " +
+                         "b.less_amount AS lessAmount, " +
+                         "b.total_amount AS totalAmount, " +
+                         "b.month_of AS monthOf, " +
+                         "b.date_from AS dateFrom , " +
+                         "b.date_to AS dateTo , " +
+                         "b.due_date AS dueDate , " +
+                         "b.remarks AS remarks , " +
+                         "b.status AS `status` , " +
+                         "b.created_by AS createdBy , " +
+                         "b.created_date AS createdDate , " +
+                         "b.updated_by AS updatedBy , " +
+                         "b.date_updated AS dateUpdated , " +
+                         "c.id AS customer_id , " +
+                         "c.account_no AS accountNo , " +
+                         "c.first_name AS firstName , " +
+                         "c.middle_name AS middleName , " +
+                         "c.last_name AS lastName , " +
+                         "c.address AS address , " +
+                         "cm.alias AS `alias` , " +
+                         "cm.branch_code AS branchCode " +
+                    "FROM reading b " +
+                    "INNER JOIN customer c " +
+                    "     ON b.customer_id = c.id " +
+                    "INNER JOIN customer_meter cm " +
+                    "     ON c.id = cm.customer_id AND b.meter_no = cm.meter_no ",
+          countQuery = "SELECT COUNT(DISTINCT b.id) " +
+                    "FROM reading b " +
+                    "INNER JOIN customer c " +
+                    "     ON b.customer_id = c.id " +
+                    "INNER JOIN customer_meter cm " +
+                    "     ON c.id = cm.customer_id AND b.meter_no = cm.meter_no ",
+          nativeQuery = true
+          )
+     Page<BillingTableListInterfaceProjection> findAllBilling(Pageable pageable);
+
+     @Query(value = "SELECT DISTINCT b.id, " +
+                         "b.reading_no AS readingNo, " +
+                         "b.meter_no AS meterNo, " +
+                         "b.previous AS previous, " +
+                         "b.present AS present, " +
+                         "b.m3_used AS m3Used, " +
+                         "b.rating AS rating, " +
+                         "b.reading_amount AS readingAmount, " +
+                         "b.parts AS parts, " +
+                         "b.maintenance_fee AS maintenanceFee, " +
+                         "b.septage_fee AS septageFee, " +
+                         "b.less_amount AS lessAmount, " +
+                         "b.total_amount AS totalAmount, " +
+                         "b.month_of AS monthOf, " +
+                         "b.date_from AS dateFrom , " +
+                         "b.date_to AS dateTo , " +
+                         "b.due_date AS dueDate , " +
+                         "b.remarks AS remarks , " +
+                         "b.status AS `status` , " +
+                         "b.created_by AS createdBy , " +
+                         "b.created_date AS createdDate , " +
+                         "b.updated_by AS updatedBy , " +
+                         "b.date_updated AS dateUpdated , " +
+                         "c.id AS customer_id , " +
+                         "c.account_no AS accountNo , " +
+                         "c.first_name AS firstName , " +
+                         "c.middle_name AS middleName , " +
+                         "c.last_name AS lastName , " +
+                         "c.address AS address , " +
+                         "cm.alias AS `alias` , " +
+                         "cm.branch_code AS branchCode " +
+                    "FROM reading b " +
+                    "INNER JOIN customer c " +
+                    "     ON b.customer_id = c.id " +
+                    "INNER JOIN customer_meter cm " +
+                    "     ON c.id = cm.customer_id AND b.meter_no = cm.meter_no " +
+                    "WHERE LOWER(b.customer_id) LIKE LOWER(CONCAT('%', :customerId, '%')) " +
+                    "            OR LOWER(c.first_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " +
+                    "            OR LOWER(c.middle_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " +
+                    "            OR LOWER(c.last_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " + 
+                    "            OR LOWER(b.reading_no) LIKE LOWER(CONCAT('%', :reading_no, '%')) " +
+                    "            OR LOWER (b.meter_no) LIKE LOWER(CONCAT('%', :meter_no, '%')) ",
+          countQuery = "SELECT COUNT(DISTINCT b.id) " +
+                    "FROM reading b " +
+                    "INNER JOIN customer c " +
+                    "     ON b.customer_id = c.id " +
+                    "INNER JOIN customer_meter cm " +
+                    "     ON c.id = cm.customer_id AND b.meter_no = cm.meter_no " +
+                    "WHERE LOWER(b.customer_id) LIKE LOWER(CONCAT('%', :customerId, '%')) " +
+                    "            OR LOWER(c.first_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " +
+                    "            OR LOWER(c.middle_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " +
+                    "            OR LOWER(c.last_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " + 
+                    "            OR LOWER(b.reading_no) LIKE LOWER(CONCAT('%', :reading_no, '%')) " +
+                    "            OR LOWER (b.meter_no) LIKE LOWER(CONCAT('%', :meter_no, '%')) ",
+          nativeQuery = true
+          )
+     Page<BillingTableListInterfaceProjection> search(
+          @Param("customerId") String customerId,
+          @Param("customerName") String customerName,
+          @Param("reading_no") String reading_no,
+          @Param("meter_no") String meter_no,
+          Pageable pageable
+     );
+
+
      Page<BillingEntity> findAll(Pageable pageable);
      Page<BillingEntity> findByCustomerId(String custId, Pageable pageable);
      BillingEntity findByReadingNo(String readingNo);
+
+
+
 }
