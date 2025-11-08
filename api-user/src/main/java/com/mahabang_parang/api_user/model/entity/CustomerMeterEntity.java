@@ -44,6 +44,9 @@ public class CustomerMeterEntity {
      @Column(nullable = false)
      private Integer branchCode;
 
+     @Column(nullable = false)
+     private Integer phase;
+
      @Column(nullable = true)
      private String location;
      

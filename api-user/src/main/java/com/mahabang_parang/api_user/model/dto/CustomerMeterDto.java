@@ -21,6 +21,7 @@ public class CustomerMeterDto {
      private String meterNo;
      private String alias;
      private Integer branchCode;
+     private Integer phase;
      private String location;
      private Integer previous;
      private Integer present;

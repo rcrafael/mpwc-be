@@ -253,7 +253,7 @@ public class CustomerController {
           }
      }
 
-     @PostMapping("meter/single-update")
+     @PutMapping("meter/single-update")
      public ResponseEntity<ApiResponse> updateMeterNo(@RequestBody CustomerMeterDto meter){
           
           ApiResponse response = new ApiResponse();
