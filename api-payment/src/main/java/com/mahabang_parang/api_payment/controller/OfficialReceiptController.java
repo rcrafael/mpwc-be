@@ -15,7 +15,6 @@ import com.mahabang_parang.api_payment.model.ApiResponse;
 import com.mahabang_parang.api_payment.model.PaginationResponse;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptDto;
 import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderDto;
-import com.mahabang_parang.api_payment.model.dto.OfficialReceiptHeaderWithCustomerDto;
 import com.mahabang_parang.api_payment.model.payload.OfficiaReceiptPayload;
 import com.mahabang_parang.api_payment.model.payload.UpdateStatusPayload;
 import com.mahabang_parang.api_payment.model.response.OfficialReceiptResponse;

@@ -30,6 +30,7 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
           custMeter.setSerialNo(customerMeter.getSerialNo());
           custMeter.setAlias(customerMeter.getAlias());
           custMeter.setBranchCode(customerMeter.getBranchCode());
+          custMeter.setPhase(customerMeter.getPhase());
           custMeter.setCustomerType(customerMeter.getCustomerType());
           custMeter.setLocation(customerMeter.getLocation());
           custMeter.setStatus(customerMeter.getStatus() == null ? 7 : customerMeter.getStatus()); // default to 7 = Deactivated
@@ -49,6 +50,7 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
           custMeter.setSerialNo(customerMeter.getSerialNo());
           custMeter.setAlias(customerMeter.getAlias());
           custMeter.setBranchCode(customerMeter.getBranchCode());
+          custMeter.setPhase(customerMeter.getPhase());
           custMeter.setCustomerType(customerMeter.getCustomerType());
           custMeter.setLocation(customerMeter.getLocation());
           custMeter.setStatus(customerMeter.getStatus());
