@@ -59,7 +59,7 @@ import com.mahabang_parang.api_payment.service.ReceiptService;
 import com.mahabang_parang.api_user.model.dto.CustomerDto;
 import com.mahabang_parang.api_user.service.CustomerService;
 
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 @Service
 public class OfficialReceiptServiceImpl implements OfficialReceiptService {
 

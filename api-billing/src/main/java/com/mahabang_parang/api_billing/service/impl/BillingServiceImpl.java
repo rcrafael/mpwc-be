@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.mahabang_parang.api_billing.model.PaginationResponse;
 import com.mahabang_parang.api_billing.model.Paginator;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
@@ -30,6 +32,7 @@ import com.mahabang_parang.api_user.service.CustomerMeterService;
 import com.mahabang_parang.api_user.service.CustomerService;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class BillingServiceImpl implements BillingService  {
 
 
@@ -232,6 +235,54 @@ public class BillingServiceImpl implements BillingService  {
           
      }
 
+     @Override
+     public BillingDto voidBilling(String billingId, String updatedBy) throws Exception {
+          BillingEntity billingEntity = billingRepo.findById(billingId).orElseThrow();
+
+          System.out.println("======================================================");
+          System.out.println("BILLIN INFO: " + billingEntity.toString());
+          System.out.println("======================================================");
+          
+          billingEntity.setStatus(4); //4 = void
+          billingEntity.setUpdatedBy(updatedBy);
+          billingEntity.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+
+          CustomerMeterDto meter = meterService.getCustomerMeterByMeterNo(billingEntity.getMeterNo());
+          int m3used = meter.getPresent();
+          int newMeterPresent = m3used - billingEntity.getM3Used();
+          meter.setPresent(newMeterPresent);
+          meter.setDateUpdated(new Date());
+          meter.setUpdatedBy(updatedBy);
+          meterService.updateCustomerMeter(meter);
+
+          BillingDto billingDto = mapper.toDto(billingRepo.save(billingEntity));
+          return billingDto;
+     }
+
+     @Override
+     public BillingDto deleteBilling(String billingId, String updatedBy) throws Exception {
+
+          BillingEntity billingEntity = billingRepo.findById(billingId).orElseThrow();
+          billingEntity.setStatus(9); //9 = deleted
+          billingEntity.setUpdatedBy(updatedBy);
+          billingEntity.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+
+          CustomerMeterDto meter = meterService.getCustomerMeterByMeterNo(billingEntity.getMeterNo());
+          int m3used = meter.getPresent();
+          int newMeterPresent = m3used - billingEntity.getM3Used();
+          meter.setPresent(newMeterPresent);
+          meter.setDateUpdated(new Date());
+          meter.setUpdatedBy(updatedBy);
+          meterService.updateCustomerMeter(meter);
+
+          BillingDto billingDto = mapper.toDto(billingRepo.save(billingEntity));
+          return billingDto;
+     }
+
+
+     ///////////
+     //HELPERS//
+     ///////////
      private String generateControlNumber() {
           String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
           String lastReadingNo = billingRepo.findLastReadingNo("R"+datePrefix);
