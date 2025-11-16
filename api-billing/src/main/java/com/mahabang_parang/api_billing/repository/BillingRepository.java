@@ -2,7 +2,6 @@ package com.mahabang_parang.api_billing.repository;
 
 import java.util.List;
 
-import org.antlr.v4.runtime.atn.SemanticContext.OR;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -65,13 +64,15 @@ public interface BillingRepository extends JpaRepository<BillingEntity, String> 
                     "INNER JOIN customer c " +
                     "     ON b.customer_id = c.id " +
                     "INNER JOIN customer_meter cm " +
-                    "     ON c.id = cm.customer_id AND b.meter_no = cm.meter_no ",
+                    "     ON c.id = cm.customer_id AND b.meter_no = cm.meter_no " +
+                    "WHERE b.status != 9",
           countQuery = "SELECT COUNT(DISTINCT b.id) " +
                     "FROM reading b " +
                     "INNER JOIN customer c " +
                     "     ON b.customer_id = c.id " +
                     "INNER JOIN customer_meter cm " +
-                    "     ON c.id = cm.customer_id AND b.meter_no = cm.meter_no ",
+                    "     ON c.id = cm.customer_id AND b.meter_no = cm.meter_no " +
+                    "WHERE b.status != 9",
           nativeQuery = true
           )
      Page<BillingTableListInterfaceProjection> findAllBilling(Pageable pageable);
@@ -112,24 +113,26 @@ public interface BillingRepository extends JpaRepository<BillingEntity, String> 
                     "     ON b.customer_id = c.id " +
                     "INNER JOIN customer_meter cm " +
                     "     ON c.id = cm.customer_id AND b.meter_no = cm.meter_no " +
-                    "WHERE LOWER(b.customer_id) LIKE LOWER(CONCAT('%', :customerId, '%')) " +
+                    "WHERE (LOWER(b.customer_id) LIKE LOWER(CONCAT('%', :customerId, '%')) " +
                     "            OR LOWER(c.first_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " +
                     "            OR LOWER(c.middle_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " +
                     "            OR LOWER(c.last_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " + 
                     "            OR LOWER(b.reading_no) LIKE LOWER(CONCAT('%', :reading_no, '%')) " +
-                    "            OR LOWER (b.meter_no) LIKE LOWER(CONCAT('%', :meter_no, '%')) ",
+                    "            OR LOWER (b.meter_no) LIKE LOWER(CONCAT('%', :meter_no, '%'))) " +
+                    "AND b.status != 9",
           countQuery = "SELECT COUNT(DISTINCT b.id) " +
                     "FROM reading b " +
                     "INNER JOIN customer c " +
                     "     ON b.customer_id = c.id " +
                     "INNER JOIN customer_meter cm " +
                     "     ON c.id = cm.customer_id AND b.meter_no = cm.meter_no " +
-                    "WHERE LOWER(b.customer_id) LIKE LOWER(CONCAT('%', :customerId, '%')) " +
+                    "WHERE (LOWER(b.customer_id) LIKE LOWER(CONCAT('%', :customerId, '%')) " +
                     "            OR LOWER(c.first_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " +
                     "            OR LOWER(c.middle_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " +
                     "            OR LOWER(c.last_name) LIKE LOWER(CONCAT('%', :customerName, '%')) " + 
                     "            OR LOWER(b.reading_no) LIKE LOWER(CONCAT('%', :reading_no, '%')) " +
-                    "            OR LOWER (b.meter_no) LIKE LOWER(CONCAT('%', :meter_no, '%')) ",
+                    "            OR LOWER (b.meter_no) LIKE LOWER(CONCAT('%', :meter_no, '%'))) " +
+                    "AND b.status != 9",
           nativeQuery = true
           )
      Page<BillingTableListInterfaceProjection> search(

@@ -23,6 +23,8 @@ public interface BillingService {
      public List<BillingDto> getUnpaidBillingByCustomerId(String customerId) throws Exception;
      public Integer updateBillingStatus(String readingNo, Integer newStatus) throws Exception;
      public BillingDto update(UpdateBillingPayload payload) throws Exception;
+     public BillingDto voidBilling(String billingId, String updatedBy) throws Exception;
+     public BillingDto deleteBilling(String billingId, String updatedBy) throws Exception;
 
      public PaginationResponse<BillingTableListResponse> searchBilling(String keyword, int pageNumber, int pageSize) throws Exception;
      

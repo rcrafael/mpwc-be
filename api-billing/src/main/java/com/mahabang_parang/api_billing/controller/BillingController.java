@@ -1,12 +1,15 @@
 package com.mahabang_parang.api_billing.controller;
 
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mahabang_parang.api_billing.model.ApiResponse;
 import com.mahabang_parang.api_billing.model.PaginationResponse;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
@@ -21,6 +25,9 @@ import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
 import com.mahabang_parang.api_billing.model.payload.UpdateBillingPayload;
 import com.mahabang_parang.api_billing.model.response.BillingTableListResponse;
 import com.mahabang_parang.api_billing.service.BillingService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -206,7 +213,71 @@ public class BillingController {
           }
 
      }
+
+     @DeleteMapping("{id}")
+     public ResponseEntity<ApiResponse> delete(HttpServletRequest request, @PathVariable String id) {
+          ApiResponse response = new ApiResponse();
+          try {
+               Map<String, Object> decodeJwt = requestMapper(request);
+               String updatedBy = (String) decodeJwt.get("id");
+
+               BillingDto bill = billingSvc.deleteBilling(id, updatedBy);
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(bill );
+               return ResponseEntity.status(HttpStatus.OK).body(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
      
 
+     @DeleteMapping("void/{id}")
+     public ResponseEntity<ApiResponse> voidBilling(HttpServletRequest request, @PathVariable String id) {
+          ApiResponse response = new ApiResponse();
+          try {
+
+               Map<String, Object> decodeJwt = requestMapper(request);
+               String updatedBy = (String) decodeJwt.get("id");
+
+               System.out.println("=======================================================");
+               System.out.println("UPDATED BY : " + updatedBy);
+               System.out.println("=======================================================");
+
+               BillingDto bill = billingSvc.voidBilling(id, updatedBy);
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(bill );
+               return ResponseEntity.status(HttpStatus.OK).body(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+
+     private Map<String, Object> requestMapper(HttpServletRequest request) {
+          try {
+               String auth = request.getHeader("Authorization");
+               String token = auth.substring(7);
+
+               String[] tokenParts = token.split("\\.");
+               String payload = "";
+
+               if(tokenParts.length > 0) {
+                    payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]));
+               }
+
+               ObjectMapper mapper = new ObjectMapper();
+               return mapper.readValue(payload, Map.class);
+          } catch (Exception e) {
+               throw new RuntimeException("Failed to decode token: " + e.getMessage(), e); 
+          }
+     }
+     
 
 }
