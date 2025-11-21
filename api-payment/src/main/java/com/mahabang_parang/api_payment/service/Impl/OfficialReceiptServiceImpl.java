@@ -135,6 +135,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           String newOrNo = this.generateControlNumber();
 
           orHeaderEntity.setOrNo(newOrNo);
+          orHeaderEntity.setIsPartSale(false);
           List<OfficialReceiptDetailsEntity> detailsList = orDetailsMapper.toEntityList(payload.getDetails());
 
           // set the orNo for the OR details

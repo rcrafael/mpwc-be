@@ -67,7 +67,7 @@ public class OfficialReceiptHeaderEntity {
      @Column(nullable = false)
      private Integer status;
 
-     private Boolean isPartSale;
+     private Boolean isPartSale = false;
 
      private Boolean isOutsideCollection;
 
