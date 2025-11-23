@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.mahabang_parang.api_user.model.ApiResponse;
 import com.mahabang_parang.api_user.model.PaginationResponse;
@@ -179,12 +180,18 @@ public class CustomerController {
           ApiResponse response = new ApiResponse();
 
           try {
-               CustomerMeterDto meter = meterService.addCustomerMeter(payload);
+               response = meterService.addCustomerMeter(payload);
 
-               response.setStatusCode(HttpStatus.OK);
-               response.setMessage("success");
-               response.setResult(meter);
+               if(response.getStatusCode() == HttpStatus.CONFLICT) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, response.getMessage());
+               }
+
                return ResponseEntity.ok(response);
+          } catch (ResponseStatusException e) {
+               response.setStatusCode(HttpStatus.CONFLICT);
+               response.setMessage(e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());

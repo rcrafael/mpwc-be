@@ -3,8 +3,10 @@ package com.mahabang_parang.api_user.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.mahabang_parang.api_user.model.ApiResponse;
 import com.mahabang_parang.api_user.model.dto.CustomerMeterDto;
 import com.mahabang_parang.api_user.model.entity.CustomerMeterEntity;
 import com.mahabang_parang.api_user.model.mapper.CustomerMeterMapper;
@@ -21,7 +23,23 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
      private CustomerMeterMapper mapper;
 
      @Override
-     public CustomerMeterDto addCustomerMeter(CustomerMeterDto customerMeter) {
+     public ApiResponse addCustomerMeter(CustomerMeterDto customerMeter) {
+
+          ApiResponse response = new ApiResponse();
+
+          if(custMeterRepo.findByMeterNo(customerMeter.getMeterNo()) != null) {
+               response.setStatusCode(HttpStatus.CONFLICT);
+               response.setMessage("Meter Number already exists: " + customerMeter.getMeterNo());
+               response.setResult(null);
+               return response;
+          }
+
+          if(custMeterRepo.findBySerialNo(customerMeter.getSerialNo()) != null) {
+               response.setStatusCode(HttpStatus.CONFLICT);
+               response.setMessage("Serial Number already exists: " + customerMeter.getSerialNo());
+               response.setResult(null);
+               return response;
+          }
 
           CustomerMeterEntity custMeter = new CustomerMeterEntity();
           
@@ -38,7 +56,11 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
           custMeter.setCustomerType(customerMeter.getCustomerType()); // 1 - residential; 2 - commercial
           CustomerMeterDto newMeter = mapper.toDto(custMeterRepo.save(custMeter));
 
-          return newMeter;
+          response.setStatusCode(HttpStatus.CREATED);
+          response.setMessage("success");
+          response.setResult(newMeter);
+
+          return response;
      }
 
      @Override
