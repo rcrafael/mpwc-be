@@ -15,6 +15,7 @@ public interface CustomerMeterRepository extends JpaRepository<CustomerMeterEnti
      Integer findPresentById(@Param("meterNo") String id);
 
      CustomerMeterEntity findByMeterNo(String meterNo);
+     CustomerMeterEntity findBySerialNo(String serialno);
      List<CustomerMeterEntity> findByCustomerId(String customerId);
      
 }
