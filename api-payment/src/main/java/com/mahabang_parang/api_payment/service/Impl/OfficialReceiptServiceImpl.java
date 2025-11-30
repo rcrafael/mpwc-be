@@ -696,6 +696,33 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           return orResponse;
      }
 
+     @Override
+     public OfficialReceiptHeaderDto voidRecord(String id) throws Exception {
+
+          System.out.println("=======================================================");
+          System.out.println("VOIDING RECORD OR: " + id);
+          System.out.println("=======================================================");
+
+          UpdateStatusPayload payload = new UpdateStatusPayload();
+          payload.setId(id);
+          payload.setStatus(4);
+          OfficialReceiptHeaderDto orHeader = this.updateRecordStatus(payload);
+
+          List<OfficialReceiptDetailsDto> orDetails = orDetailsMapper.toDtoList(orDetailsRepo.findByOrNo(orHeader.getOrNo()));
+
+          for (OfficialReceiptDetailsDto orDetail : orDetails) {
+               if (orDetail.getReadingNo() != null) {
+                    System.out.println("=======================================================");
+                    System.out.println("VOIDING RECORD BILLING: " + orDetail.getReadingNo());
+                    System.out.println("=======================================================");
+                    billingService.updateBillingStatus(orDetail.getReadingNo(), 2); //2 - INCOMPLETE
+               }
+          }
+
+          return orHeader;
+
+     }
+
      private String generateControlNumber() {
           String datePrefix = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
           String lastReadingNo = orHeaderRepo.findLastOrNo("OR" + datePrefix);
