@@ -13,5 +13,5 @@ public class UpdateStatusPayload {
 
      private String id;
      private int status;
-
+     
 }

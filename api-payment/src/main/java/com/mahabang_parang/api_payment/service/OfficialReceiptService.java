@@ -20,7 +20,7 @@ public interface OfficialReceiptService {
      public PaginationResponse<OfficialReceiptTableListResponse> getOfficialReceiptWithCustomer(int pageNo, int pageSize, String sortColumn) throws Exception;
      public OfficialReceiptResponse getOfficialReceiptWithDetailsById(String orhId) throws Exception;
      public PaginationResponse<OfficialReceiptTableListResponse> getOfficialReceiptWithSearch(String keyword, int pageNo, int pageSize) throws Exception;
-
+     public OfficialReceiptHeaderDto voidRecord(String id) throws Exception;
 
      public String deleteRecord(String id) throws Exception; //both OR and Other Collection
      public OfficialReceiptHeaderDto updateRecordStatus(UpdateStatusPayload payload) throws Exception;
