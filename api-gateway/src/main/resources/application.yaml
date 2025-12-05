@@ -30,6 +30,10 @@ spring:
                       uri: ${SETTINGS_SERVICE:http://localhost:8084}
                       predicates:
                          - Path=/api/settings/**
+                    - id: reports-service-route
+                      uri: ${REPORTS_SERVICE:http://localhost:8085}
+                      predicates:
+                         - Path=/api/reports/**
                globalcors:
                     cors-configurations:
                          '[/**]':

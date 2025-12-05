@@ -1,0 +1,115 @@
+package com.mahabang_parang.api_reports.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mahabang_parang.api_reports.model.ApiResponse;
+import com.mahabang_parang.api_reports.model.PaginationResponse;
+import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionInterfaceProjection;
+import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionListInterfaceProjection;
+import com.mahabang_parang.api_reports.service.CollectionReportService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@RestController
+@RequestMapping("/api/reports")
+public class ReportController {
+
+     @Autowired
+     private CollectionReportService collectionReportService;
+
+     @GetMapping("getShareCapCbuSavingsCollectionByCustomer/{customerId}")
+     public ResponseEntity<ApiResponse> getShareCapCbuSavingsCollectionByCustomerId(@PathVariable String customerId) {
+         ApiResponse response = new ApiResponse();
+         try {
+          
+               ShareCapCbuSavingsCollectionInterfaceProjection result = collectionReportService.getShareCapCbuSavingsCollectionByCustomerId(customerId);
+               response.setResult(result);
+               response.setMessage("success");
+               response.setStatusCode(HttpStatus.OK);
+               return ResponseEntity.ok(response);
+         } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+         }
+     }
+
+     @GetMapping("getShareCapCbuSavingsCollectionByCustomerAndDateRange/{customerId}/{startDate}/{endDate}")
+     public ResponseEntity<ApiResponse> getShareCapCbuSavingsCollectionByCustomerAndDateRange(
+                                                @PathVariable String customerId, 
+                                                @PathVariable String startDate, 
+                                                @PathVariable String endDate) {
+                                                      
+         ApiResponse response = new ApiResponse();
+         try {
+               ShareCapCbuSavingsCollectionInterfaceProjection result = collectionReportService.getShareCapCbuSavingsCollectionByCustomerIdAndDateRange(customerId, startDate, endDate);
+               response.setResult(result);
+               response.setMessage("success");
+               response.setStatusCode(HttpStatus.OK);
+               return ResponseEntity.ok(response);
+         } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+         }
+     }
+
+     @GetMapping("getShareCapCbuSavingsCollectionListByDateRange/{pageNo}/{pageSize}")
+     public ResponseEntity<ApiResponse> getShareCapCbuSavingsCollectionListByDateRange(
+                                                @PathVariable int pageNo, 
+                                                @PathVariable int pageSize, 
+                                                @RequestParam String startDate,
+                                                @RequestParam String endDate) {
+
+         ApiResponse response = new ApiResponse();
+         try {
+          
+            PaginationResponse<ShareCapCbuSavingsCollectionListInterfaceProjection> result = 
+                                          collectionReportService.getShareCapCbuSavingsCollectionListByDateRange(pageNo, pageSize, startDate, endDate);
+            response.setResult(result);
+            response.setMessage("success");
+            response.setStatusCode(HttpStatus.OK);
+            return ResponseEntity.ok(response);
+         } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+         }
+     }
+
+     @GetMapping("getShareCapCbuSavingsCollectionListByCustomerIdAndDateRange/{pageNo}/{pageSize}")
+     public ResponseEntity<ApiResponse> getShareCapCbuSavingsCollectionListByCustomerIdAndDateRange(
+                                                @PathVariable int pageNo, 
+                                                @PathVariable int pageSize, 
+                                                @RequestParam String customerId, 
+                                                @RequestParam String startDate,
+                                                @RequestParam String endDate) {
+
+         ApiResponse response = new ApiResponse();
+         try {
+          
+            PaginationResponse<ShareCapCbuSavingsCollectionListInterfaceProjection> result = 
+                                          collectionReportService.getShareCapCbuSavingsCollectionListByCustomerIdAndDateRange(pageNo, pageSize, customerId, startDate, endDate);
+            response.setResult(result);
+            response.setMessage("success");
+            response.setStatusCode(HttpStatus.OK);
+            return ResponseEntity.ok(response);
+         } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+         }
+     }
+     
+
+}

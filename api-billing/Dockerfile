@@ -9,6 +9,7 @@ COPY api-user/pom.xml /app/api-user/pom.xml
 COPY api-billing/pom.xml /app/api-billing/pom.xml
 COPY api-payment/pom.xml /app/api-payment/pom.xml
 COPY api-settings/pom.xml /app/api-settings/pom.xml
+COPY api-reports/pom.xml /app/api-reports/pom.xml
 
 COPY api-user/src /app/api-user/src
 WORKDIR /app/api-user
