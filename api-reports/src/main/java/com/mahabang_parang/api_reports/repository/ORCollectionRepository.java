@@ -1,5 +1,7 @@
 package com.mahabang_parang.api_reports.repository;
 
+import java.util.Date;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,9 +15,9 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
 
      @Query(value = "SELECT " + 
           "cust.account_no AS accountNo, " +
-          "SUM(shareCap.amount) As totalShareCap, " +
-          "SUM(cbu.amount) As totalCbu, " +
-          "SUM(savings.amount) As totalSavings " +
+          "IFNULL(SUM(shareCap.amount),0) As totalShareCap, " +
+          "IFNULL(SUM(cbu.amount),0) As totalCbu, " +
+          "IFNULL(SUM(savings.amount),0) As totalSavings " +
           "FROM official_receipt_header orh " +
                "LEFT JOIN customer cust " +
                     "ON orh.customer_id = cust.id " +
@@ -33,9 +35,9 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
 
      @Query(value = "SELECT " + 
           "cust.account_no AS accountNo, " +
-          "SUM(shareCap.amount) As totalShareCap, " +
-          "SUM(cbu.amount) As totalCbu, " +
-          "SUM(savings.amount) As totalSavings " +
+          "IFNULL(SUM(shareCap.amount),0) As totalShareCap, " +
+          "IFNULL(SUM(cbu.amount),0) As totalCbu, " +
+          "IFNULL(SUM(savings.amount),0) As totalSavings " +
           "FROM official_receipt_header orh " +
                "LEFT JOIN customer cust " +
                     "ON orh.customer_id = cust.id " +
@@ -50,7 +52,7 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
                " AND orh.or_date BETWEEN :startDate AND :endDate " +
           "GROUP BY cust.account_no",
           nativeQuery = true)
-     ShareCapCbuSavingsCollectionInterfaceProjection getShareCapCbuSavingsCollectionByCustomerIdAndDateRange(String customerId, String startDate, String endDate);
+     ShareCapCbuSavingsCollectionInterfaceProjection getShareCapCbuSavingsCollectionByCustomerIdAndDateRange(String customerId, Date startDate, Date endDate);
 
 
      @Query(value = "SELECT " + 
@@ -78,7 +80,7 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
                " AND shareCap.amount > 0 AND cbu.amount > 0 AND savings.amount > 0 " +
                " AND orh.or_date BETWEEN :startDate AND :endDate ",
           nativeQuery = true)
-     Page<ShareCapCbuSavingsCollectionListInterfaceProjection> getShareCapCbuSavingsCollectionListByDateRange(String startDate, String endDate, Pageable pageable);
+     Page<ShareCapCbuSavingsCollectionListInterfaceProjection> getShareCapCbuSavingsCollectionListByDateRange(Date startDate, Date endDate, Pageable pageable);
 
 
      @Query(value = "SELECT " + 
@@ -107,6 +109,25 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
                " AND shareCap.amount > 0 AND cbu.amount > 0 AND savings.amount > 0 " +
                " AND orh.or_date BETWEEN :startDate AND :endDate ",
           nativeQuery = true)
-     Page<ShareCapCbuSavingsCollectionListInterfaceProjection> getShareCapCbuSavingsCollectionListByCustomerIdAndDateRange(String customerId, String startDate, String endDate, Pageable pageable);
+     Page<ShareCapCbuSavingsCollectionListInterfaceProjection> getShareCapCbuSavingsCollectionListByCustomerIdAndDateRange(String customerId, Date startDate, Date endDate, Pageable pageable);
+
+
+     @Query(value = "SELECT " + 
+          "IFNULL(SUM(shareCap.amount),0) As totalShareCap " +
+          "FROM share_capital shareCap " +
+               "LEFT JOIN official_receipt_header orh " +
+                    "ON orh.or_no = shareCap.or_no AND shareCap.transaction_type = 1 " +
+          "WHERE orh.or_date BETWEEN :startDate AND :endDate AND orh.status = 1",
+          nativeQuery = true)
+     Double sumOfShareCapitalByDateRange(Date startDate, Date endDate);
+     
+     @Query(value = "SELECT " + 
+          "IFNULL(SUM(cbu.amount),0) As totalShareCap " +
+          "FROM share_cbu cbu " +
+               "LEFT JOIN official_receipt_header orh " +
+                    "ON orh.or_no = cbu.or_no AND cbu.transaction_type = 1 " +
+          "WHERE orh.or_date BETWEEN :startDate AND :endDate AND orh.status = 1",
+          nativeQuery = true)
+     Double sumOfCbuByDateRange(Date startDate, Date endDate);
 
 }

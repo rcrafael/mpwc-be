@@ -1,6 +1,9 @@
 package com.mahabang_parang.api_reports.service;
 
+import java.util.Date;
+
 import com.mahabang_parang.api_reports.model.PaginationResponse;
+import com.mahabang_parang.api_reports.model.dto.DashboardCardDataDto;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionInterfaceProjection;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionListInterfaceProjection;
 
@@ -10,19 +13,21 @@ public interface CollectionReportService {
 
      public ShareCapCbuSavingsCollectionInterfaceProjection getShareCapCbuSavingsCollectionByCustomerIdAndDateRange(
                                                             String customerId, 
-                                                            String startDate, 
-                                                            String endDate);
+                                                            Date startDate, 
+                                                            Date endDate);
 
      public PaginationResponse<ShareCapCbuSavingsCollectionListInterfaceProjection> getShareCapCbuSavingsCollectionListByCustomerIdAndDateRange(
                                                             int pageNo,
                                                             int pageSize,
                                                             String customerId, 
-                                                            String startDate, 
-                                                            String endDate);
+                                                            Date startDate, 
+                                                            Date endDate);
 
      public PaginationResponse<ShareCapCbuSavingsCollectionListInterfaceProjection> getShareCapCbuSavingsCollectionListByDateRange(
                                                             int pageNo,
                                                             int pageSize,
-                                                            String startDate, 
-                                                            String endDate);
+                                                            Date startDate, 
+                                                            Date endDate);
+
+     public DashboardCardDataDto getDashboardCardData(Date startDate, Date endDate);
 }

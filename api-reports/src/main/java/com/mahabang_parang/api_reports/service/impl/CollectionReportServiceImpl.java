@@ -1,5 +1,7 @@
 package com.mahabang_parang.api_reports.service.impl;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -7,17 +9,38 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.mahabang_parang.api_billing.repository.BillingRepository;
+import com.mahabang_parang.api_payment.repository.OfficialReceiptHeaderRepository;
 import com.mahabang_parang.api_reports.model.PaginationResponse;
+import com.mahabang_parang.api_reports.model.dto.DashboardCardDataDto;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionInterfaceProjection;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionListInterfaceProjection;
 import com.mahabang_parang.api_reports.repository.ORCollectionRepository;
 import com.mahabang_parang.api_reports.service.CollectionReportService;
+import com.mahabang_parang.api_user.repository.CustomerMeterRepository;
+import com.mahabang_parang.api_user.repository.CustomerRepository;
 
 @Service
 public class CollectionReportServiceImpl implements CollectionReportService {
 
-     @Autowired
-     private ORCollectionRepository orCollectionRepo;
+     private final ORCollectionRepository orCollectionRepo;
+     private final BillingRepository billingRepo;
+     private final CustomerRepository customerRepo;
+     private final CustomerMeterRepository customerMeterRepo;
+     private final OfficialReceiptHeaderRepository orHeaderRepo;
+
+     public CollectionReportServiceImpl(ORCollectionRepository _orCollectionRepo,
+                                        BillingRepository _billingRepo,
+                                        CustomerRepository _customerRepo,
+                                        CustomerMeterRepository _customerMeterRepo,
+                                        OfficialReceiptHeaderRepository _orHeaderRepo
+     ) {
+          this.orCollectionRepo = _orCollectionRepo;
+          this.billingRepo = _billingRepo;
+          this.customerRepo = _customerRepo;
+          this.customerMeterRepo = _customerMeterRepo;
+          this.orHeaderRepo = _orHeaderRepo;
+     }
 
      @Override
      public ShareCapCbuSavingsCollectionInterfaceProjection getShareCapCbuSavingsCollectionByCustomerId(String customerId) {
@@ -28,8 +51,8 @@ public class CollectionReportServiceImpl implements CollectionReportService {
      @Override
      public ShareCapCbuSavingsCollectionInterfaceProjection getShareCapCbuSavingsCollectionByCustomerIdAndDateRange(
                                                             String customerId, 
-                                                            String startDate, 
-                                                            String endDate) {
+                                                            Date startDate, 
+                                                            Date endDate) {
           ShareCapCbuSavingsCollectionInterfaceProjection result = 
                               orCollectionRepo.getShareCapCbuSavingsCollectionByCustomerIdAndDateRange(customerId, startDate, endDate);
           return result;
@@ -40,8 +63,8 @@ public class CollectionReportServiceImpl implements CollectionReportService {
                                                             int pageNo,
                                                             int pageSize,
                                                             String customerId, 
-                                                            String startDate, 
-                                                            String endDate) {
+                                                            Date startDate, 
+                                                            Date endDate) {
 
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
 
@@ -61,8 +84,8 @@ public class CollectionReportServiceImpl implements CollectionReportService {
      public PaginationResponse<ShareCapCbuSavingsCollectionListInterfaceProjection> getShareCapCbuSavingsCollectionListByDateRange(
                                                             int pageNo,
                                                             int pageSize,
-                                                            String startDate, 
-                                                            String endDate) {
+                                                            Date startDate, 
+                                                            Date endDate) {
 
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
 
@@ -75,6 +98,33 @@ public class CollectionReportServiceImpl implements CollectionReportService {
                result.getTotalPages(),
                result.getTotalElements()
           );
+
+     }
+
+     
+     @Override
+     public DashboardCardDataDto getDashboardCardData(Date startDate, Date endDate) {
+          
+          DashboardCardDataDto result = new DashboardCardDataDto();
+          Long userCount = customerRepo.count();
+          Long activeMeterCount = customerMeterRepo.countByStatus(6); //6 = Active
+          Integer totalCubicMeterUsage =  billingRepo.totalCubicMeterUsageByDate(startDate, endDate);
+          Double totalUnpaidBillingAmount = billingRepo.sumOfUnpaidBillingByDate(startDate, endDate);
+          Double totalOfficialReceiptAmount = orHeaderRepo.sumOfOfficialReceiptByDate(startDate, endDate, false);
+          Double totalOtherCollectionAmount = orHeaderRepo.sumOfOfficialReceiptByDate(startDate, endDate, true);
+          double totalShareCapAmount = orCollectionRepo.sumOfShareCapitalByDateRange(startDate, endDate);
+          double totalCbuAmount = orCollectionRepo.sumOfCbuByDateRange(startDate, endDate);
+
+          result.setUserCount(userCount);
+          result.setActiveMeterCount(activeMeterCount);
+          result.setTotalCubicMeterUsage(totalCubicMeterUsage);
+          result.setTotalUnpaidBillingAmount(totalUnpaidBillingAmount);
+          result.setTotalOfficialReceiptAmount(totalOfficialReceiptAmount);
+          result.setTotalOtherCollectionAmount(totalOtherCollectionAmount);
+          result.setTotalShareCapAmount(totalShareCapAmount);
+          result.setTotalCbuAmount(totalCbuAmount);
+          
+          return result;
 
      }
 

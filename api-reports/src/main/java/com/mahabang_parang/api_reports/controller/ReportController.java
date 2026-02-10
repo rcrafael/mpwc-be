@@ -5,11 +5,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mahabang_parang.api_reports.model.ApiResponse;
 import com.mahabang_parang.api_reports.model.PaginationResponse;
+import com.mahabang_parang.api_reports.model.dto.DashboardCardDataDto;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionInterfaceProjection;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionListInterfaceProjection;
 import com.mahabang_parang.api_reports.service.CollectionReportService;
 
+import java.util.Date;
+
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,8 +49,8 @@ public class ReportController {
      @GetMapping("getShareCapCbuSavingsCollectionByCustomerAndDateRange/{customerId}/{startDate}/{endDate}")
      public ResponseEntity<ApiResponse> getShareCapCbuSavingsCollectionByCustomerAndDateRange(
                                                 @PathVariable String customerId, 
-                                                @PathVariable String startDate, 
-                                                @PathVariable String endDate) {
+                                                @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, 
+                                                @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
                                                       
          ApiResponse response = new ApiResponse();
          try {
@@ -66,8 +71,8 @@ public class ReportController {
      public ResponseEntity<ApiResponse> getShareCapCbuSavingsCollectionListByDateRange(
                                                 @PathVariable int pageNo, 
                                                 @PathVariable int pageSize, 
-                                                @RequestParam String startDate,
-                                                @RequestParam String endDate) {
+                                                @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+                                                @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
 
          ApiResponse response = new ApiResponse();
          try {
@@ -91,14 +96,33 @@ public class ReportController {
                                                 @PathVariable int pageNo, 
                                                 @PathVariable int pageSize, 
                                                 @RequestParam String customerId, 
-                                                @RequestParam String startDate,
-                                                @RequestParam String endDate) {
+                                                @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+                                                @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
 
          ApiResponse response = new ApiResponse();
          try {
           
             PaginationResponse<ShareCapCbuSavingsCollectionListInterfaceProjection> result = 
                                           collectionReportService.getShareCapCbuSavingsCollectionListByCustomerIdAndDateRange(pageNo, pageSize, customerId, startDate, endDate);
+            response.setResult(result);
+            response.setMessage("success");
+            response.setStatusCode(HttpStatus.OK);
+            return ResponseEntity.ok(response);
+         } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+         }
+     }
+     
+     @GetMapping("getDashboardData/{startDate}/{endDate}")
+     public ResponseEntity<ApiResponse> getDashboardData(@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+         ApiResponse response = new ApiResponse();
+         try {
+          
+            DashboardCardDataDto result = 
+                                          collectionReportService.getDashboardCardData(startDate, endDate);
             response.setResult(result);
             response.setMessage("success");
             response.setStatusCode(HttpStatus.OK);

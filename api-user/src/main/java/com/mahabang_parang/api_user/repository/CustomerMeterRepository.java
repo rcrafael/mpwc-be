@@ -14,6 +14,8 @@ public interface CustomerMeterRepository extends JpaRepository<CustomerMeterEnti
      @Query("SELECT m.present FROM CustomerMeterEntity m WHERE m.meterNo = :meterNo")
      Integer findPresentById(@Param("meterNo") String id);
 
+     Long countByStatus(int status);
+
      CustomerMeterEntity findByMeterNo(String meterNo);
      CustomerMeterEntity findBySerialNo(String serialno);
      List<CustomerMeterEntity> findByCustomerId(String customerId);
