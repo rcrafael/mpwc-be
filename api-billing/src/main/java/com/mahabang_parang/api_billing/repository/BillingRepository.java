@@ -1,5 +1,6 @@
 package com.mahabang_parang.api_billing.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -143,6 +144,12 @@ public interface BillingRepository extends JpaRepository<BillingEntity, String> 
           Pageable pageable
      );
 
+
+     @Query("SELECT IFNULL(SUM(b.readingAmount),0.00) FROM BillingEntity b WHERE b.status IN (3,2) AND b.dateFrom BETWEEN :startDate AND :endDate")
+     Double sumOfUnpaidBillingByDate(Date startDate, Date endDate);
+
+     @Query("SELECT IFNULL(SUM(b.m3Used),0) FROM BillingEntity b WHERE b.status NOT IN (4,5,7,8,9) AND b.dateFrom BETWEEN :startDate AND :endDate")
+     Integer totalCubicMeterUsageByDate(Date startDate, Date endDate);
 
      Page<BillingEntity> findAll(Pageable pageable);
      Page<BillingEntity> findByCustomerId(String custId, Pageable pageable);

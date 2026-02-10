@@ -1,5 +1,7 @@
 package com.mahabang_parang.api_payment.repository;
 
+import java.util.Date;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -83,5 +85,8 @@ public interface OfficialReceiptHeaderRepository extends JpaRepository<OfficialR
                         @Param("orNo") String orNo,
                         @Param("isPartSale") Boolean isPartSale,
                         Pageable pageable);
+
+        @Query("SELECT IFNULL(SUM(o.totalAmountPay),0.00) FROM OfficialReceiptHeaderEntity o WHERE o.orDate BETWEEN :startDate AND :endDate AND o.status = 1 AND o.isPartSale = :isPartSale")
+        Double sumOfOfficialReceiptByDate(Date startDate, Date endDate, Boolean isPartSale);
 
 }

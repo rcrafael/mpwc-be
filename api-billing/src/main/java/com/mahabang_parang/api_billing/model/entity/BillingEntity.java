@@ -63,7 +63,7 @@ public class BillingEntity {
 
      private double septageFee;
 
-     @Column(length = 250)
+     @Column(length = 250) 
      private String remarks;
 
      private Integer monthOf;
@@ -95,6 +95,5 @@ public class BillingEntity {
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      @Column(nullable = true)
      private LocalDateTime dateUpdated;
-
 
 }

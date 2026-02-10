@@ -152,7 +152,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           }
 
           ShareCapitalEntity shareCapitalEntity = new ShareCapitalEntity();
-          if (payload.getShareCapital() != null) {
+          if (payload.getShareCapital() != null && payload.getShareCapital().getAmount() > 0) {
                shareCapitalEntity = shareCapMapper.toEntity(payload.getShareCapital());
                shareCapitalEntity.setOrNo(newOrNo);
                shareCapitalEntity = shareCapRepo.save(shareCapitalEntity);
@@ -160,7 +160,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           }
 
           ShareCbuEntity cbuEntity = new ShareCbuEntity();
-          if (payload.getCbu() != null) {
+          if (payload.getCbu() != null && payload.getCbu().getAmount() > 0) {
                cbuEntity = cbuMapper.toEntity(payload.getCbu());
                cbuEntity.setOrNo(newOrNo);
                cbuEntity = cbuRepo.save(cbuEntity);
@@ -168,7 +168,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           }
 
           ShareSavingsEntity savingsEntity = new ShareSavingsEntity();
-          if (payload.getSavings() != null) {
+          if (payload.getSavings() != null && payload.getSavings().getAmount() > 0) {
                savingsEntity = savingsMapper.toEntity(payload.getSavings());
                savingsEntity.setOrNo(newOrNo);
                savingsEntity = savingsRepo.save(savingsEntity);
