@@ -26,6 +26,12 @@ public class JwtUtil {
 
      private String SECRET_KEY = "TWFiYWhhbmdQYXJhbmdXYXRlcldvcmtzQ29vcGVyYXRpdmVXZWJBcHBsaWNhdGlvblNlY3JldEtleQ=="; //base64 encoded
 
+     private final long jwtExpirationMs = 12 * 60 * 60 * 1000L; // 12 hours
+     private final long refreshExpirationMs = 7 * 24 * 60 * 60 * 1000L; // 7 days
+
+     public long getJwtExpirationMs() { return jwtExpirationMs; }
+     public long getRefreshExpirationMs() { return refreshExpirationMs; }
+
      public String generateToken(UserEntity userDetails) {
           return Jwts.builder()
                          .subject(userDetails.getEmail())
@@ -35,8 +41,18 @@ public class JwtUtil {
                          .claim("fname", userDetails.getFname())
                          .claim("lname", userDetails.getLname())
                          .claim("mname", userDetails.getMname())
+                         .claim("role", userDetails.getRole() != null ? userDetails.getRole().getRole() : null)
                          .issuedAt(new Date(System.currentTimeMillis()))
-                         .expiration(Date.from(Instant.now().plus(Duration.of(12, ChronoUnit.HOURS))))
+                         .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                         .signWith(getSigningKey(), Jwts.SIG.HS256)
+                         .compact();
+     }
+
+     public String generateRefreshToken(UserEntity userDetails) {
+          return Jwts.builder()
+                         .subject(userDetails.getEmail())
+                         .issuedAt(new Date(System.currentTimeMillis()))
+                         .expiration(new Date(System.currentTimeMillis() + refreshExpirationMs))
                          .signWith(getSigningKey(), Jwts.SIG.HS256)
                          .compact();
      }

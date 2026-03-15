@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.mahabang_parang.api_user.model.dto.UserDto;
 import com.mahabang_parang.api_user.model.entity.UserEntity;
+import com.mahabang_parang.api_user.model.entity.UserEntity;
 import com.mahabang_parang.api_user.model.mapper.UserMapper;
 import com.mahabang_parang.api_user.model.payload.LoginPayload;
 import com.mahabang_parang.api_user.repository.UserRepository;
@@ -16,6 +17,8 @@ import com.mahabang_parang.api_user.service.AuthService;
 import com.mahabang_parang.api_user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
+
+import com.mahabang_parang.api_user.model.response.LoginResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
      private final UserMapper mapper;
 
 
-     public String login(LoginPayload payload) throws Exception {
+     public LoginResponse login(LoginPayload payload) throws Exception {
           System.out.println("LOGIN API TRIGGERED!");
 
           System.out.println("PAYLOAD : "  + payload.toString());
@@ -39,7 +42,17 @@ public class AuthServiceImpl implements AuthService {
 
           System.out.println("USER: " + user.toString());
           if(user != null && passwordEncoder.matches(payload.getPassword(), user.getPassword()) ) {
-               return jwtUtils.generateToken(mapper.toEntity(user));
+               UserEntity entity = mapper.toEntity(user);
+               String accessToken = jwtUtils.generateToken(entity);
+               String refreshToken = jwtUtils.generateRefreshToken(entity);
+               
+               return LoginResponse.builder()
+                       .accessToken(accessToken)
+                       .refreshToken(refreshToken)
+                       .tokenType("Bearer")
+                       .expiresIn(jwtUtils.getJwtExpirationMs() / 1000)
+                       .refreshTokenExpiresIn(jwtUtils.getRefreshExpirationMs() / 1000)
+                       .build();
           }
           throw new RuntimeException("Invalid Username or Password!");
      }
