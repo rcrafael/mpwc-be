@@ -16,6 +16,8 @@ import com.mahabang_parang.api_user.model.ApiResponse;
 import com.mahabang_parang.api_user.model.payload.LoginPayload;
 import com.mahabang_parang.api_user.service.AuthService;
 
+import com.mahabang_parang.api_user.model.response.LoginResponse;
+
 @RestController
 @RequestMapping("api/auth")
 public class AuthController {
@@ -28,10 +30,10 @@ public class AuthController {
           ApiResponse response = new ApiResponse();
 
           try {
-               String token = authService.login(payload);
+               LoginResponse result = authService.login(payload);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
-               response.setResult(Map.of("accessToken", token));
+               response.setResult(result);
                return ResponseEntity.ok(response);
           } catch (BadCredentialsException e) {
                response.setStatusCode(HttpStatus.UNAUTHORIZED);
