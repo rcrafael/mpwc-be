@@ -135,5 +135,21 @@ public class ReportController {
          }
      }
      
+     @GetMapping("generateCollectionReport/{startDate}/{endDate}")
+     public ResponseEntity<byte[]> generateCollectionReport(
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, 
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+          try {
+               byte[] fileContent = collectionReportService.generateCollectionReportExcel(startDate, endDate);
+               
+               org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+               headers.add("Content-Disposition", "attachment; filename=Collection_Report.xlsx");
+               headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+               
+               return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+          } catch (Exception e) {
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+          }
+     }
 
 }

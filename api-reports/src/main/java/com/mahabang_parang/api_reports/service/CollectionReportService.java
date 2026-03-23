@@ -30,4 +30,6 @@ public interface CollectionReportService {
                                                             Date endDate);
 
      public DashboardCardDataDto getDashboardCardData(Date startDate, Date endDate);
+
+     public byte[] generateCollectionReportExcel(Date startDate, Date endDate);
 }
