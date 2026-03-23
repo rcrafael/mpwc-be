@@ -130,4 +130,24 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
           nativeQuery = true)
      Double sumOfCbuByDateRange(Date startDate, Date endDate);
 
+     @Query(value = "SELECT " + 
+          "orh.or_no AS orNo, " +
+          "orh.or_date AS orDate, " +
+          "orh.total_billing_amount AS totalBillingAmount, " +
+          "orh.total_share_amount AS totalShareAmount, " +
+          "orh.senior_discount AS seniorDiscount, " +
+          "orh.total_amount_pay AS totalAmountPay, " +
+          "cust.account_no AS accountNo, " +
+          "cust.alias AS customerAlias, " +
+          "cust.first_name AS firstName, " +
+          "cust.middle_name AS middleName, " +
+          "cust.last_name AS lastName " +
+          "FROM official_receipt_header orh " +
+               "LEFT JOIN customer cust " +
+                    "ON orh.customer_id = cust.id " +
+          "WHERE orh.or_date BETWEEN :startDate AND :endDate AND orh.status = 1 " +
+          "ORDER BY orh.or_date ASC",
+          nativeQuery = true)
+     java.util.List<com.mahabang_parang.api_reports.model.interfaces.CollectionReportInterfaceProjection> getCollectionReportByDateRange(Date startDate, Date endDate);
+
 }
