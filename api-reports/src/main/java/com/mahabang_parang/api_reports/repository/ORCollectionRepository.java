@@ -1,13 +1,16 @@
 package com.mahabang_parang.api_reports.repository;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.mahabang_parang.api_payment.model.entity.OfficialReceiptHeaderEntity;
+import com.mahabang_parang.api_reports.model.interfaces.CollectionReportDetailInterfaceProjection;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionInterfaceProjection;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionListInterfaceProjection;
 
@@ -149,5 +152,52 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
           "ORDER BY orh.or_date ASC",
           nativeQuery = true)
      java.util.List<com.mahabang_parang.api_reports.model.interfaces.CollectionReportInterfaceProjection> getCollectionReportByDateRange(Date startDate, Date endDate);
+
+     @Query(value =
+             "SELECT " +
+             "  orh.or_no               AS orNo, " +
+             "  orh.or_date             AS orDate, " +
+             "  orh.total_billing_amount AS totalBillingAmount, " +
+             "  orh.total_share_amount  AS totalShareAmount, " +
+             "  orh.senior_discount     AS seniorDiscount, " +
+             "  orh.total_amount_pay    AS totalAmountPay, " +
+             "  cust.account_no         AS accountNo, " +
+             "  cust.alias              AS customerAlias, " +
+             "  cust.first_name         AS firstName, " +
+             "  cust.middle_name        AS middleName, " +
+             "  cust.last_name          AS lastName, " +
+             "  ord.meter_no            AS meterNo, " +
+             "  cm.branch_code          AS branchCode, " +
+             "  cm.phase                AS phase, " +
+             "  ord.reading_amount_paid AS readingAmountPaid, " +
+             "  ord.parts               AS parts, " +
+             "  ord.membership          AS membership, " +
+             "  ord.tapping             AS tapping, " +
+             "  ord.calibration         AS calibration, " +
+             "  ord.reconnection        AS reconnection, " +
+             "  ord.sub_receivable      AS subReceivable, " +
+             "  ord.penalty             AS penalty, " +
+             "  ord.other_collection    AS otherCollection, " +
+             "  ord.other_description   AS otherDescription, " +
+             "  ord.maintenance_fee     AS maintenanceFee, " +
+             "  ord.senior_discount     AS detailSeniorDiscount, " +
+             "  ord.septage_fee         AS septageFee, " +
+             "  ord.total_amount        AS detailTotalAmount, " +
+             "  ord.remarks             AS remarks " +
+             "FROM official_receipt_header orh " +
+             "  INNER JOIN official_receipt_detail ord ON ord.or_no = orh.or_no " +
+             "  LEFT  JOIN customer cust               ON cust.id   = orh.customer_id " +
+             "  LEFT  JOIN customer_meter cm           ON cm.meter_no = ord.meter_no " +
+             "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
+             "  AND orh.status = 1 " +
+             "  AND (:branchCode IS NULL OR cm.branch_code = :branchCode) " +
+             "  AND (:phase      IS NULL OR cm.phase       = :phase) " +
+             "ORDER BY orh.or_date ASC, orh.or_no ASC",
+             nativeQuery = true)
+      List<CollectionReportDetailInterfaceProjection> getCollectionReportDetailsByDateRange(
+              @Param("startDate")  Date startDate,
+              @Param("endDate")    Date endDate,
+              @Param("branchCode") Integer branchCode,
+              @Param("phase")      Integer phase);
 
 }

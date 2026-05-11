@@ -135,7 +135,7 @@ public class ReportController {
          }
      }
      
-     @GetMapping("generateCollectionReport/{startDate}/{endDate}")
+     @GetMapping("generateCollectionReportSummary/{startDate}/{endDate}")
      public ResponseEntity<byte[]> generateCollectionReport(
                @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, 
                @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
@@ -146,6 +146,25 @@ public class ReportController {
                headers.add("Content-Disposition", "attachment; filename=Collection_Report.xlsx");
                headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
                
+               return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+          } catch (Exception e) {
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+          }
+     }
+
+     @GetMapping("generateCollectionReportDetails/{startDate}/{endDate}")
+     public ResponseEntity<byte[]> generateCollectionReportDetails(
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
+               @RequestParam(required = false) Integer branchCode,
+               @RequestParam(required = false) Integer phase) {
+          try {
+               byte[] fileContent = collectionReportService.generateCollectionReportDetails(startDate, endDate, branchCode, phase);
+
+               org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+               headers.add("Content-Disposition", "attachment; filename=Collection_Report_Details.xlsx");
+               headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
                return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
           } catch (Exception e) {
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
