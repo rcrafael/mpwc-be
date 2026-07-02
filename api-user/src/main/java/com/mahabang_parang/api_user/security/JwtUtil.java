@@ -21,44 +21,51 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+
 @Component
 public class JwtUtil {
 
-     private String SECRET_KEY = "TWFiYWhhbmdQYXJhbmdXYXRlcldvcmtzQ29vcGVyYXRpdmVXZWJBcHBsaWNhdGlvblNlY3JldEtleQ=="; //base64 encoded
+     private String SECRET_KEY = "TWFiYWhhbmdQYXJhbmdXYXRlcldvcmtzQ29vcGVyYXRpdmVXZWJBcHBsaWNhdGlvblNlY3JldEtleQ=="; // base64
+                                                                                                                     // encoded
 
      private final long jwtExpirationMs = 12 * 60 * 60 * 1000L; // 12 hours
      private final long refreshExpirationMs = 7 * 24 * 60 * 60 * 1000L; // 7 days
 
-     public long getJwtExpirationMs() { return jwtExpirationMs; }
-     public long getRefreshExpirationMs() { return refreshExpirationMs; }
+     public long getJwtExpirationMs() {
+          return jwtExpirationMs;
+     }
+
+     public long getRefreshExpirationMs() {
+          return refreshExpirationMs;
+     }
 
      public String generateToken(UserEntity userDetails) {
           return Jwts.builder()
-                         .subject(userDetails.getEmail())
-                         .claim("id",userDetails.getId())
-                         .claim("email", userDetails.getEmail())
-                         .claim("username", userDetails.getUsername())
-                         .claim("fname", userDetails.getFname())
-                         .claim("lname", userDetails.getLname())
-                         .claim("mname", userDetails.getMname())
-                         .claim("role", userDetails.getRole() != null ? userDetails.getRole().getRole() : null)
-                         .issuedAt(new Date(System.currentTimeMillis()))
-                         .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                         .signWith(getSigningKey(), Jwts.SIG.HS256)
-                         .compact();
+                    .subject(userDetails.getEmail())
+                    .claim("id", userDetails.getId())
+                    .claim("email", userDetails.getEmail())
+                    .claim("username", userDetails.getUsername())
+                    .claim("fname", userDetails.getFname())
+                    .claim("lname", userDetails.getLname())
+                    .claim("mname", userDetails.getMname())
+                    .claim("role", userDetails.getRole() != null ? userDetails.getRole() : null)
+                    .issuedAt(new Date(System.currentTimeMillis()))
+                    .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                    .signWith(getSigningKey(), Jwts.SIG.HS256)
+                    .compact();
      }
 
      public String generateRefreshToken(UserEntity userDetails) {
           return Jwts.builder()
-                         .subject(userDetails.getEmail())
-                         .issuedAt(new Date(System.currentTimeMillis()))
-                         .expiration(new Date(System.currentTimeMillis() + refreshExpirationMs))
-                         .signWith(getSigningKey(), Jwts.SIG.HS256)
-                         .compact();
+                    .subject(userDetails.getEmail())
+                    .issuedAt(new Date(System.currentTimeMillis()))
+                    .expiration(new Date(System.currentTimeMillis() + refreshExpirationMs))
+                    .signWith(getSigningKey(), Jwts.SIG.HS256)
+                    .compact();
      }
 
      public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+          return extractClaim(token, Claims::getSubject);
      }
 
      public Date extractExpiration(String token) {
@@ -67,12 +74,12 @@ public class JwtUtil {
 
      public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
           final Claims claims = Jwts.parser()
-                  .verifyWith(getSigningKey())
-                  .build()
-                  .parseSignedClaims(token)
-                  .getPayload();
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
           return claimsResolver.apply(claims);
-      }
+     }
 
      public boolean isValidToken(String token, UserDetails userDetails) {
           try {
@@ -87,8 +94,8 @@ public class JwtUtil {
 
      private SecretKey getSigningKey() {
           byte[] keyBytes = Base64.getDecoder().decode(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
-         return new SecretKeySpec(keyBytes, "HmacSHA256");
-        //    return Keys.hmacShaKeyFor(keyBytes);
-    }
+          return new SecretKeySpec(keyBytes, "HmacSHA256");
+          // return Keys.hmacShaKeyFor(keyBytes);
+     }
 
 }
