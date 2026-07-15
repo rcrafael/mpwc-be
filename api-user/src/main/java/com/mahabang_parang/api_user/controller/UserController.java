@@ -82,4 +82,20 @@ public class UserController {
           }
      }
 
+     @GetMapping("getAllUser")
+     public ResponseEntity<ApiResponse> getAllUsers() {
+          ApiResponse response = new ApiResponse();
+
+          try {
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(this.userService.getAllUsers());
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+
 }
