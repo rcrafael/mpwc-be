@@ -1,5 +1,7 @@
 package com.mahabang_parang.api_user.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -67,6 +69,11 @@ public class UserServiceImpl implements UserService {
 
           UserEntity saved = userRepository.save(user);
           return mapper.toDto(saved);
+     }
+
+     public List<UserDto> getAllUsers() {
+          List<UserEntity> users = userRepository.findAll();
+          return mapper.toList(users);
      }
 
 }
