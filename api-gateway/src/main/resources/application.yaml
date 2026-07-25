@@ -18,6 +18,10 @@ spring:
                       uri: ${USER_SERVICE:http://localhost:8081}
                       predicates:
                          - Path=/api/auth/**
+                    - id: auth-service-route
+                      uri: ${USER_SERVICE:http://localhost:8081}
+                      predicates:
+                         - Path=/api/role/**
                     - id: payment-service-route
                       uri: ${PAYMENT_SERVICE:http://localhost:8082}
                       predicates:
