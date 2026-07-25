@@ -2,22 +2,27 @@ package com.mahabang_parang.api_user.service.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mahabang_parang.api_user.model.entity.RoleEntity;
+import com.mahabang_parang.api_user.model.dto.RoleDto;
+import com.mahabang_parang.api_user.model.mapper.RoleMapper;
 import com.mahabang_parang.api_user.repository.RoleRepository;
 import com.mahabang_parang.api_user.service.RoleService;
 
 @Service
 public class RoleServiceImpl implements RoleService {
 
-     @Autowired
-     private RoleRepository roleRepository;
+     private final RoleRepository roleRepository;
+     private final RoleMapper mapper;
+
+     RoleServiceImpl(RoleRepository roleRepository, RoleMapper mapper) {
+          this.roleRepository = roleRepository;
+          this.mapper = mapper;
+     }
 
      @Override
-     public List<RoleEntity> findAll() {
-          return roleRepository.findAll();
+     public List<RoleDto> findAll() {
+          return  mapper.toDtoList(roleRepository.findAll());
      }
 
 }

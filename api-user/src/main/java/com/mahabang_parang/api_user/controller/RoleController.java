@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mahabang_parang.api_user.model.ApiResponse;
-import com.mahabang_parang.api_user.model.entity.RoleEntity;
+import com.mahabang_parang.api_user.model.dto.RoleDto;
 import com.mahabang_parang.api_user.service.RoleService;
 
 @RestController
@@ -25,7 +25,7 @@ public class RoleController {
           ApiResponse response = new ApiResponse();
 
           try {
-               List<RoleEntity> roles = roleService.findAll();
+               List<RoleDto> roles = roleService.findAll();
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(roles);

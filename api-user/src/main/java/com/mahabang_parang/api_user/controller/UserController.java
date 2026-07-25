@@ -20,8 +20,11 @@ import com.mahabang_parang.api_user.service.UserService;
 @RequestMapping("api/user")
 public class UserController {
 
-     @Autowired
-     private UserService userService;
+     private final UserService userService;
+
+     UserController(UserService userService) {
+          this.userService = userService;
+     }
 
      @GetMapping()
      public ResponseEntity<ApiResponse> getUserById(@RequestParam String id) {
