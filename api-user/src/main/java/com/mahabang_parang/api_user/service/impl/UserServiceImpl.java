@@ -1,5 +1,6 @@
 package com.mahabang_parang.api_user.service.impl;
 
+import com.mahabang_parang.api_user.ApiUserApplication;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import com.mahabang_parang.api_user.model.entity.RoleEntity;
 import com.mahabang_parang.api_user.model.entity.UserEntity;
 import com.mahabang_parang.api_user.model.mapper.UserMapper;
 import com.mahabang_parang.api_user.model.payload.RegisterPayload;
+import com.mahabang_parang.api_user.model.payload.UpdateUserPayload;
 import com.mahabang_parang.api_user.repository.RoleRepository;
 import com.mahabang_parang.api_user.repository.UserRepository;
 import com.mahabang_parang.api_user.service.UserService;
@@ -19,18 +21,21 @@ import com.mahabang_parang.api_user.service.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-     @Autowired
-     private UserRepository userRepository;
+     private final UserRepository userRepository;
 
-     @Autowired
-     private RoleRepository roleRepository;
+     private final RoleRepository roleRepository;
 
-     @Autowired
-     private UserMapper mapper;
+     private final UserMapper mapper;
 
      @Lazy
-     @Autowired
-     private PasswordEncoder passwordEncoder;
+     private final PasswordEncoder passwordEncoder;
+
+     UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserMapper mapper, PasswordEncoder passwordEncoder) {
+          this.userRepository = userRepository;
+          this.roleRepository = roleRepository;
+          this.mapper = mapper;
+          this.passwordEncoder = passwordEncoder;
+     }
 
      @Override
      public UserDto findByEmail(String email) {
@@ -74,6 +79,49 @@ public class UserServiceImpl implements UserService {
      public List<UserDto> getAllUsers() {
           List<UserEntity> users = userRepository.findAll();
           return mapper.toList(users);
+     }
+
+
+     @Override
+     public UserDto updateUser(UpdateUserPayload payload) throws Exception {
+          
+          UserEntity user = userRepository.findById(payload.getId()).orElseThrow();
+
+          if(user == null) {
+               throw new RuntimeException("User not found with id: " + payload.getId());
+          }
+
+          // check every field if contains value
+
+          if(payload.getEmail() != null && !payload.getPassword().isEmpty()) {
+               user.setEmail(payload.getEmail());
+          }
+
+          if(payload.getPassword() != null && !payload.getPassword().isEmpty()) {
+               user.setPassword(passwordEncoder.encode(payload.getPassword()));
+          }
+
+          if(payload.getFname() != null && !payload.getFname().isEmpty()) {
+               user.setFname(payload.getFname());
+          }
+
+          if(payload.getLname() != null && !payload.getLname().isEmpty()) {
+               user.setLname(payload.getLname());
+          }
+
+          if(payload.getMname() != null && !payload.getMname().isEmpty()) {
+               user.setMname(payload.getMname());
+          }
+
+          if(payload.getRoleId() != null && !payload.getRoleId().isEmpty()) {
+               RoleEntity role = roleRepository.findById(payload.getRoleId())
+                         .orElseThrow(() -> new RuntimeException("Role not found with id: " + payload.getRoleId()));
+               user.setRole(role);
+          }
+
+          UserEntity saved = userRepository.save(user);
+          return mapper.toDto(saved);
+
      }
 
 }

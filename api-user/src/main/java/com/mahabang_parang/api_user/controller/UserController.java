@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mahabang_parang.api_user.model.ApiResponse;
 import com.mahabang_parang.api_user.model.dto.UserDto;
 import com.mahabang_parang.api_user.model.payload.RegisterPayload;
+import com.mahabang_parang.api_user.model.payload.UpdateUserPayload;
 import com.mahabang_parang.api_user.service.UserService;
 
 @RestController
@@ -26,11 +27,11 @@ public class UserController {
           this.userService = userService;
      }
 
-     @GetMapping()
-     public ResponseEntity<ApiResponse> getUserById(@RequestParam String id) {
+     @GetMapping("{id}")
+     public ResponseEntity<ApiResponse> getUserById(@PathVariable String id) {
           ApiResponse response = new ApiResponse();
-
-           try {
+          System.out.println("USERID: " + id);
+          try {
                UserDto user = this.userService.findById(id);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
@@ -97,6 +98,24 @@ public class UserController {
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+
+     @PostMapping()
+     public ResponseEntity<ApiResponse> update(@RequestBody UpdateUserPayload payload) {
+          ApiResponse response = new ApiResponse();
+
+          try {
+               UserDto user =  userService.updateUser(payload);
+               response.setStatusCode(HttpStatus.CREATED);
+               response.setMessage("success");
+               response.setResult(user);
+               return ResponseEntity.status(HttpStatus.OK).body(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
