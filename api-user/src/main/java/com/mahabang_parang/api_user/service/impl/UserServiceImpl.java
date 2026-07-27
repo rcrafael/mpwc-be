@@ -93,27 +93,33 @@ public class UserServiceImpl implements UserService {
 
           // check every field if contains value
 
-          if(payload.getEmail() != null && !payload.getPassword().isEmpty()) {
+          if(payload.getEmail() != null && !payload.getEmail().isEmpty()) {
+               System.out.println("UPDATE EMAIL: " + payload.getEmail());
                user.setEmail(payload.getEmail());
           }
 
           if(payload.getPassword() != null && !payload.getPassword().isEmpty()) {
+               System.out.println("UPDATE Password: " + passwordEncoder.encode(payload.getPassword()));
                user.setPassword(passwordEncoder.encode(payload.getPassword()));
           }
 
           if(payload.getFname() != null && !payload.getFname().isEmpty()) {
+               System.out.println("UPDATE Fname: " + payload.getFname());
                user.setFname(payload.getFname());
           }
 
           if(payload.getLname() != null && !payload.getLname().isEmpty()) {
+               System.out.println("UPDATE Lname: " + payload.getLname());
                user.setLname(payload.getLname());
           }
 
           if(payload.getMname() != null && !payload.getMname().isEmpty()) {
+               System.out.println("UPDATE Mname: " + payload.getMname());
                user.setMname(payload.getMname());
           }
 
           if(payload.getRoleId() != null && !payload.getRoleId().isEmpty()) {
+               System.out.println("UPDATE RoleId: " + payload.getRoleId());
                RoleEntity role = roleRepository.findById(payload.getRoleId())
                          .orElseThrow(() -> new RuntimeException("Role not found with id: " + payload.getRoleId()));
                user.setRole(role);
