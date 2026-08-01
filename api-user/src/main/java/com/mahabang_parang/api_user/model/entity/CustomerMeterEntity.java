@@ -1,5 +1,6 @@
 package com.mahabang_parang.api_user.model.entity;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -68,7 +69,7 @@ public class CustomerMeterEntity {
      @UpdateTimestamp
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      @Column(nullable = true)
-     private Date dateUpdated;
+     private LocalDateTime dateUpdated;
 
      @Column(length = 36, nullable = true)
      private String updatedBy;

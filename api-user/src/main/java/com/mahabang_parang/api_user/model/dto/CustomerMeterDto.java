@@ -1,5 +1,6 @@
 package com.mahabang_parang.api_user.model.dto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -30,7 +31,7 @@ public class CustomerMeterDto {
      private Date dateCreated;
      private String createdBy;
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-     private Date dateUpdated;
+     private LocalDateTime dateUpdated;
      private String updatedBy;
      private int customerType;
      private String serialNo;
