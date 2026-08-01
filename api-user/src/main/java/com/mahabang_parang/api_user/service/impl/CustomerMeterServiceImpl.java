@@ -1,8 +1,9 @@
 package com.mahabang_parang.api_user.service.impl;
 
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -10,17 +11,21 @@ import com.mahabang_parang.api_user.model.ApiResponse;
 import com.mahabang_parang.api_user.model.dto.CustomerMeterDto;
 import com.mahabang_parang.api_user.model.entity.CustomerMeterEntity;
 import com.mahabang_parang.api_user.model.mapper.CustomerMeterMapper;
+import com.mahabang_parang.api_user.model.payload.UpdateMeterStatusPayload;
 import com.mahabang_parang.api_user.repository.CustomerMeterRepository;
 import com.mahabang_parang.api_user.service.CustomerMeterService;
 
 @Service
 public class CustomerMeterServiceImpl implements CustomerMeterService{
 
-     @Autowired
-     private CustomerMeterRepository custMeterRepo;
+     private final CustomerMeterRepository custMeterRepo;
 
-     @Autowired
-     private CustomerMeterMapper mapper;
+     private final CustomerMeterMapper mapper;
+
+     CustomerMeterServiceImpl(CustomerMeterMapper mapper, CustomerMeterRepository custMeterRepo) {
+          this.mapper = mapper;
+          this.custMeterRepo = custMeterRepo;
+     }
 
      @Override
      public ApiResponse addCustomerMeter(CustomerMeterDto customerMeter) {
@@ -79,6 +84,7 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
           custMeter.setPrevious(customerMeter.getPrevious());
           custMeter.setPresent(customerMeter.getPresent());
           custMeter.setUpdatedBy(customerMeter.getUpdatedBy());
+          custMeter.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
           CustomerMeterDto newMeter = mapper.toDto(custMeterRepo.save(custMeter));
 
           return newMeter;
@@ -102,6 +108,13 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
      public List<CustomerMeterDto> getCustomerMetersByCustomerId(String customerId) {
           List<CustomerMeterEntity> meters = custMeterRepo.findByCustomerId(customerId);
           return mapper.toDtoList(meters);
+     }
+
+     @Override
+     public CustomerMeterDto updateCustomerMeterStatus(UpdateMeterStatusPayload meterStatus) {
+          CustomerMeterEntity entity = custMeterRepo.findById(meterStatus.getMeterId()).orElseThrow();
+          entity.setStatus(meterStatus.getStatus());
+          return mapper.toDto(custMeterRepo.save(entity));
      }
 
      private Integer getPreviousUsage(String meterNo) {

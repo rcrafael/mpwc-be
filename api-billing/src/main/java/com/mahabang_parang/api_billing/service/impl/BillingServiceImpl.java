@@ -251,7 +251,7 @@ public class BillingServiceImpl implements BillingService  {
           int m3used = meter.getPresent();
           int newMeterPresent = m3used - billingEntity.getM3Used();
           meter.setPresent(newMeterPresent);
-          meter.setDateUpdated(new Date());
+          meter.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
           meter.setUpdatedBy(updatedBy);
           meterService.updateCustomerMeter(meter);
 
@@ -271,7 +271,7 @@ public class BillingServiceImpl implements BillingService  {
           int m3used = meter.getPresent();
           int newMeterPresent = m3used - billingEntity.getM3Used();
           meter.setPresent(newMeterPresent);
-          meter.setDateUpdated(new Date());
+          meter.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
           meter.setUpdatedBy(updatedBy);
           meterService.updateCustomerMeter(meter);
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.mahabang_parang.api_user.model.ApiResponse;
 import com.mahabang_parang.api_user.model.dto.CustomerMeterDto;
+import com.mahabang_parang.api_user.model.payload.UpdateMeterStatusPayload;
 
 public interface CustomerMeterService {
 
@@ -12,6 +13,6 @@ public interface CustomerMeterService {
      CustomerMeterDto getCustomerMeterByMeterNo(String meterNo);
      List<CustomerMeterDto> getCustomerMeters();
      List<CustomerMeterDto> getCustomerMetersByCustomerId(String customerId);
-     
+     CustomerMeterDto updateCustomerMeterStatus(UpdateMeterStatusPayload meterStatus);
 
 }

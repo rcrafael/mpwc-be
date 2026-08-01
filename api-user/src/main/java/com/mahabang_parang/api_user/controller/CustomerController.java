@@ -15,6 +15,7 @@ import com.mahabang_parang.api_user.model.ApiResponse;
 import com.mahabang_parang.api_user.model.PaginationResponse;
 import com.mahabang_parang.api_user.model.dto.CustomerDto;
 import com.mahabang_parang.api_user.model.dto.CustomerMeterDto;
+import com.mahabang_parang.api_user.model.payload.UpdateMeterStatusPayload;
 import com.mahabang_parang.api_user.service.CustomerMeterService;
 import com.mahabang_parang.api_user.service.CustomerService;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,10 +31,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("api/customer")
 public class CustomerController {
 
-     @Autowired
-     private CustomerService custService;
-     @Autowired
-     private CustomerMeterService meterService;
+     private final CustomerService custService;
+     private final CustomerMeterService meterService;
+
+     CustomerController(CustomerService custService, CustomerMeterService meterService) {
+          this.custService = custService;
+          this.meterService = meterService;
+     }
      @GetMapping("get/{pageNo}/{pageSize}")
      public ResponseEntity<ApiResponse> getCustomers(@PathVariable int pageNo, @PathVariable int pageSize) {
           
@@ -267,6 +271,26 @@ public class CustomerController {
 
           try {
                CustomerMeterDto mtr = meterService.updateCustomerMeter(meter);
+
+               response.setStatusCode(HttpStatus.OK);
+               response.setMessage("success");
+               response.setResult(mtr);
+               return ResponseEntity.ok(response);
+          } catch (Exception e) {
+               response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+               response.setMessage("Internal Server Error: " + e.getMessage());
+               
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+          }
+     }
+
+
+     @PutMapping("meter/status-update") 
+     public ResponseEntity<ApiResponse> updateMeterStaus(@RequestBody UpdateMeterStatusPayload payload) {
+          ApiResponse response = new ApiResponse();
+
+          try {
+               CustomerMeterDto mtr = meterService.updateCustomerMeterStatus(payload);
 
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
