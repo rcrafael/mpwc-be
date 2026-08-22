@@ -106,7 +106,7 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
 
      @Override
      public List<CustomerMeterDto> getCustomerMetersByCustomerId(String customerId) {
-          List<CustomerMeterEntity> meters = custMeterRepo.findByCustomerId(customerId);
+          List<CustomerMeterEntity> meters = custMeterRepo.findByCustomerIdAndStatus(customerId, 6);
           return mapper.toDtoList(meters);
      }
 

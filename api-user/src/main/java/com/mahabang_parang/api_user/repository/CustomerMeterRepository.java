@@ -18,6 +18,6 @@ public interface CustomerMeterRepository extends JpaRepository<CustomerMeterEnti
 
      CustomerMeterEntity findByMeterNo(String meterNo);
      CustomerMeterEntity findBySerialNo(String serialno);
-     List<CustomerMeterEntity> findByCustomerId(String customerId);
+     List<CustomerMeterEntity> findByCustomerIdAndStatus(String customerId, int status);
      
 }
