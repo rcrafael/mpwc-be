@@ -28,6 +28,9 @@ public class ReportController {
      @Autowired
      private CollectionReportService collectionReportService;
 
+     @Autowired
+     private com.mahabang_parang.api_reports.service.CustomerMeterUsageReportService customerMeterUsageReportService;
+
      @GetMapping("getShareCapCbuSavingsCollectionByCustomer/{customerId}")
      public ResponseEntity<ApiResponse> getShareCapCbuSavingsCollectionByCustomerId(@PathVariable String customerId) {
          ApiResponse response = new ApiResponse();
@@ -163,6 +166,21 @@ public class ReportController {
 
                org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
                headers.add("Content-Disposition", "attachment; filename=Collection_Report_Details.xlsx");
+               headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+               return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+          } catch (Exception e) {
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+          }
+     }
+
+     @GetMapping("getCustomerMeterUsagePerYear/{year}")
+     public ResponseEntity<byte[]> getCustomerMeterUsagePerYear(@PathVariable int year) {
+          try {
+               byte[] fileContent = customerMeterUsageReportService.generateCustomerMeterUsageExcel(year);
+
+               org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+               headers.add("Content-Disposition", "attachment; filename=Customer_Meter_Usage_" + year + ".xlsx");
                headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
                return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
