@@ -1,6 +1,8 @@
 package com.mahabang_parang.api_reports.service.impl;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,8 +19,12 @@ import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollec
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionListInterfaceProjection;
 import com.mahabang_parang.api_reports.repository.ORCollectionRepository;
 import com.mahabang_parang.api_reports.service.CollectionReportService;
+import com.mahabang_parang.api_user.model.dto.BranchDto;
+import com.mahabang_parang.api_user.model.dto.PhaseDto;
 import com.mahabang_parang.api_user.repository.CustomerMeterRepository;
 import com.mahabang_parang.api_user.repository.CustomerRepository;
+import com.mahabang_parang.api_user.service.BranchService;
+import com.mahabang_parang.api_user.service.PhaseService;
 
 @Service
 public class CollectionReportServiceImpl implements CollectionReportService {
@@ -28,18 +34,37 @@ public class CollectionReportServiceImpl implements CollectionReportService {
      private final CustomerRepository customerRepo;
      private final CustomerMeterRepository customerMeterRepo;
      private final OfficialReceiptHeaderRepository orHeaderRepo;
+     private final BranchService branchService;
+     private final PhaseService phaseService;
 
      public CollectionReportServiceImpl(ORCollectionRepository _orCollectionRepo,
                                         BillingRepository _billingRepo,
                                         CustomerRepository _customerRepo,
                                         CustomerMeterRepository _customerMeterRepo,
-                                        OfficialReceiptHeaderRepository _orHeaderRepo
+                                        OfficialReceiptHeaderRepository _orHeaderRepo,
+                                        BranchService _branchService,
+                                        PhaseService _phaseService
      ) {
           this.orCollectionRepo = _orCollectionRepo;
           this.billingRepo = _billingRepo;
           this.customerRepo = _customerRepo;
           this.customerMeterRepo = _customerMeterRepo;
           this.orHeaderRepo = _orHeaderRepo;
+          this.branchService = _branchService;
+          this.phaseService = _phaseService;
+     }
+
+     private Date getEndOfDay(Date date) {
+          if (date == null) {
+               return null;
+          }
+          java.util.Calendar cal = java.util.Calendar.getInstance();
+          cal.setTime(date);
+          cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+          cal.set(java.util.Calendar.MINUTE, 59);
+          cal.set(java.util.Calendar.SECOND, 59);
+          cal.set(java.util.Calendar.MILLISECOND, 999);
+          return cal.getTime();
      }
 
      @Override
@@ -53,8 +78,9 @@ public class CollectionReportServiceImpl implements CollectionReportService {
                                                             String customerId, 
                                                             Date startDate, 
                                                             Date endDate) {
+          Date adjustedEndDate = getEndOfDay(endDate);
           ShareCapCbuSavingsCollectionInterfaceProjection result = 
-                              orCollectionRepo.getShareCapCbuSavingsCollectionByCustomerIdAndDateRange(customerId, startDate, endDate);
+                              orCollectionRepo.getShareCapCbuSavingsCollectionByCustomerIdAndDateRange(customerId, startDate, adjustedEndDate);
           return result;
      }
 
@@ -67,9 +93,10 @@ public class CollectionReportServiceImpl implements CollectionReportService {
                                                             Date endDate) {
 
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
+          Date adjustedEndDate = getEndOfDay(endDate);
 
           Page<ShareCapCbuSavingsCollectionListInterfaceProjection> result = 
-                              orCollectionRepo.getShareCapCbuSavingsCollectionListByCustomerIdAndDateRange(customerId, startDate, endDate, pageable);
+                              orCollectionRepo.getShareCapCbuSavingsCollectionListByCustomerIdAndDateRange(customerId, startDate, adjustedEndDate, pageable);
           return new PaginationResponse<>(
                result.getContent(),
                result.getNumber(),
@@ -88,9 +115,10 @@ public class CollectionReportServiceImpl implements CollectionReportService {
                                                             Date endDate) {
 
           Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("orDate").descending());
+          Date adjustedEndDate = getEndOfDay(endDate);
 
           Page<ShareCapCbuSavingsCollectionListInterfaceProjection> result = 
-                              orCollectionRepo.getShareCapCbuSavingsCollectionListByDateRange(startDate, endDate, pageable);
+                              orCollectionRepo.getShareCapCbuSavingsCollectionListByDateRange(startDate, adjustedEndDate, pageable);
           return new PaginationResponse<>(
                result.getContent(),
                result.getNumber(),
@@ -105,15 +133,16 @@ public class CollectionReportServiceImpl implements CollectionReportService {
      @Override
      public DashboardCardDataDto getDashboardCardData(Date startDate, Date endDate) {
           
+          Date adjustedEndDate = getEndOfDay(endDate);
           DashboardCardDataDto result = new DashboardCardDataDto();
           Long userCount = customerRepo.count();
           Long activeMeterCount = customerMeterRepo.countByStatus(6); //6 = Active
-          Integer totalCubicMeterUsage =  billingRepo.totalCubicMeterUsageByDate(startDate, endDate);
-          Double totalUnpaidBillingAmount = billingRepo.sumOfUnpaidBillingByDate(startDate, endDate);
-          Double totalOfficialReceiptAmount = orHeaderRepo.sumOfOfficialReceiptByDate(startDate, endDate, false);
-          Double totalOtherCollectionAmount = orHeaderRepo.sumOfOfficialReceiptByDate(startDate, endDate, true);
-          double totalShareCapAmount = orCollectionRepo.sumOfShareCapitalByDateRange(startDate, endDate);
-          double totalCbuAmount = orCollectionRepo.sumOfCbuByDateRange(startDate, endDate);
+          Integer totalCubicMeterUsage =  billingRepo.totalCubicMeterUsageByDate(startDate, adjustedEndDate);
+          Double totalUnpaidBillingAmount = billingRepo.sumOfUnpaidBillingByDate(startDate, adjustedEndDate);
+          Double totalOfficialReceiptAmount = orHeaderRepo.sumOfOfficialReceiptByDate(startDate, adjustedEndDate, false);
+          Double totalOtherCollectionAmount = orHeaderRepo.sumOfOfficialReceiptByDate(startDate, adjustedEndDate, true);
+          double totalShareCapAmount = orCollectionRepo.sumOfShareCapitalByDateRange(startDate, adjustedEndDate);
+          double totalCbuAmount = orCollectionRepo.sumOfCbuByDateRange(startDate, adjustedEndDate);
 
           result.setUserCount(userCount);
           result.setActiveMeterCount(activeMeterCount);
@@ -130,9 +159,13 @@ public class CollectionReportServiceImpl implements CollectionReportService {
 
 
      @Override
-     public byte[] generateCollectionReportExcel(Date startDate, Date endDate) {
+     public byte[] generateCollectionReportExcel(Date startDate, Date endDate, Integer branchCode, Integer phase) {
+          int bCode = (branchCode == null) ? -1 : branchCode;
+          int pCode = (phase == null) ? -1 : phase;
+          Date adjustedEndDate = getEndOfDay(endDate);
+
           java.util.List<com.mahabang_parang.api_reports.model.interfaces.CollectionReportInterfaceProjection> data = 
-                    orCollectionRepo.getCollectionReportByDateRange(startDate, endDate);
+                    orCollectionRepo.getCollectionReportByDateRange(startDate, adjustedEndDate, bCode, pCode);
           
           try (org.apache.poi.xssf.usermodel.XSSFWorkbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
                java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
@@ -204,6 +237,21 @@ public class CollectionReportServiceImpl implements CollectionReportService {
                dateRangeCell.setCellValue("Report Date: " + sdf.format(startDate) + " to " + sdf.format(endDate));
                dateRangeCell.setCellStyle(mainHeaderStyle);
                
+                // Branch Code and Phase
+                Map<Integer, String> branchMap = branchService.findAll().stream()
+                     .filter(b -> b.getId() != null && b.getBranchCode() != null)
+                     .collect(Collectors.toMap(BranchDto::getId, BranchDto::getBranchCode, (v1, v2) -> v1));
+                Map<Integer, String> phaseMap = phaseService.findAll().stream()
+                     .filter(p -> p.getId() != null && p.getPhase() != null)
+                     .collect(Collectors.toMap(PhaseDto::getId, PhaseDto::getPhase, (v1, v2) -> v1));
+
+                String branchLabel = (bCode == -1) ? "All" : branchMap.getOrDefault(bCode, String.valueOf(bCode));
+                String phaseLabel  = (pCode == -1) ? "All" : phaseMap.getOrDefault(pCode, String.valueOf(pCode));
+                org.apache.poi.ss.usermodel.Row filterRow = sheet.createRow(rowIdx++);
+                org.apache.poi.ss.usermodel.Cell filterCell = filterRow.createCell(0);
+                filterCell.setCellValue("Branch Code: " + branchLabel + "   |   Phase: " + phaseLabel);
+                filterCell.setCellStyle(mainHeaderStyle);
+
                // Empty row before table
                rowIdx++;
                
@@ -325,9 +373,12 @@ public class CollectionReportServiceImpl implements CollectionReportService {
 
      @Override
      public byte[] generateCollectionReportDetails(Date startDate, Date endDate, Integer branchCode, Integer phase) {
+          int bCode = (branchCode == null) ? -1 : branchCode;
+          int pCode = (phase == null) ? -1 : phase;
+          Date adjustedEndDate = getEndOfDay(endDate);
 
           java.util.List<com.mahabang_parang.api_reports.model.interfaces.CollectionReportDetailInterfaceProjection> data =
-                    orCollectionRepo.getCollectionReportDetailsByDateRange(startDate, endDate, branchCode, phase);
+                    orCollectionRepo.getCollectionReportDetailsByDateRange(startDate, adjustedEndDate, bCode, pCode);
 
           // Group rows by OR No (preserving insertion order)
           java.util.LinkedHashMap<String, java.util.List<com.mahabang_parang.api_reports.model.interfaces.CollectionReportDetailInterfaceProjection>> grouped =
@@ -432,9 +483,16 @@ public class CollectionReportServiceImpl implements CollectionReportService {
                int rowIdx = 0;
 
                // ── Report meta rows ──────────────────────────────────────────────
+               Map<Integer, String> branchMap = branchService.findAll().stream()
+                    .filter(b -> b.getId() != null && b.getBranchCode() != null)
+                    .collect(Collectors.toMap(BranchDto::getId, BranchDto::getBranchCode, (v1, v2) -> v1));
+               Map<Integer, String> phaseMap = phaseService.findAll().stream()
+                    .filter(p -> p.getId() != null && p.getPhase() != null)
+                    .collect(Collectors.toMap(PhaseDto::getId, PhaseDto::getPhase, (v1, v2) -> v1));
+
                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy");
-               String branchLabel = (branchCode == null) ? "All" : String.valueOf(branchCode);
-               String phaseLabel  = (phase      == null) ? "All" : String.valueOf(phase);
+               String branchLabel = (bCode == -1) ? "All" : branchMap.getOrDefault(bCode, String.valueOf(bCode));
+               String phaseLabel  = (pCode == -1) ? "All" : phaseMap.getOrDefault(pCode, String.valueOf(pCode));
 
                org.apache.poi.ss.usermodel.Row r0 = sheet.createRow(rowIdx++);
                org.apache.poi.ss.usermodel.Cell c0 = r0.createCell(0);
@@ -575,12 +633,14 @@ public class CollectionReportServiceImpl implements CollectionReportService {
                          dMeter.setCellStyle(childStyle);
 
                          org.apache.poi.ss.usermodel.Cell dBranch = childRow.createCell(cc++);
-                         dBranch.setCellValue(detail.getBranchCode() != null ? detail.getBranchCode() : 0);
+                         String branchName = (detail.getBranchCode() != null) ? branchMap.getOrDefault(detail.getBranchCode(), String.valueOf(detail.getBranchCode())) : "";
+                         dBranch.setCellValue(branchName);
                          dBranch.setCellStyle(childStyle);
 
-                         org.apache.poi.ss.usermodel.Cell dPhase = childRow.createCell(cc++);
-                         dPhase.setCellValue(detail.getPhase() != null ? detail.getPhase() : 0);
-                         dPhase.setCellStyle(childStyle);
+                          org.apache.poi.ss.usermodel.Cell dPhase = childRow.createCell(cc++);
+                          String phaseName = (detail.getPhase() != null) ? phaseMap.getOrDefault(detail.getPhase(), String.valueOf(detail.getPhase())) : "";
+                          dPhase.setCellValue(phaseName);
+                          dPhase.setCellStyle(childStyle);
 
                          org.apache.poi.ss.usermodel.Cell dReading = childRow.createCell(cc++);
                          if (detail.getReadingAmountPaid() != null) dReading.setCellValue(detail.getReadingAmountPaid());

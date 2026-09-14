@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mahabang_parang.api_user.config.FlexibleLocalDateTimeDeserializer;
 
 import jakarta.persistence.Column;
 import lombok.Getter;
@@ -31,6 +33,7 @@ public class CustomerMeterDto {
      private Date dateCreated;
      private String createdBy;
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+     @JsonDeserialize(using = FlexibleLocalDateTimeDeserializer.class)
      private LocalDateTime dateUpdated;
      private String updatedBy;
      private int customerType;

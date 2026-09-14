@@ -32,6 +32,8 @@
 
 	<properties>
 		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 		<maven.compiler.parameters>true</maven.compiler.parameters>
 		<spring-cloud.version>2024.0.0</spring-cloud.version>
 	</properties>
@@ -157,11 +159,6 @@
 						</exclude>
 					</excludes>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>3.4.2</version>
 				<executions>
 					<execution>
 						<goals>

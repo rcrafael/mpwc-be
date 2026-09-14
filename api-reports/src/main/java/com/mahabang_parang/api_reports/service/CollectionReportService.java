@@ -31,7 +31,7 @@ public interface CollectionReportService {
 
      public DashboardCardDataDto getDashboardCardData(Date startDate, Date endDate);
 
-     public byte[] generateCollectionReportExcel(Date startDate, Date endDate);
+     public byte[] generateCollectionReportExcel(Date startDate, Date endDate, Integer branchCode, Integer phase);
 
      public byte[] generateCollectionReportDetails(Date startDate, Date endDate, Integer branchCode, Integer phase);
 }
