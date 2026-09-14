@@ -56,4 +56,34 @@ public class GlobalExceptionHandler {
           
           return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
      }
+
+     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+     public ResponseEntity<Object> handleHttpMessageNotReadableException(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+          Map<String, Object> body = new LinkedHashMap<>();
+          body.put("statusCode", HttpStatus.BAD_REQUEST.value());
+          body.put("message", "Malformed request: " + (ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage()));
+          body.put("result", null);
+          
+          return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+     }
+
+     @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+     public ResponseEntity<Object> handleMethodArgumentNotValidException(org.springframework.web.bind.MethodArgumentNotValidException ex) {
+          Map<String, Object> body = new LinkedHashMap<>();
+          body.put("statusCode", HttpStatus.BAD_REQUEST.value());
+          body.put("message", "Validation error: " + (ex.getBindingResult().getFieldError() != null ? ex.getBindingResult().getFieldError().getDefaultMessage() : ex.getMessage()));
+          body.put("result", null);
+          
+          return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+     }
+
+     @ExceptionHandler(Exception.class)
+     public ResponseEntity<Object> handleGeneralException(Exception ex) {
+          Map<String, Object> body = new LinkedHashMap<>();
+          body.put("statusCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
+          body.put("message", "Internal Server Error: " + ex.getMessage());
+          body.put("result", null);
+          
+          return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+     }
 }

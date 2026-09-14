@@ -247,13 +247,7 @@ public class BillingServiceImpl implements BillingService  {
           billingEntity.setUpdatedBy(updatedBy);
           billingEntity.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
 
-          CustomerMeterDto meter = meterService.getCustomerMeterByMeterNo(billingEntity.getMeterNo());
-          int m3used = meter.getPresent();
-          int newMeterPresent = m3used - billingEntity.getM3Used();
-          meter.setPresent(newMeterPresent);
-          meter.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-          meter.setUpdatedBy(updatedBy);
-          meterService.updateCustomerMeter(meter);
+          revertCustomerMeter(billingEntity, updatedBy);
 
           BillingDto billingDto = mapper.toDto(billingRepo.save(billingEntity));
           return billingDto;
@@ -267,16 +261,64 @@ public class BillingServiceImpl implements BillingService  {
           billingEntity.setUpdatedBy(updatedBy);
           billingEntity.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
 
-          CustomerMeterDto meter = meterService.getCustomerMeterByMeterNo(billingEntity.getMeterNo());
-          int m3used = meter.getPresent();
-          int newMeterPresent = m3used - billingEntity.getM3Used();
-          meter.setPresent(newMeterPresent);
-          meter.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-          meter.setUpdatedBy(updatedBy);
-          meterService.updateCustomerMeter(meter);
+          revertCustomerMeter(billingEntity, updatedBy);
 
           BillingDto billingDto = mapper.toDto(billingRepo.save(billingEntity));
           return billingDto;
+     }
+
+     private void revertCustomerMeter(BillingEntity billingEntity, String updatedBy) {
+          if (billingEntity == null || billingEntity.getMeterNo() == null || billingEntity.getMeterNo().trim().isEmpty()) {
+               return;
+          }
+
+          CustomerMeterDto meter = meterService.getCustomerMeterByMeterNo(billingEntity.getMeterNo());
+          if (meter == null) {
+               return;
+          }
+
+          int m3Used = 0;
+          if (billingEntity.getM3Used() != null) {
+               m3Used = billingEntity.getM3Used();
+          } else if (billingEntity.getPresent() != null && billingEntity.getPrevious() != null) {
+               m3Used = Math.max(0, billingEntity.getPresent() - billingEntity.getPrevious());
+          } else if (billingEntity.getPresent() != null) {
+               m3Used = billingEntity.getPresent();
+          }
+
+          Integer currentPresent = meter.getPresent();
+          Integer currentPrevious = meter.getPrevious();
+
+          int basePresent;
+          if (currentPresent != null) {
+               basePresent = currentPresent;
+          } else if (currentPrevious != null) {
+               basePresent = currentPrevious;
+          } else if (billingEntity.getPresent() != null) {
+               basePresent = billingEntity.getPresent();
+          } else {
+               basePresent = 0;
+          }
+
+          int newMeterPresent = Math.max(0, basePresent - m3Used);
+
+          if (currentPresent == null && billingEntity.getPrevious() != null) {
+               newMeterPresent = Math.max(0, billingEntity.getPrevious());
+          }
+
+          meter.setPresent(newMeterPresent);
+
+          if (meter.getPrevious() == null) {
+               if (billingEntity.getPrevious() != null) {
+                    meter.setPrevious(billingEntity.getPrevious());
+               } else {
+                    meter.setPrevious(0);
+               }
+          }
+
+          meter.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+          meter.setUpdatedBy(updatedBy);
+          meterService.updateCustomerMeter(meter);
      }
 
 

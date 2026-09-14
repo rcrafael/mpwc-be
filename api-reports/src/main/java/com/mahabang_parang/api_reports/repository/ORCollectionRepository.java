@@ -133,7 +133,7 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
           nativeQuery = true)
      Double sumOfCbuByDateRange(Date startDate, Date endDate);
 
-     @Query(value = "SELECT " + 
+     @Query(value = "SELECT DISTINCT " + 
           "orh.or_no AS orNo, " +
           "orh.or_date AS orDate, " +
           "orh.total_billing_amount AS totalBillingAmount, " +
@@ -148,10 +148,22 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
           "FROM official_receipt_header orh " +
                "LEFT JOIN customer cust " +
                     "ON orh.customer_id = cust.id " +
-          "WHERE orh.or_date BETWEEN :startDate AND :endDate AND orh.status = 1 " +
-          "ORDER BY orh.or_date ASC",
+               "LEFT JOIN official_receipt_detail ord " +
+                    "ON ord.or_no = orh.or_no " +
+               "LEFT JOIN customer_meter cm " +
+                    "ON cm.meter_no = ord.meter_no " +
+          "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
+          "  AND orh.status = 1 " +
+          "  AND (:branchCode IS NULL OR :branchCode = -1 OR cm.branch_code = :branchCode) " +
+          "  AND (:phase      IS NULL OR :phase = -1      OR cm.phase       = :phase) " +
+          "ORDER BY orh.or_date ASC, orh.or_no ASC",
           nativeQuery = true)
-     java.util.List<com.mahabang_parang.api_reports.model.interfaces.CollectionReportInterfaceProjection> getCollectionReportByDateRange(Date startDate, Date endDate);
+     List<com.mahabang_parang.api_reports.model.interfaces.CollectionReportInterfaceProjection> getCollectionReportByDateRange(
+             @Param("startDate")  Date startDate,
+             @Param("endDate")    Date endDate,
+             @Param("branchCode") Integer branchCode,
+             @Param("phase")      Integer phase);
+
 
      @Query(value =
              "SELECT " +
@@ -190,8 +202,8 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
              "  LEFT  JOIN customer_meter cm           ON cm.meter_no = ord.meter_no " +
              "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
              "  AND orh.status = 1 " +
-             "  AND (:branchCode IS NULL OR cm.branch_code = :branchCode) " +
-             "  AND (:phase      IS NULL OR cm.phase       = :phase) " +
+             "  AND (:branchCode IS NULL OR :branchCode = -1 OR cm.branch_code = :branchCode) " +
+             "  AND (:phase      IS NULL OR :phase = -1      OR cm.phase       = :phase) " +
              "ORDER BY orh.or_date ASC, orh.or_no ASC",
              nativeQuery = true)
       List<CollectionReportDetailInterfaceProjection> getCollectionReportDetailsByDateRange(

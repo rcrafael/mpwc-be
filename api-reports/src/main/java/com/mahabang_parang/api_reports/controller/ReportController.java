@@ -141,9 +141,11 @@ public class ReportController {
      @GetMapping("generateCollectionReportSummary/{startDate}/{endDate}")
      public ResponseEntity<byte[]> generateCollectionReport(
                @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, 
-               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
+               @RequestParam(required = false) Integer branchCode,
+               @RequestParam(required = false) Integer phase) {
           try {
-               byte[] fileContent = collectionReportService.generateCollectionReportExcel(startDate, endDate);
+               byte[] fileContent = collectionReportService.generateCollectionReportExcel(startDate, endDate, branchCode, phase);
                
                org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
                headers.add("Content-Disposition", "attachment; filename=Collection_Report.xlsx");
