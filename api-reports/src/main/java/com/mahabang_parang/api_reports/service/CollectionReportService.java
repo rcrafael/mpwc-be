@@ -38,4 +38,8 @@ public interface CollectionReportService {
      public byte[] generateOtherCollectionReportSummary(Date startDate, Date endDate);
 
      public byte[] generateOtherCollectionReportDetails(Date startDate, Date endDate);
+
+     public byte[] generateOutsideCollectionReportSummary(Date startDate, Date endDate);
+
+     public byte[] generateOutsideCollectionReportDetails(Date startDate, Date endDate);
 }

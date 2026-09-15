@@ -17,6 +17,8 @@ import com.mahabang_parang.api_reports.model.PaginationResponse;
 import com.mahabang_parang.api_reports.model.dto.DashboardCardDataDto;
 import com.mahabang_parang.api_reports.model.interfaces.OtherCollectionReportDetailProjection;
 import com.mahabang_parang.api_reports.model.interfaces.OtherCollectionReportSummaryProjection;
+import com.mahabang_parang.api_reports.model.interfaces.OutsideCollectionReportDetailProjection;
+import com.mahabang_parang.api_reports.model.interfaces.OutsideCollectionReportSummaryProjection;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionInterfaceProjection;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionListInterfaceProjection;
 import com.mahabang_parang.api_reports.repository.ORCollectionRepository;
@@ -1151,6 +1153,415 @@ public class CollectionReportServiceImpl implements CollectionReportService {
 
           } catch (Exception e) {
                throw new RuntimeException("Failed to generate Other Collection Details Report Excel: " + e.getMessage(), e);
+          }
+     }
+
+     @Override
+     public byte[] generateOutsideCollectionReportSummary(Date startDate, Date endDate) {
+          Date adjustedEndDate = getEndOfDay(endDate);
+          java.util.List<OutsideCollectionReportSummaryProjection> data =
+                    orCollectionRepo.getOutsideCollectionSummaryReportByDateRange(startDate, adjustedEndDate);
+
+          try (org.apache.poi.xssf.usermodel.XSSFWorkbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
+               java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+
+               org.apache.poi.ss.usermodel.Sheet sheet = workbook.createSheet("Outside Collection Summary");
+
+               // Fonts
+               org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont();
+               headerFont.setBold(true);
+               headerFont.setFontHeightInPoints((short) 11);
+
+               // Main Header / Title Style
+               org.apache.poi.ss.usermodel.CellStyle mainHeaderStyle = workbook.createCellStyle();
+               mainHeaderStyle.setFont(headerFont);
+
+               // Table Header Style
+               org.apache.poi.ss.usermodel.CellStyle tableHeaderStyle = workbook.createCellStyle();
+               tableHeaderStyle.setFont(headerFont);
+               tableHeaderStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               tableHeaderStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               tableHeaderStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               tableHeaderStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+
+               // Data Row Style
+               org.apache.poi.ss.usermodel.CellStyle dataStyle = workbook.createCellStyle();
+               dataStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               dataStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               dataStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               dataStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+
+               // Date Style
+               org.apache.poi.ss.usermodel.CellStyle dateStyle = workbook.createCellStyle();
+               org.apache.poi.ss.usermodel.CreationHelper createHelper = workbook.getCreationHelper();
+               dateStyle.setDataFormat(createHelper.createDataFormat().getFormat("MMM dd, yyyy"));
+               dateStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               dateStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               dateStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               dateStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+
+               // Number Style
+               org.apache.poi.ss.usermodel.CellStyle numberStyle = workbook.createCellStyle();
+               numberStyle.setDataFormat(createHelper.createDataFormat().getFormat("#,##0.00"));
+               numberStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               numberStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               numberStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               numberStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+
+               // Number Style for Totals row
+               org.apache.poi.ss.usermodel.CellStyle numberTotalStyle = workbook.createCellStyle();
+               numberTotalStyle.setFont(headerFont);
+               numberTotalStyle.setDataFormat(createHelper.createDataFormat().getFormat("#,##0.00"));
+               numberTotalStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               numberTotalStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               numberTotalStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               numberTotalStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+
+               int rowIdx = 0;
+
+               // Report Name
+               org.apache.poi.ss.usermodel.Row reportNameRow = sheet.createRow(rowIdx++);
+               org.apache.poi.ss.usermodel.Cell reportNameCell = reportNameRow.createCell(0);
+               reportNameCell.setCellValue("Report Name: Outside Collection Summary Report");
+               reportNameCell.setCellStyle(mainHeaderStyle);
+
+               // Date Range
+               java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy");
+               org.apache.poi.ss.usermodel.Row dateRangeRow = sheet.createRow(rowIdx++);
+               org.apache.poi.ss.usermodel.Cell dateRangeCell = dateRangeRow.createCell(0);
+               dateRangeCell.setCellValue("Report Date: " + sdf.format(startDate) + " to " + sdf.format(endDate));
+               dateRangeCell.setCellStyle(mainHeaderStyle);
+
+               // Blank row
+               rowIdx++;
+
+               // Table Headers
+               org.apache.poi.ss.usermodel.Row headerRow = sheet.createRow(rowIdx++);
+               String[] columns = {"OR No.", "OR Date", "Account No", "Customer Name", "Address", "Status", "Total Amount To Pay"};
+               for (int col = 0; col < columns.length; col++) {
+                    org.apache.poi.ss.usermodel.Cell cell = headerRow.createCell(col);
+                    cell.setCellValue(columns[col]);
+                    cell.setCellStyle(tableHeaderStyle);
+               }
+
+               double grandTotalAmountPay = 0.0;
+
+               // Data Rows
+               for (OutsideCollectionReportSummaryProjection record : data) {
+                    org.apache.poi.ss.usermodel.Row row = sheet.createRow(rowIdx++);
+
+                    org.apache.poi.ss.usermodel.Cell cellOrNo = row.createCell(0);
+                    cellOrNo.setCellValue(record.getOrNo() != null ? record.getOrNo() : "");
+                    cellOrNo.setCellStyle(dataStyle);
+
+                    org.apache.poi.ss.usermodel.Cell cellDate = row.createCell(1);
+                    if (record.getOrDate() != null) {
+                         cellDate.setCellValue(record.getOrDate());
+                    }
+                    cellDate.setCellStyle(dateStyle);
+
+                    org.apache.poi.ss.usermodel.Cell cellAccountNo = row.createCell(2);
+                    cellAccountNo.setCellValue(record.getAccountNo() != null ? record.getAccountNo() : "");
+                    cellAccountNo.setCellStyle(dataStyle);
+
+                    org.apache.poi.ss.usermodel.Cell cellName = row.createCell(3);
+                    cellName.setCellValue(record.getCustomerName() != null ? record.getCustomerName() : "");
+                    cellName.setCellStyle(dataStyle);
+
+                    org.apache.poi.ss.usermodel.Cell cellAddress = row.createCell(4);
+                    cellAddress.setCellValue(record.getAddress() != null ? record.getAddress() : "");
+                    cellAddress.setCellStyle(dataStyle);
+
+                    org.apache.poi.ss.usermodel.Cell cellStatus = row.createCell(5);
+                    cellStatus.setCellValue("Complete");
+                    cellStatus.setCellStyle(dataStyle);
+
+                    org.apache.poi.ss.usermodel.Cell cellAmount = row.createCell(6);
+                    if (record.getTotalAmountPay() != null) {
+                         cellAmount.setCellValue(record.getTotalAmountPay());
+                         grandTotalAmountPay += record.getTotalAmountPay();
+                    }
+                    cellAmount.setCellStyle(numberStyle);
+               }
+
+               // Totals Row
+               org.apache.poi.ss.usermodel.Row totalRow = sheet.createRow(rowIdx++);
+               for (int col = 0; col <= 4; col++) {
+                    totalRow.createCell(col).setCellStyle(tableHeaderStyle);
+               }
+               org.apache.poi.ss.usermodel.Cell cellTotalLabel = totalRow.createCell(5);
+               cellTotalLabel.setCellValue("TOTAL:");
+               cellTotalLabel.setCellStyle(tableHeaderStyle);
+
+               org.apache.poi.ss.usermodel.Cell cellGrandTotal = totalRow.createCell(6);
+               cellGrandTotal.setCellValue(grandTotalAmountPay);
+               cellGrandTotal.setCellStyle(numberTotalStyle);
+
+               // Auto-size columns
+               for (int i = 0; i < columns.length; i++) {
+                    sheet.autoSizeColumn(i);
+               }
+
+               workbook.write(out);
+               return out.toByteArray();
+          } catch (Exception e) {
+               throw new RuntimeException("Failed to generate Outside Collection Summary Excel: " + e.getMessage(), e);
+          }
+     }
+
+     @Override
+     public byte[] generateOutsideCollectionReportDetails(Date startDate, Date endDate) {
+          Date adjustedEndDate = getEndOfDay(endDate);
+
+          java.util.List<OutsideCollectionReportDetailProjection> data =
+                    orCollectionRepo.getOutsideCollectionDetailsReportByDateRange(startDate, adjustedEndDate);
+
+          // Group rows by OR No (preserving insertion order)
+          java.util.LinkedHashMap<String, java.util.List<OutsideCollectionReportDetailProjection>> grouped =
+                    new java.util.LinkedHashMap<>();
+          for (OutsideCollectionReportDetailProjection row : data) {
+               grouped.computeIfAbsent(row.getOrNo(), k -> new java.util.ArrayList<>()).add(row);
+          }
+
+          try (org.apache.poi.xssf.usermodel.XSSFWorkbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
+               java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+
+               org.apache.poi.ss.usermodel.Sheet sheet = workbook.createSheet("Outside Collection Details");
+               org.apache.poi.ss.usermodel.CreationHelper ch = workbook.getCreationHelper();
+
+               // Fonts
+               org.apache.poi.ss.usermodel.Font boldFont = workbook.createFont();
+               boldFont.setBold(true);
+               boldFont.setFontHeightInPoints((short) 11);
+
+               org.apache.poi.ss.usermodel.Font boldSmFont = workbook.createFont();
+               boldSmFont.setBold(true);
+               boldSmFont.setFontHeightInPoints((short) 10);
+
+               // Styles
+               org.apache.poi.ss.usermodel.CellStyle titleStyle = workbook.createCellStyle();
+               titleStyle.setFont(boldFont);
+
+               // Parent row - light blue fill
+               org.apache.poi.ss.usermodel.CellStyle parentStyle = workbook.createCellStyle();
+               parentStyle.setFont(boldSmFont);
+               parentStyle.setFillForegroundColor(org.apache.poi.ss.usermodel.IndexedColors.PALE_BLUE.getIndex());
+               parentStyle.setFillPattern(org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND);
+               parentStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               parentStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               parentStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               parentStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+
+               org.apache.poi.ss.usermodel.CellStyle parentDateStyle = workbook.createCellStyle();
+               parentDateStyle.setFont(boldSmFont);
+               parentDateStyle.setFillForegroundColor(org.apache.poi.ss.usermodel.IndexedColors.PALE_BLUE.getIndex());
+               parentDateStyle.setFillPattern(org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND);
+               parentDateStyle.setDataFormat(ch.createDataFormat().getFormat("MMM dd, yyyy"));
+               parentDateStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               parentDateStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               parentDateStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               parentDateStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+
+               org.apache.poi.ss.usermodel.CellStyle parentNumStyle = workbook.createCellStyle();
+               parentNumStyle.setFont(boldSmFont);
+               parentNumStyle.setFillForegroundColor(org.apache.poi.ss.usermodel.IndexedColors.PALE_BLUE.getIndex());
+               parentNumStyle.setFillPattern(org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND);
+               parentNumStyle.setDataFormat(ch.createDataFormat().getFormat("#,##0.00"));
+               parentNumStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               parentNumStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               parentNumStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               parentNumStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+
+               // Child row - plain with borders
+               org.apache.poi.ss.usermodel.CellStyle childStyle = workbook.createCellStyle();
+               childStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               childStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               childStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               childStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+
+               org.apache.poi.ss.usermodel.CellStyle childNumStyle = workbook.createCellStyle();
+               childNumStyle.setDataFormat(ch.createDataFormat().getFormat("#,##0.00"));
+               childNumStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               childNumStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               childNumStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+               childNumStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+
+               // Grand total row
+               org.apache.poi.ss.usermodel.CellStyle totalStyle = workbook.createCellStyle();
+               totalStyle.setFont(boldFont);
+               totalStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+               totalStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+               totalStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+               totalStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+
+               org.apache.poi.ss.usermodel.CellStyle totalNumStyle = workbook.createCellStyle();
+               totalNumStyle.setFont(boldFont);
+               totalNumStyle.setDataFormat(ch.createDataFormat().getFormat("#,##0.00"));
+               totalNumStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+               totalNumStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+               totalNumStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+               totalNumStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+
+               // Table header style
+               org.apache.poi.ss.usermodel.CellStyle headerStyle = workbook.createCellStyle();
+               headerStyle.setFont(boldFont);
+               headerStyle.setFillForegroundColor(org.apache.poi.ss.usermodel.IndexedColors.GREY_25_PERCENT.getIndex());
+               headerStyle.setFillPattern(org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND);
+               headerStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+               headerStyle.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+               headerStyle.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+               headerStyle.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.MEDIUM);
+
+               int rowIdx = 0;
+
+               // Meta rows
+               java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy");
+
+               org.apache.poi.ss.usermodel.Row r0 = sheet.createRow(rowIdx++);
+               org.apache.poi.ss.usermodel.Cell c0 = r0.createCell(0);
+               c0.setCellValue("Report Name: Outside Collection Detailed Report");
+               c0.setCellStyle(titleStyle);
+
+               org.apache.poi.ss.usermodel.Row r1 = sheet.createRow(rowIdx++);
+               org.apache.poi.ss.usermodel.Cell c1 = r1.createCell(0);
+               c1.setCellValue("Report Date: " + sdf.format(startDate) + " to " + sdf.format(endDate));
+               c1.setCellStyle(titleStyle);
+
+               rowIdx++; // blank row
+
+               // Column headers
+               // PARENT columns (cols 0-6)
+               // CHILD columns (cols 7-9)
+               String[] parentCols = {
+                    "OR No.", "OR Date", "Account No", "Customer Name",
+                    "Address", "Status", "Total Amount To Pay"
+               };
+               String[] childCols = {
+                    "Description", "Remarks", "Total Amount"
+               };
+
+               int totalCols = parentCols.length + childCols.length;
+               org.apache.poi.ss.usermodel.Row hdrRow = sheet.createRow(rowIdx++);
+               int col = 0;
+               for (String h : parentCols) {
+                    org.apache.poi.ss.usermodel.Cell cell = hdrRow.createCell(col++);
+                    cell.setCellValue(h);
+                    cell.setCellStyle(headerStyle);
+               }
+               for (String h : childCols) {
+                    org.apache.poi.ss.usermodel.Cell cell = hdrRow.createCell(col++);
+                    cell.setCellValue(h);
+                    cell.setCellStyle(headerStyle);
+               }
+
+               // Grand-total accumulators
+               double gtTotalPay = 0.0;
+               double gtDetailTotal = 0.0;
+
+               // Data rows
+               for (java.util.Map.Entry<String, java.util.List<OutsideCollectionReportDetailProjection>> entry : grouped.entrySet()) {
+                    java.util.List<OutsideCollectionReportDetailProjection> rows = entry.getValue();
+                    OutsideCollectionReportDetailProjection first = rows.get(0);
+
+                    // Parent row
+                    org.apache.poi.ss.usermodel.Row parentRow = sheet.createRow(rowIdx++);
+                    int pc = 0;
+
+                    org.apache.poi.ss.usermodel.Cell pOrNo = parentRow.createCell(pc++);
+                    pOrNo.setCellValue(first.getOrNo() != null ? first.getOrNo() : "");
+                    pOrNo.setCellStyle(parentStyle);
+
+                    org.apache.poi.ss.usermodel.Cell pDate = parentRow.createCell(pc++);
+                    if (first.getOrDate() != null) { pDate.setCellValue(first.getOrDate()); }
+                    pDate.setCellStyle(parentDateStyle);
+
+                    org.apache.poi.ss.usermodel.Cell pAcct = parentRow.createCell(pc++);
+                    pAcct.setCellValue(first.getAccountNo() != null ? first.getAccountNo() : "");
+                    pAcct.setCellStyle(parentStyle);
+
+                    org.apache.poi.ss.usermodel.Cell pCust = parentRow.createCell(pc++);
+                    pCust.setCellValue(first.getCustomerName() != null ? first.getCustomerName() : "");
+                    pCust.setCellStyle(parentStyle);
+
+                    org.apache.poi.ss.usermodel.Cell pAddr = parentRow.createCell(pc++);
+                    pAddr.setCellValue(first.getAddress() != null ? first.getAddress() : "");
+                    pAddr.setCellStyle(parentStyle);
+
+                    org.apache.poi.ss.usermodel.Cell pStatus = parentRow.createCell(pc++);
+                    pStatus.setCellValue("Complete");
+                    pStatus.setCellStyle(parentStyle);
+
+                    double hTotalPay = first.getTotalAmountPay() != null ? first.getTotalAmountPay() : 0.0;
+                    org.apache.poi.ss.usermodel.Cell pTotalPay = parentRow.createCell(pc++);
+                    pTotalPay.setCellValue(hTotalPay);
+                    pTotalPay.setCellStyle(parentNumStyle);
+
+                    // Pad remaining child columns on parent row
+                    for (int ci = pc; ci < totalCols; ci++) {
+                         parentRow.createCell(ci).setCellStyle(parentStyle);
+                    }
+
+                    gtTotalPay += hTotalPay;
+
+                    // Child (detail) rows
+                    for (OutsideCollectionReportDetailProjection detail : rows) {
+                         if (detail.getOrdId() == null && detail.getDescription() == null && detail.getDetailTotalAmount() == null) {
+                              continue;
+                         }
+
+                         org.apache.poi.ss.usermodel.Row childRow = sheet.createRow(rowIdx++);
+                         int cc = 0;
+
+                         // Blank parent columns
+                         for (int ci = 0; ci < parentCols.length; ci++) {
+                              childRow.createCell(cc++).setCellStyle(childStyle);
+                         }
+
+                         org.apache.poi.ss.usermodel.Cell dDesc = childRow.createCell(cc++);
+                         dDesc.setCellValue(detail.getDescription() != null ? detail.getDescription() : "");
+                         dDesc.setCellStyle(childStyle);
+
+                         org.apache.poi.ss.usermodel.Cell dRemarks = childRow.createCell(cc++);
+                         dRemarks.setCellValue(detail.getRemarks() != null ? detail.getRemarks() : "");
+                         dRemarks.setCellStyle(childStyle);
+
+                         double dAmount = detail.getDetailTotalAmount() != null ? detail.getDetailTotalAmount() : 0.0;
+                         org.apache.poi.ss.usermodel.Cell dTotal = childRow.createCell(cc++);
+                         dTotal.setCellValue(dAmount);
+                         dTotal.setCellStyle(childNumStyle);
+
+                         gtDetailTotal += dAmount;
+                    }
+               }
+
+               // Grand-total row
+               org.apache.poi.ss.usermodel.Row totalRow = sheet.createRow(rowIdx++);
+               for (int ci = 0; ci < totalCols; ci++) {
+                    totalRow.createCell(ci).setCellStyle(totalStyle);
+               }
+
+               org.apache.poi.ss.usermodel.Cell tLabel = totalRow.createCell(5);
+               tLabel.setCellValue("GRAND TOTAL:");
+               tLabel.setCellStyle(totalStyle);
+
+               org.apache.poi.ss.usermodel.Cell tPay = totalRow.createCell(6);
+               tPay.setCellValue(gtTotalPay);
+               tPay.setCellStyle(totalNumStyle);
+
+               org.apache.poi.ss.usermodel.Cell tDetail = totalRow.createCell(9);
+               tDetail.setCellValue(gtDetailTotal);
+               tDetail.setCellStyle(totalNumStyle);
+
+               // Auto-size columns
+               for (int i = 0; i < totalCols; i++) {
+                    sheet.autoSizeColumn(i);
+               }
+
+               workbook.write(out);
+               return out.toByteArray();
+
+          } catch (Exception e) {
+               throw new RuntimeException("Failed to generate Outside Collection Details Report Excel: " + e.getMessage(), e);
           }
      }
 
