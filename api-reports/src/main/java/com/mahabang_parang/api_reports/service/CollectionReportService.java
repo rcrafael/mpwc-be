@@ -34,4 +34,8 @@ public interface CollectionReportService {
      public byte[] generateCollectionReportExcel(Date startDate, Date endDate, Integer branchCode, Integer phase);
 
      public byte[] generateCollectionReportDetails(Date startDate, Date endDate, Integer branchCode, Integer phase);
+
+     public byte[] generateOtherCollectionReportSummary(Date startDate, Date endDate);
+
+     public byte[] generateOtherCollectionReportDetails(Date startDate, Date endDate);
 }
