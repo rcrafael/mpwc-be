@@ -11,6 +11,10 @@ import org.springframework.data.repository.query.Param;
 
 import com.mahabang_parang.api_payment.model.entity.OfficialReceiptHeaderEntity;
 import com.mahabang_parang.api_reports.model.interfaces.CollectionReportDetailInterfaceProjection;
+import com.mahabang_parang.api_reports.model.interfaces.OtherCollectionReportDetailProjection;
+import com.mahabang_parang.api_reports.model.interfaces.OtherCollectionReportSummaryProjection;
+import com.mahabang_parang.api_reports.model.interfaces.OutsideCollectionReportDetailProjection;
+import com.mahabang_parang.api_reports.model.interfaces.OutsideCollectionReportSummaryProjection;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionInterfaceProjection;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionListInterfaceProjection;
 
@@ -154,6 +158,7 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
                     "ON cm.meter_no = ord.meter_no " +
           "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
           "  AND orh.status = 1 " +
+          "  AND (orh.is_part_sale = FALSE OR orh.is_part_sale IS NULL) " +
           "  AND (:branchCode IS NULL OR :branchCode = -1 OR cm.branch_code = :branchCode) " +
           "  AND (:phase      IS NULL OR :phase = -1      OR cm.phase       = :phase) " +
           "ORDER BY orh.or_date ASC, orh.or_no ASC",
@@ -202,14 +207,139 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
              "  LEFT  JOIN customer_meter cm           ON cm.meter_no = ord.meter_no " +
              "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
              "  AND orh.status = 1 " +
+             "  AND (orh.is_part_sale = FALSE OR orh.is_part_sale IS NULL) " +
              "  AND (:branchCode IS NULL OR :branchCode = -1 OR cm.branch_code = :branchCode) " +
              "  AND (:phase      IS NULL OR :phase = -1      OR cm.phase       = :phase) " +
              "ORDER BY orh.or_date ASC, orh.or_no ASC",
              nativeQuery = true)
-      List<CollectionReportDetailInterfaceProjection> getCollectionReportDetailsByDateRange(
-              @Param("startDate")  Date startDate,
-              @Param("endDate")    Date endDate,
-              @Param("branchCode") Integer branchCode,
-              @Param("phase")      Integer phase);
+       List<CollectionReportDetailInterfaceProjection> getCollectionReportDetailsByDateRange(
+               @Param("startDate")  Date startDate,
+               @Param("endDate")    Date endDate,
+               @Param("branchCode") Integer branchCode,
+               @Param("phase")      Integer phase);
+
+     @Query(value =
+             "SELECT " +
+             "  orh.or_no               AS orNo, " +
+             "  orh.or_date             AS orDate, " +
+             "  IFNULL(cust.account_no, '') AS accountNo, " +
+             "  IFNULL(NULLIF(TRIM(CONCAT(" +
+             "    IFNULL(cust.last_name, ''), " +
+             "    IF(cust.last_name IS NOT NULL AND cust.first_name IS NOT NULL, ', ', ''), " +
+             "    IFNULL(cust.first_name, ''), " +
+             "    IF(cust.middle_name IS NOT NULL AND TRIM(cust.middle_name) != '', CONCAT(' ', TRIM(cust.middle_name)), '') " +
+             "  )), ''), IFNULL(cust.alias, '')) AS customerName, " +
+             "  IFNULL(cust.address, '') AS address, " +
+             "  orh.status              AS status, " +
+             "  orh.total_amount_pay    AS totalAmountPay " +
+             "FROM official_receipt_header orh " +
+             "  LEFT JOIN customer cust ON cust.id = orh.customer_id " +
+             "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
+             "  AND orh.status = 1 " +
+             "  AND orh.is_part_sale = TRUE " +
+             "  AND (orh.is_outside_collection IS NULL OR orh.is_outside_collection = FALSE) " +
+             "  AND (orh.is_deleted = FALSE OR orh.is_deleted IS NULL) " +
+             "ORDER BY orh.or_date ASC, orh.or_no ASC",
+             nativeQuery = true)
+     List<OtherCollectionReportSummaryProjection> getOtherCollectionSummaryReportByDateRange(
+             @Param("startDate") Date startDate,
+             @Param("endDate")   Date endDate);
+
+     @Query(value =
+             "SELECT " +
+             "  orh.or_no               AS orNo, " +
+             "  orh.or_date             AS orDate, " +
+             "  IFNULL(cust.account_no, '') AS accountNo, " +
+             "  IFNULL(NULLIF(TRIM(CONCAT(" +
+             "    IFNULL(cust.last_name, ''), " +
+             "    IF(cust.last_name IS NOT NULL AND cust.first_name IS NOT NULL, ', ', ''), " +
+             "    IFNULL(cust.first_name, ''), " +
+             "    IF(cust.middle_name IS NOT NULL AND TRIM(cust.middle_name) != '', CONCAT(' ', TRIM(cust.middle_name)), '') " +
+             "  )), ''), IFNULL(cust.alias, '')) AS customerName, " +
+             "  IFNULL(cust.address, '') AS address, " +
+             "  orh.status              AS status, " +
+             "  orh.total_amount_pay    AS totalAmountPay, " +
+             "  ord.id                  AS ordId, " +
+             "  COALESCE(NULLIF(ord.other_description, ''), p.description, '') AS description, " +
+             "  ord.remarks             AS remarks, " +
+             "  ord.total_amount        AS detailTotalAmount " +
+             "FROM official_receipt_header orh " +
+             "  LEFT JOIN official_receipt_detail ord ON ord.or_no = orh.or_no " +
+             "  LEFT JOIN customer cust               ON cust.id = orh.customer_id " +
+             "  LEFT JOIN parts p                     ON p.id = ord.part_id " +
+             "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
+             "  AND orh.status = 1 " +
+             "  AND orh.is_part_sale = TRUE " +
+             "  AND (orh.is_outside_collection IS NULL OR orh.is_outside_collection = FALSE) " +
+             "  AND (orh.is_deleted = FALSE OR orh.is_deleted IS NULL) " +
+             "ORDER BY orh.or_date ASC, orh.or_no ASC, ord.id ASC",
+             nativeQuery = true)
+     List<OtherCollectionReportDetailProjection> getOtherCollectionDetailsReportByDateRange(
+             @Param("startDate") Date startDate,
+             @Param("endDate")   Date endDate);
+
+     @Query(value =
+             "SELECT " +
+             "  orh.or_no               AS orNo, " +
+             "  orh.or_date             AS orDate, " +
+             "  IFNULL(cust.account_no, '') AS accountNo, " +
+             "  IFNULL(NULLIF(TRIM(orh.outside_customer_name), ''), " +
+             "    IFNULL(NULLIF(TRIM(CONCAT(" +
+             "      IFNULL(cust.last_name, ''), " +
+             "      IF(cust.last_name IS NOT NULL AND cust.first_name IS NOT NULL, ', ', ''), " +
+             "      IFNULL(cust.first_name, ''), " +
+             "      IF(cust.middle_name IS NOT NULL AND TRIM(cust.middle_name) != '', CONCAT(' ', TRIM(cust.middle_name)), '') " +
+             "    )), ''), IFNULL(cust.alias, '')) " +
+             "  ) AS customerName, " +
+             "  COALESCE(NULLIF(TRIM(orh.outside_customer_address), ''), cust.address, '') AS address, " +
+             "  orh.status              AS status, " +
+             "  orh.total_amount_pay    AS totalAmountPay " +
+             "FROM official_receipt_header orh " +
+             "  LEFT JOIN customer cust ON cust.id = orh.customer_id " +
+             "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
+             "  AND orh.status = 1 " +
+             "  AND orh.is_part_sale = TRUE " +
+             "  AND orh.is_outside_collection = TRUE " +
+             "  AND (orh.is_deleted = FALSE OR orh.is_deleted IS NULL) " +
+             "ORDER BY orh.or_date ASC, orh.or_no ASC",
+             nativeQuery = true)
+     List<OutsideCollectionReportSummaryProjection> getOutsideCollectionSummaryReportByDateRange(
+             @Param("startDate") Date startDate,
+             @Param("endDate")   Date endDate);
+
+     @Query(value =
+             "SELECT " +
+             "  orh.or_no               AS orNo, " +
+             "  orh.or_date             AS orDate, " +
+             "  IFNULL(cust.account_no, '') AS accountNo, " +
+             "  IFNULL(NULLIF(TRIM(orh.outside_customer_name), ''), " +
+             "    IFNULL(NULLIF(TRIM(CONCAT(" +
+             "      IFNULL(cust.last_name, ''), " +
+             "      IF(cust.last_name IS NOT NULL AND cust.first_name IS NOT NULL, ', ', ''), " +
+             "      IFNULL(cust.first_name, ''), " +
+             "      IF(cust.middle_name IS NOT NULL AND TRIM(cust.middle_name) != '', CONCAT(' ', TRIM(cust.middle_name)), '') " +
+             "    )), ''), IFNULL(cust.alias, '')) " +
+             "  ) AS customerName, " +
+             "  COALESCE(NULLIF(TRIM(orh.outside_customer_address), ''), cust.address, '') AS address, " +
+             "  orh.status              AS status, " +
+             "  orh.total_amount_pay    AS totalAmountPay, " +
+             "  ord.id                  AS ordId, " +
+             "  COALESCE(NULLIF(ord.other_description, ''), p.description, '') AS description, " +
+             "  ord.remarks             AS remarks, " +
+             "  ord.total_amount        AS detailTotalAmount " +
+             "FROM official_receipt_header orh " +
+             "  LEFT JOIN official_receipt_detail ord ON ord.or_no = orh.or_no " +
+             "  LEFT JOIN customer cust               ON cust.id = orh.customer_id " +
+             "  LEFT JOIN parts p                     ON p.id = ord.part_id " +
+             "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
+             "  AND orh.status = 1 " +
+             "  AND orh.is_part_sale = TRUE " +
+             "  AND orh.is_outside_collection = TRUE " +
+             "  AND (orh.is_deleted = FALSE OR orh.is_deleted IS NULL) " +
+             "ORDER BY orh.or_date ASC, orh.or_no ASC, ord.id ASC",
+             nativeQuery = true)
+     List<OutsideCollectionReportDetailProjection> getOutsideCollectionDetailsReportByDateRange(
+             @Param("startDate") Date startDate,
+             @Param("endDate")   Date endDate);
 
 }

@@ -191,4 +191,72 @@ public class ReportController {
           }
      }
 
+     @GetMapping("generateOtherCollectionReportSummary/{startDate}/{endDate}")
+     public ResponseEntity<byte[]> generateOtherCollectionReportSummary(
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+          try {
+               byte[] fileContent = collectionReportService.generateOtherCollectionReportSummary(startDate, endDate);
+
+               org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+               headers.add("Content-Disposition", "attachment; filename=Other_Collection_Summary_Report.xlsx");
+               headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+               return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+          } catch (Exception e) {
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+          }
+     }
+
+     @GetMapping("generateOtherCollectionReportDetails/{startDate}/{endDate}")
+     public ResponseEntity<byte[]> generateOtherCollectionReportDetails(
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+          try {
+               byte[] fileContent = collectionReportService.generateOtherCollectionReportDetails(startDate, endDate);
+
+               org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+               headers.add("Content-Disposition", "attachment; filename=Other_Collection_Detailed_Report.xlsx");
+               headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+               return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+          } catch (Exception e) {
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+          }
+     }
+
+     @GetMapping("generateOutsideCollectionReportSummary/{startDate}/{endDate}")
+     public ResponseEntity<byte[]> generateOutsideCollectionReportSummary(
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+          try {
+               byte[] fileContent = collectionReportService.generateOutsideCollectionReportSummary(startDate, endDate);
+
+               org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+               headers.add("Content-Disposition", "attachment; filename=Outside_Collection_Summary_Report.xlsx");
+               headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+               return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+          } catch (Exception e) {
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+          }
+     }
+
+     @GetMapping("generateOutsideCollectionReportDetails/{startDate}/{endDate}")
+     public ResponseEntity<byte[]> generateOutsideCollectionReportDetails(
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+               @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+          try {
+               byte[] fileContent = collectionReportService.generateOutsideCollectionReportDetails(startDate, endDate);
+
+               org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+               headers.add("Content-Disposition", "attachment; filename=Outside_Collection_Detailed_Report.xlsx");
+               headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+               return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+          } catch (Exception e) {
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+          }
+     }
+
 }
