@@ -158,6 +158,7 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
                     "ON cm.meter_no = ord.meter_no " +
           "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
           "  AND orh.status = 1 " +
+          "  AND (orh.is_part_sale = FALSE OR orh.is_part_sale IS NULL) " +
           "  AND (:branchCode IS NULL OR :branchCode = -1 OR cm.branch_code = :branchCode) " +
           "  AND (:phase      IS NULL OR :phase = -1      OR cm.phase       = :phase) " +
           "ORDER BY orh.or_date ASC, orh.or_no ASC",
@@ -206,6 +207,7 @@ public interface ORCollectionRepository extends JpaRepository<OfficialReceiptHea
              "  LEFT  JOIN customer_meter cm           ON cm.meter_no = ord.meter_no " +
              "WHERE orh.or_date BETWEEN :startDate AND :endDate " +
              "  AND orh.status = 1 " +
+             "  AND (orh.is_part_sale = FALSE OR orh.is_part_sale IS NULL) " +
              "  AND (:branchCode IS NULL OR :branchCode = -1 OR cm.branch_code = :branchCode) " +
              "  AND (:phase      IS NULL OR :phase = -1      OR cm.phase       = :phase) " +
              "ORDER BY orh.or_date ASC, orh.or_no ASC",
