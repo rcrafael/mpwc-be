@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -28,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.mahabang_parang.api_reports.model.interfaces.BillingReportDetailedProjection;
 import com.mahabang_parang.api_reports.model.interfaces.BillingReportSummaryProjection;
+import com.mahabang_parang.api_reports.model.interfaces.UnpaidBillingReportProjection;
 import com.mahabang_parang.api_reports.repository.BillingReportRepository;
 import com.mahabang_parang.api_reports.service.impl.BillingReportServiceImpl;
 import com.mahabang_parang.api_user.model.dto.BranchDto;
@@ -327,5 +329,128 @@ public class BillingReportServiceImplTest {
         }
 
         verify(billingReportRepo).getBillingReportDetailed(eq(start), any(Date.class), eq(-1), eq(-1));
+    }
+
+    private UnpaidBillingReportProjection createUnpaidProjection(
+            String readingNo, String accountNo, String meterNo, String customerName,
+            String alias, Integer branchCode, Integer phase, String address,
+            Integer monthOf, Date dateFrom, Date dateTo, Date dueDate,
+            Integer status, Integer m3Used, Double amountToPay, Double amountPaid, Double remainingBalance) {
+        return new UnpaidBillingReportProjection() {
+            @Override public String getReadingNo() { return readingNo; }
+            @Override public String getAccountNo() { return accountNo; }
+            @Override public String getMeterNo() { return meterNo; }
+            @Override public String getCustomerName() { return customerName; }
+            @Override public String getAlias() { return alias; }
+            @Override public Integer getBranchCode() { return branchCode; }
+            @Override public Integer getPhase() { return phase; }
+            @Override public String getAddress() { return address; }
+            @Override public Integer getMonthOf() { return monthOf; }
+            @Override public Date getDateFrom() { return dateFrom; }
+            @Override public Date getDateTo() { return dateTo; }
+            @Override public Date getDueDate() { return dueDate; }
+            @Override public Integer getStatus() { return status; }
+            @Override public Integer getM3Used() { return m3Used; }
+            @Override public Double getAmountToPay() { return amountToPay; }
+            @Override public Double getAmountPaid() { return amountPaid; }
+            @Override public Double getRemainingBalance() { return remainingBalance; }
+        };
+    }
+
+    @Test
+    void testGenerateUnpaidBillingReport_withOverdueHighlightAndTotals() throws Exception {
+        Calendar cal = Calendar.getInstance();
+        cal.set(2026, Calendar.JANUARY, 1, 0, 0, 0);
+        Date dateFrom = cal.getTime();
+        cal.set(2026, Calendar.JANUARY, 31, 23, 59, 59);
+        Date dateTo = cal.getTime();
+
+        // Past due date (e.g., in 2020) -> should be overdue
+        Calendar pastCal = Calendar.getInstance();
+        pastCal.set(2020, Calendar.FEBRUARY, 15, 0, 0, 0);
+        Date overdueDueDate = pastCal.getTime();
+
+        // Future due date (e.g., year 2099) -> should NOT be overdue
+        Calendar futureCal = Calendar.getInstance();
+        futureCal.set(2099, Calendar.FEBRUARY, 15, 0, 0, 0);
+        Date futureDueDate = futureCal.getTime();
+
+        UnpaidBillingReportProjection record1 = createUnpaidProjection(
+                "RD-001", "ACC-101", "MTR-201", "Dela Cruz, Juan M",
+                "JD", 1, 2, "123 Main St",
+                1, dateFrom, dateTo, overdueDueDate,
+                2, 25, 500.0, 100.0, 400.0
+        );
+
+        UnpaidBillingReportProjection record2 = createUnpaidProjection(
+                "RD-002", "ACC-102", "MTR-202", "Santos, Maria A",
+                "MS", 1, 2, "456 Side St",
+                1, dateFrom, dateTo, futureDueDate,
+                2, 15, 300.0, 50.0, 250.0
+        );
+
+        when(billingReportRepo.getUnpaidBillingReport(eq(dateFrom), any(Date.class), eq(-1), eq(-1)))
+                .thenReturn(List.of(record1, record2));
+        when(branchService.findAll()).thenReturn(Collections.emptyList());
+        when(phaseService.findAll()).thenReturn(Collections.emptyList());
+
+        byte[] result = service.generateUnpaidBillingReport(dateFrom, dateTo, null, null);
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+
+        try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(result))) {
+            Sheet sheet = wb.getSheet("Unpaid Billing Report");
+            assertNotNull(sheet);
+
+            // Report Header rows
+            assertEquals("Report Name: Unpaid Billing Report", sheet.getRow(0).getCell(0).getStringCellValue());
+            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
+            assertEquals("Report Date: " + sdf.format(dateFrom) + " to " + sdf.format(dateTo),
+                    sheet.getRow(1).getCell(0).getStringCellValue());
+            assertEquals("Branch Code: All   |   Phase: All", sheet.getRow(2).getCell(0).getStringCellValue());
+
+            // Column Headers (row 4)
+            Row hdr = sheet.getRow(4);
+            assertEquals("Reading No", hdr.getCell(0).getStringCellValue());
+            assertEquals("Account No", hdr.getCell(1).getStringCellValue());
+            assertEquals("Meter No", hdr.getCell(2).getStringCellValue());
+            assertEquals("Customer Name", hdr.getCell(3).getStringCellValue());
+            assertEquals("Alias", hdr.getCell(4).getStringCellValue());
+            assertEquals("Branch Code", hdr.getCell(5).getStringCellValue());
+            assertEquals("Phase", hdr.getCell(6).getStringCellValue());
+            assertEquals("Address", hdr.getCell(7).getStringCellValue());
+            assertEquals("Month", hdr.getCell(8).getStringCellValue());
+            assertEquals("Billing Period", hdr.getCell(9).getStringCellValue());
+            assertEquals("Due Date", hdr.getCell(10).getStringCellValue());
+            assertEquals("Status", hdr.getCell(11).getStringCellValue());
+            assertEquals("M3 Used", hdr.getCell(12).getStringCellValue());
+            assertEquals("Remaining Balance", hdr.getCell(13).getStringCellValue());
+
+            // Data Row 1 (Overdue)
+            Row row1 = sheet.getRow(5);
+            assertEquals("RD-001", row1.getCell(0).getStringCellValue());
+            assertEquals("Incomplete", row1.getCell(11).getStringCellValue());
+            assertEquals(25.0, row1.getCell(12).getNumericCellValue(), 0.001);
+            assertEquals(400.0, row1.getCell(13).getNumericCellValue(), 0.001);
+            // Verify light red (ROSE) fill pattern on overdue row
+            assertEquals(IndexedColors.ROSE.getIndex(), row1.getCell(0).getCellStyle().getFillForegroundColor());
+
+            // Data Row 2 (Not Overdue)
+            Row row2 = sheet.getRow(6);
+            assertEquals("RD-002", row2.getCell(0).getStringCellValue());
+            assertEquals("Incomplete", row2.getCell(11).getStringCellValue());
+            assertEquals(15.0, row2.getCell(12).getNumericCellValue(), 0.001);
+            assertEquals(250.0, row2.getCell(13).getNumericCellValue(), 0.001);
+            // Verify not overdue style (fillForegroundColor != ROSE)
+            assertTrue(row2.getCell(0).getCellStyle().getFillForegroundColor() != IndexedColors.ROSE.getIndex());
+
+            // Totals row (row 7)
+            Row totalRow = sheet.getRow(7);
+            assertEquals("TOTAL:", totalRow.getCell(11).getStringCellValue());
+            assertEquals(40.0, totalRow.getCell(12).getNumericCellValue(), 0.001);
+            assertEquals(650.0, totalRow.getCell(13).getNumericCellValue(), 0.001);
+        }
+
+        verify(billingReportRepo).getUnpaidBillingReport(eq(dateFrom), any(Date.class), eq(-1), eq(-1));
     }
 }

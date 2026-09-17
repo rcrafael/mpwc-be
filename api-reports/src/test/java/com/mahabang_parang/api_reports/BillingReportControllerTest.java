@@ -98,4 +98,34 @@ public class BillingReportControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
+
+    @Test
+    void testGenerateUnpaidBillingReport_success() {
+        byte[] dummyContent = new byte[]{9, 10, 11, 12};
+        when(billingReportService.generateUnpaidBillingReport(eq(startDate), eq(endDate), eq(1), eq(2)))
+                .thenReturn(dummyContent);
+
+        ResponseEntity<byte[]> response = controller.generateUnpaidBillingReport(startDate, endDate, 1, 2);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(dummyContent, response.getBody());
+        assertEquals("attachment; filename=Unpaid_Billing_Report.xlsx",
+                response.getHeaders().getFirst("Content-Disposition"));
+        assertEquals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                response.getHeaders().getFirst("Content-Type"));
+
+        verify(billingReportService).generateUnpaidBillingReport(eq(startDate), eq(endDate), eq(1), eq(2));
+    }
+
+    @Test
+    void testGenerateUnpaidBillingReport_error() {
+        when(billingReportService.generateUnpaidBillingReport(any(), any(), any(), any()))
+                .thenThrow(new RuntimeException("DB error"));
+
+        ResponseEntity<byte[]> response = controller.generateUnpaidBillingReport(startDate, endDate, null, null);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
 }
