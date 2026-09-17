@@ -9,10 +9,10 @@ import com.mahabang_parang.api_reports.model.dto.DashboardCardDataDto;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionInterfaceProjection;
 import com.mahabang_parang.api_reports.model.interfaces.ShareCapCbuSavingsCollectionListInterfaceProjection;
 import com.mahabang_parang.api_reports.service.CollectionReportService;
+import com.mahabang_parang.api_reports.service.CustomerMeterUsageReportService;
 
 import java.util.Date;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -22,14 +22,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
-@RequestMapping("/api/reports")
-public class ReportController {
+@RequestMapping("/api/reports/collection")
+public class CollectionReportController {
 
      @Autowired
      private CollectionReportService collectionReportService;
 
      @Autowired
-     private com.mahabang_parang.api_reports.service.CustomerMeterUsageReportService customerMeterUsageReportService;
+     private CustomerMeterUsageReportService customerMeterUsageReportService;
 
      @GetMapping("getShareCapCbuSavingsCollectionByCustomer/{customerId}")
      public ResponseEntity<ApiResponse> getShareCapCbuSavingsCollectionByCustomerId(@PathVariable String customerId) {
