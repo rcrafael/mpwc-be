@@ -8,4 +8,5 @@ public interface BillingReportService {
 
     byte[] generateBillingReportDetailed(Date startDate, Date endDate, Integer branchCode, Integer phase);
 
+    byte[] generateUnpaidBillingReport(Date startDate, Date endDate, Integer branchCode, Integer phase);
 }
