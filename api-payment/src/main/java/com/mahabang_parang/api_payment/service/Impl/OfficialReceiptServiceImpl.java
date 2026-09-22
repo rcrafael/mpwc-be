@@ -663,8 +663,9 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           // First generate Excel
           byte[] excelBytes = printExcelOR(id);
 
-          // Then convert to PDF
-          return receiptService.convertExcelToPdf(excelBytes);
+          // Then convert to PDF using Spire.XLS (comment/uncomment to switch back to MS Office)
+          // return receiptService.convertExcelToPdf(excelBytes);
+          return receiptService.convertExcelToPdfWithSpire(excelBytes);
      }
 
      private OfficialReceiptTableListResponse convertInterfaceToResponse(

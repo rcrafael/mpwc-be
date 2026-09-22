@@ -166,4 +166,23 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
     }
 
+    @Override
+    public byte[] convertExcelToPdfWithSpire(byte[] excelBytes) throws IOException {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(excelBytes);
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+
+            com.spire.xls.Workbook workbook = new com.spire.xls.Workbook();
+            workbook.loadFromStream(inputStream);
+
+            if (workbook.getWorksheets().getCount() > 0) {
+                workbook.getWorksheets().get(0).getPageSetup().isFitToPage(true);
+            }
+
+            workbook.saveToStream(outputStream, com.spire.xls.FileFormat.PDF);
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            throw new IOException("Failed to convert Excel to PDF using Spire.XLS", e);
+        }
+    }
+
 }
