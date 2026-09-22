@@ -13,4 +13,5 @@ public interface ReceiptService {
      public void setCellValue(Sheet sheet, int rowIndex, int columnIndex, double value);
      public void setCellFormula(Sheet sheet, int rowIndex, int columnIndex, String formula);
      public byte[] convertExcelToPdf(byte[] excelBytes) throws IOException;
+     public byte[] convertExcelToPdfWithSpire(byte[] excelBytes) throws IOException;
 }
