@@ -57,6 +57,8 @@ import com.mahabang_parang.api_payment.repository.ShareSavingsRepository;
 import com.mahabang_parang.api_payment.service.OfficialReceiptService;
 import com.mahabang_parang.api_payment.service.ReceiptService;
 import com.mahabang_parang.api_user.model.dto.CustomerDto;
+import com.mahabang_parang.api_user.model.dto.CustomerMeterDto;
+import com.mahabang_parang.api_user.service.CustomerMeterService;
 import com.mahabang_parang.api_user.service.CustomerService;
 
 @Transactional(rollbackFor = Exception.class)
@@ -78,6 +80,9 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
      private BillingService billingService;
      @Autowired
      private CustomerService customerService;
+
+     @Autowired
+     private CustomerMeterService customerMeterService;
 
      @Autowired
      private OfficialReceiptHeaderMapper orHeaderMapper;
@@ -606,16 +611,29 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           }
 
           String billingMonths = "";
+          String meterNumber = "";
           String meterNumbers = "";
+          
+          List<String> meterNumbersList = new ArrayList<String>();
+          List<String> distinctMeterList = new ArrayList<String>();
           if (billing.size() > 0) {
                for (BillingDto b : billing) {
                     billingMonths = billingMonths + convertIntToMMM(b.getMonthOf()) + ", ";
-                    meterNumbers = meterNumbers + b.getMeterNo() + ", ";
+                    meterNumbersList.add(b.getMeterNo());
+                    meterNumber = b.getMeterNo();
                }
                billingMonths = billingMonths.substring(0, billingMonths.length() - 2);
-               meterNumbers = meterNumbers.substring(0, meterNumbers.length() - 2);
+               distinctMeterList = meterNumbersList.stream().distinct().toList();
+               meterNumbers = String.join(", ", distinctMeterList);
           }
 
+          // get alias
+          String alias = "";
+          CustomerMeterDto customerMeter = customerMeterService.getCustomerMeterByMeterNo(meterNumber);
+          if (customerMeter != null) {
+               alias = customerMeter.getAlias();
+          }
+          
           CustomerDto customer = new CustomerDto();
           if (orHeader.getCustomerId() != null && !orHeader.getCustomerId().equals("")) {
                customer = customerService.getCustomer(orHeader.getCustomerId());
@@ -630,6 +648,7 @@ public class OfficialReceiptServiceImpl implements OfficialReceiptService {
           receipt.setOrNo(orHeader.getOrNo());
           receipt.setCustomerId(orHeader.getCustomerId());
           receipt.setCustomer(customer);
+          receipt.setAlias(alias);
           receipt.setOutsideCustomerName(orHeader.getOutsideCustomerName());
           receipt.setOutsideCustomerAddress(orHeader.getOutsideCustomerAddress());
           receipt.setOrDate(orHeader.getOrDate());

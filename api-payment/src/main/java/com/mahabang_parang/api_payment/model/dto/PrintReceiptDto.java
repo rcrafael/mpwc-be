@@ -19,6 +19,7 @@ public class PrintReceiptDto {
      private String orNo;
      private String customerId;
      private CustomerDto customer;
+     private String alias;
      private String outsideCustomerName;
      private String outsideCustomerAddress;
      private Date orDate;
