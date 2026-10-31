@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("api/settings/default-values")
 public class DefaultValueController {
 
-     @Autowired
-     private DefaultValueService defaultValueService;
+     private final DefaultValueService defaultValueService;
+
+     public DefaultValueController(DefaultValueService defaultValueService) {
+          this.defaultValueService = defaultValueService;
+     }
 
      @GetMapping()
      public ResponseEntity<ApiResponse> getDefaultValues() throws Exception {

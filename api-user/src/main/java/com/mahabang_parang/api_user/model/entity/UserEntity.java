@@ -42,6 +42,9 @@ public class UserEntity implements UserDetails {
      @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
      private RoleEntity role;
 
+     @jakarta.persistence.OneToMany(mappedBy = "user", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true, fetch = jakarta.persistence.FetchType.EAGER)
+     private List<UserPageAccessEntity> pageAccess = new java.util.ArrayList<>();
+
      @Override
      public Collection<? extends GrantedAuthority> getAuthorities() {
          return List.of(new SimpleGrantedAuthority(role.getRole()));

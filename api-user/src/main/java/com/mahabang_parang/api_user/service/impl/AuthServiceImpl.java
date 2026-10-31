@@ -35,11 +35,10 @@ public class AuthServiceImpl implements AuthService {
 
           authManager.authenticate(new UsernamePasswordAuthenticationToken(payload.getEmail(), payload.getPassword()));
           System.out.println("AUTHENTICATED! ");
-          UserDto user = userService.findByEmail(payload.getEmail());
+          UserEntity entity = userService.findEntityByEmail(payload.getEmail());
 
-          System.out.println("USER: " + user.toString());
-          if(user != null && passwordEncoder.matches(payload.getPassword(), user.getPassword()) ) {
-               UserEntity entity = mapper.toEntity(user);
+          System.out.println("USER: " + (entity != null ? entity.getEmail() : "null"));
+          if(entity != null && passwordEncoder.matches(payload.getPassword(), entity.getPassword()) ) {
                String accessToken = jwtUtils.generateToken(entity);
                String refreshToken = jwtUtils.generateRefreshToken(entity);
                

@@ -40,6 +40,20 @@ public class JwtUtil {
      }
 
      public String generateToken(UserEntity userDetails) {
+          java.util.List<String> effectivePages = new java.util.ArrayList<>();
+          String roleName = (userDetails.getRole() != null && userDetails.getRole().getRole() != null)
+                    ? userDetails.getRole().getRole()
+                    : "";
+
+          if ("superadmin".equalsIgnoreCase(roleName)) {
+               effectivePages.addAll(com.mahabang_parang.api_user.model.constant.PageConstants.ALL_PAGES);
+          } else if (userDetails.getPageAccess() != null) {
+               effectivePages = userDetails.getPageAccess().stream()
+                         .map(com.mahabang_parang.api_user.model.entity.UserPageAccessEntity::getPageCode)
+                         .distinct()
+                         .collect(java.util.stream.Collectors.toList());
+          }
+
           return Jwts.builder()
                     .subject(userDetails.getEmail())
                     .claim("id", userDetails.getId())
@@ -49,6 +63,7 @@ public class JwtUtil {
                     .claim("lname", userDetails.getLname())
                     .claim("mname", userDetails.getMname())
                     .claim("role", userDetails.getRole() != null ? userDetails.getRole() : null)
+                    .claim("pageAccess", effectivePages)
                     .issuedAt(new Date(System.currentTimeMillis()))
                     .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                     .signWith(getSigningKey(), Jwts.SIG.HS256)
