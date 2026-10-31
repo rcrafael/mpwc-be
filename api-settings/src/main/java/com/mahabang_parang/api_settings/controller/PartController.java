@@ -27,10 +27,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("api/settings/part")
 public class PartController {
 
-     @Autowired
-     private PartService partService;
+     private final PartService partService;
 
-
+     public PartController(PartService partService) {
+          this.partService = partService;
+     }
 
      @GetMapping("{pageNo}/{pageSize}")
      public ResponseEntity<ApiResponse> getAll(@PathVariable int pageNo, @PathVariable int pageSize) {

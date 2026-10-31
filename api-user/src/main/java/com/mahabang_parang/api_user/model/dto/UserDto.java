@@ -30,4 +30,6 @@ public class UserDto {
 
      private RoleEntity role;
 
+     private java.util.List<String> pageAccess = new java.util.ArrayList<>();
+
 }

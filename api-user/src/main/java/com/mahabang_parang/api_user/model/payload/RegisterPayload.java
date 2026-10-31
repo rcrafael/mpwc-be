@@ -21,4 +21,6 @@ public class RegisterPayload {
      /** The ID of the role to assign to the new user. */
      private String roleId;
 
+     private java.util.List<String> pageAccess;
+
 }

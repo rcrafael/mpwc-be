@@ -1,6 +1,5 @@
 package com.mahabang_parang.api_settings.service.Impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +14,13 @@ import com.mahabang_parang.api_settings.service.DefaultValueService;
 @Transactional
 public class DefaultValueServiceImpl implements DefaultValueService {
 
-     @Autowired
-     private DefaultValueRepository defaultValueRepo;
-     @Autowired
-     private DefaultValueMapper mapper;
+     private final DefaultValueRepository defaultValueRepo;
+     private final DefaultValueMapper mapper;
+
+     public DefaultValueServiceImpl(DefaultValueRepository defaultValueRepo, DefaultValueMapper mapper) {
+          this.defaultValueRepo = defaultValueRepo;
+          this.mapper = mapper;
+     }
 
      @Override
      public DefaultValueDto getDefaultValue() throws Exception {

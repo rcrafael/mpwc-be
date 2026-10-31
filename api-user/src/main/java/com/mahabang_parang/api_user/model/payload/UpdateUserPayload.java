@@ -19,5 +19,6 @@ public class UpdateUserPayload {
      private String lname;
      private String mname;
      private String roleId;
+     private java.util.List<String> pageAccess;
 
 }

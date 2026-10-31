@@ -18,21 +18,24 @@ import com.mahabang_parang.api_user.repository.RoleRepository;
 import com.mahabang_parang.api_user.repository.UserRepository;
 import com.mahabang_parang.api_user.service.UserService;
 
+import org.springframework.transaction.annotation.Transactional;
+import com.mahabang_parang.api_user.repository.UserPageAccessRepository;
+
 @Service
 public class UserServiceImpl implements UserService {
 
      private final UserRepository userRepository;
-
      private final RoleRepository roleRepository;
-
+     private final UserPageAccessRepository userPageAccessRepository;
      private final UserMapper mapper;
 
      @Lazy
      private final PasswordEncoder passwordEncoder;
 
-     UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserMapper mapper, PasswordEncoder passwordEncoder) {
+     UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserPageAccessRepository userPageAccessRepository, UserMapper mapper, PasswordEncoder passwordEncoder) {
           this.userRepository = userRepository;
           this.roleRepository = roleRepository;
+          this.userPageAccessRepository = userPageAccessRepository;
           this.mapper = mapper;
           this.passwordEncoder = passwordEncoder;
      }
@@ -41,6 +44,11 @@ public class UserServiceImpl implements UserService {
      public UserDto findByEmail(String email) {
           UserDto user = mapper.toDto(userRepository.findByEmail(email));
           return user;
+     }
+
+     @Override
+     public UserEntity findEntityByEmail(String email) {
+          return userRepository.findByEmail(email);
      }
 
      @Override
@@ -57,6 +65,7 @@ public class UserServiceImpl implements UserService {
      }
 
      @Override
+     @Transactional(rollbackFor = Exception.class)
      public UserDto register(RegisterPayload payload) throws Exception {
           RoleEntity role = roleRepository.findById(payload.getRoleId())
                     .orElseThrow(() -> new RuntimeException("Role not found with id: " + payload.getRoleId()));
@@ -72,6 +81,28 @@ public class UserServiceImpl implements UserService {
           user.setMname(payload.getMname());
           user.setRole(role);
 
+          List<String> pagesToAssign = payload.getPageAccess();
+          String roleName = role.getRole() != null ? role.getRole() : "";
+
+          // If role is superadmin or admin and no explicit pages provided, default to all pages
+          if ((pagesToAssign == null || pagesToAssign.isEmpty()) && 
+              ("superadmin".equalsIgnoreCase(roleName) || "admin".equalsIgnoreCase(roleName))) {
+               pagesToAssign = com.mahabang_parang.api_user.model.constant.PageConstants.ALL_PAGES;
+          }
+
+          if (pagesToAssign != null && !pagesToAssign.isEmpty()) {
+               for (String pageCode : pagesToAssign) {
+                    if (pageCode != null && !pageCode.trim().isEmpty()) {
+                         user.getPageAccess().add(
+                              com.mahabang_parang.api_user.model.entity.UserPageAccessEntity.builder()
+                                   .user(user)
+                                   .pageCode(pageCode.trim())
+                                   .build()
+                         );
+                    }
+               }
+          }
+
           UserEntity saved = userRepository.save(user);
           return mapper.toDto(saved);
      }
@@ -81,8 +112,13 @@ public class UserServiceImpl implements UserService {
           return mapper.toList(users);
      }
 
+     @Override
+     public List<java.util.Map<String, String>> getPageDefinitions() {
+          return com.mahabang_parang.api_user.model.constant.PageConstants.ALL_PAGE_DEFINITIONS;
+     }
 
      @Override
+     @Transactional(rollbackFor = Exception.class)
      public UserDto updateUser(UpdateUserPayload payload) throws Exception {
           
           UserEntity user = userRepository.findById(payload.getId()).orElseThrow();
@@ -123,6 +159,35 @@ public class UserServiceImpl implements UserService {
                RoleEntity role = roleRepository.findById(payload.getRoleId())
                          .orElseThrow(() -> new RuntimeException("Role not found with id: " + payload.getRoleId()));
                user.setRole(role);
+          }
+
+          if(payload.getPageAccess() != null) {
+               System.out.println("UPDATE PageAccess: " + payload.getPageAccess());
+               
+               java.util.Set<String> newPageCodes = payload.getPageAccess().stream()
+                         .filter(code -> code != null && !code.trim().isEmpty())
+                         .map(String::trim)
+                         .collect(java.util.stream.Collectors.toSet());
+
+               // Remove permissions that are not in the new list (orphanRemoval handles DELETEs)
+               user.getPageAccess().removeIf(existing -> !newPageCodes.contains(existing.getPageCode()));
+
+               // Find existing page codes remaining
+               java.util.Set<String> existingCodes = user.getPageAccess().stream()
+                         .map(com.mahabang_parang.api_user.model.entity.UserPageAccessEntity::getPageCode)
+                         .collect(java.util.stream.Collectors.toSet());
+
+               // Add only genuinely new page codes (no duplicate inserts for existing rows)
+               for (String code : newPageCodes) {
+                    if (!existingCodes.contains(code)) {
+                         user.getPageAccess().add(
+                              com.mahabang_parang.api_user.model.entity.UserPageAccessEntity.builder()
+                                   .user(user)
+                                   .pageCode(code)
+                                   .build()
+                         );
+                    }
+               }
           }
 
           UserEntity saved = userRepository.save(user);

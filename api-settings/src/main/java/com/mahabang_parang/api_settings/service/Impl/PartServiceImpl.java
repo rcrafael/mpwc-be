@@ -21,11 +21,13 @@ import com.mahabang_parang.api_settings.service.PartService;
 @Service
 public class PartServiceImpl implements PartService {
 
-     @Autowired
-     private PartRepository partRepo;
+     private final PartRepository partRepo;
+     private final PartMapper mapper;
 
-     @Autowired
-     private PartMapper mapper;
+     public PartServiceImpl(PartRepository partRepo, PartMapper mapper) {
+          this.partRepo = partRepo;
+          this.mapper = mapper;
+     }
 
      @Override
      public PartDto create(PartDto payload) throws Exception {
