@@ -16,7 +16,7 @@ import com.mahabang_parang.api_user.repository.CustomerMeterRepository;
 import com.mahabang_parang.api_user.service.CustomerMeterService;
 
 @Service
-public class CustomerMeterServiceImpl implements CustomerMeterService{
+public class CustomerMeterServiceImpl implements CustomerMeterService {
 
      private final CustomerMeterRepository custMeterRepo;
 
@@ -32,14 +32,14 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
 
           ApiResponse response = new ApiResponse();
 
-          if(custMeterRepo.findByMeterNo(customerMeter.getMeterNo()) != null) {
+          if (custMeterRepo.findByMeterNo(customerMeter.getMeterNo()) != null) {
                response.setStatusCode(HttpStatus.CONFLICT);
                response.setMessage("Meter Number already exists: " + customerMeter.getMeterNo());
                response.setResult(null);
                return response;
           }
 
-          if(custMeterRepo.findBySerialNo(customerMeter.getSerialNo()) != null) {
+          if (custMeterRepo.findBySerialNo(customerMeter.getSerialNo()) != null) {
                response.setStatusCode(HttpStatus.CONFLICT);
                response.setMessage("Serial Number already exists: " + customerMeter.getSerialNo());
                response.setResult(null);
@@ -47,7 +47,7 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
           }
 
           CustomerMeterEntity custMeter = new CustomerMeterEntity();
-          
+
           custMeter.setCustomerId(customerMeter.getCustomerId());
           custMeter.setMeterNo(customerMeter.getMeterNo());
           custMeter.setSerialNo(customerMeter.getSerialNo());
@@ -56,7 +56,8 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
           custMeter.setPhase(customerMeter.getPhase());
           custMeter.setCustomerType(customerMeter.getCustomerType());
           custMeter.setLocation(customerMeter.getLocation());
-          custMeter.setStatus(customerMeter.getStatus() == null ? 7 : customerMeter.getStatus()); // default to 7 = Deactivated
+          custMeter.setStatus(customerMeter.getStatus() == null ? 7 : customerMeter.getStatus()); // default to 7 =
+                                                                                                  // Deactivated
           custMeter.setCreatedBy(customerMeter.getCreatedBy());
           custMeter.setCustomerType(customerMeter.getCustomerType()); // 1 - residential; 2 - commercial
           CustomerMeterDto newMeter = mapper.toDto(custMeterRepo.save(custMeter));
@@ -70,10 +71,11 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
 
      @Override
      public CustomerMeterDto updateCustomerMeter(CustomerMeterDto customerMeter) {
-          
 
-          CustomerMeterEntity custMeter = custMeterRepo.findByMeterNo(customerMeter.getMeterNo());
-          
+          // CustomerMeterEntity custMeter =
+          // custMeterRepo.findByMeterNo(customerMeter.getMeterNo());
+          CustomerMeterEntity custMeter = custMeterRepo.findById(customerMeter.getId()).orElseThrow();
+
           custMeter.setSerialNo(customerMeter.getSerialNo());
           custMeter.setAlias(customerMeter.getAlias());
           custMeter.setBranchCode(customerMeter.getBranchCode());
@@ -121,5 +123,5 @@ public class CustomerMeterServiceImpl implements CustomerMeterService{
           Integer previousUsage = custMeterRepo.findPresentById(meterNo);
           return previousUsage == null ? 0 : previousUsage;
      }
-     
+
 }
