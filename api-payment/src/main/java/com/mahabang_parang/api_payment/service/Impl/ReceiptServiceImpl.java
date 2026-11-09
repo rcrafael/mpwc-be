@@ -64,7 +64,12 @@ public class ReceiptServiceImpl implements ReceiptService {
             setCellValue(sheet, 10, 4, receipt.getMembership());
             setCellValue(sheet, 11, 4, receipt.getTapping());
             setCellValue(sheet, 12, 4, receipt.getReconnection());
-            setCellValue(sheet, 13, 4, receipt.getCalibration());
+
+            Double calibration = receipt.getCalibration() != null ? receipt.getCalibration() : 0.0;
+            Double mmf = receipt.getMaintenanceFee() != null ? receipt.getMaintenanceFee() : 0.0;
+            Double callibrationAndMmf = calibration + mmf;
+
+            setCellValue(sheet, 13, 4, callibrationAndMmf);
             setCellValue(sheet, 14, 4, receipt.getSeptageFee());
             setCellValue(sheet, 15, 4, 0); // sharecap
             setCellValue(sheet, 16, 4, receipt.getSubReceivable());
