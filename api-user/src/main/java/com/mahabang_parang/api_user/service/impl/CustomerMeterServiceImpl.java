@@ -39,12 +39,13 @@ public class CustomerMeterServiceImpl implements CustomerMeterService {
                return response;
           }
 
-          if (custMeterRepo.findBySerialNo(customerMeter.getSerialNo()) != null) {
-               response.setStatusCode(HttpStatus.CONFLICT);
-               response.setMessage("Serial Number already exists: " + customerMeter.getSerialNo());
-               response.setResult(null);
-               return response;
-          }
+          // if (custMeterRepo.findBySerialNo(customerMeter.getSerialNo()) != null) {
+          // response.setStatusCode(HttpStatus.CONFLICT);
+          // response.setMessage("Serial Number already exists: " +
+          // customerMeter.getSerialNo());
+          // response.setResult(null);
+          // return response;
+          // }
 
           CustomerMeterEntity custMeter = new CustomerMeterEntity();
 
