@@ -20,6 +20,7 @@ import com.mahabang_parang.api_billing.model.Paginator;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
 import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
 import com.mahabang_parang.api_billing.model.entity.BillingEntity;
+import com.mahabang_parang.api_billing.model.interfaces.BillingInfoWithAlias;
 import com.mahabang_parang.api_billing.model.interfaces.BillingTableListInterfaceProjection;
 import com.mahabang_parang.api_billing.model.mapper.BillingMapper;
 import com.mahabang_parang.api_billing.model.payload.UpdateBillingPayload;
@@ -33,8 +34,7 @@ import com.mahabang_parang.api_user.service.CustomerService;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class BillingServiceImpl implements BillingService  {
-
+public class BillingServiceImpl implements BillingService {
 
      @Autowired
      private BillingRepository billingRepo;
@@ -48,38 +48,36 @@ public class BillingServiceImpl implements BillingService  {
      @Autowired
      private BillingMapper mapper;
 
-
      @Override
      public PaginationResponse<BillingTableListResponse> getBilling(int pageNumber, int pageSize) throws Exception {
 
           PageRequest pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
-          
+
           Page<BillingTableListInterfaceProjection> billingProjection = billingRepo.findAllBilling(pageable);
 
           Page<BillingTableListResponse> billingResponse = billingProjection.map(this::convertProjectionToDto);
 
           return new PaginationResponse<>(
-               billingResponse.getContent(),
-               billingResponse.getNumber(),
-               billingResponse.getSize(),
-               billingResponse.getTotalPages(),
-               billingResponse.getTotalElements()
-          );
-              
+                    billingResponse.getContent(),
+                    billingResponse.getNumber(),
+                    billingResponse.getSize(),
+                    billingResponse.getTotalPages(),
+                    billingResponse.getTotalElements());
+
      }
 
      @Override
-     public PaginationResponse<BillingDto> getBillingByCustId(String customerId, int pageNumber, int pageSize) throws Exception {
+     public PaginationResponse<BillingDto> getBillingByCustId(String customerId, int pageNumber, int pageSize)
+               throws Exception {
           PageRequest pageable = PageRequest.of(pageNumber, pageSize);
-          
+
           Page<BillingEntity> billing = billingRepo.findByCustomerId(customerId, pageable);
 
           Paginator paginator = new Paginator(
-               billing.getNumber(),
-               billing.getSize(),
-               billing.getTotalPages(),
-               billing.getTotalElements()
-          );
+                    billing.getNumber(),
+                    billing.getSize(),
+                    billing.getTotalPages(),
+                    billing.getTotalElements());
 
           PaginationResponse<BillingDto> pageResponse = new PaginationResponse<BillingDto>();
           pageResponse.setData(billing.getContent());
@@ -87,8 +85,9 @@ public class BillingServiceImpl implements BillingService  {
 
           return pageResponse;
      }
+
      @Override
-     public BillingWithCustomerInfoDto getBillingWithCustomerInfoById(String billingId) throws Exception { 
+     public BillingWithCustomerInfoDto getBillingWithCustomerInfoById(String billingId) throws Exception {
 
           BillingEntity bill = billingRepo.findById(billingId).orElseThrow();
           BillingDto billingDto = mapper.toDto(bill);
@@ -105,10 +104,10 @@ public class BillingServiceImpl implements BillingService  {
           billingWithCustomer.setMeterNo(billingDto.getMeterNo());
           billingWithCustomer.setMeterInfo(meterInfo);
           billingWithCustomer.setPrevious(billingDto.getPrevious());
-          billingWithCustomer.setPresent(billingDto.getPresent()); 
+          billingWithCustomer.setPresent(billingDto.getPresent());
           billingWithCustomer.setM3Used(billingDto.getM3Used());
           billingWithCustomer.setReadingAmount(billingDto.getReadingAmount());
-          billingWithCustomer.setParts(billingDto.getParts());      
+          billingWithCustomer.setParts(billingDto.getParts());
           billingWithCustomer.setTotalAmount(billingDto.getTotalAmount());
           billingWithCustomer.setMaintenanceFee(billingDto.getMaintenanceFee());
           billingWithCustomer.setLessAmount(billingDto.getLessAmount());
@@ -128,7 +127,7 @@ public class BillingServiceImpl implements BillingService  {
      }
 
      @Override
-     public BillingDto getBillingById(String billingId) throws Exception { 
+     public BillingDto getBillingById(String billingId) throws Exception {
 
           BillingEntity bill = billingRepo.findById(billingId).orElseThrow();
           BillingDto billingDto = mapper.toDto(bill);
@@ -151,32 +150,37 @@ public class BillingServiceImpl implements BillingService  {
      }
 
      @Override
-     public List<BillingDto> getRecentBillingByCustomerId(String customerId) throws Exception {
+     public List<BillingInfoWithAlias> getRecentBillingByCustomerId(String customerId) throws Exception {
           int maxRow = 20;
 
-          //get billing records with incomplete status
-          List<BillingEntity> incompleteBillings = billingRepo.findByCustomerIdAndStatus(customerId, 2, maxRow); // 2 = Incomplete transaction status
+          // get billing records with incomplete status
+          List<BillingInfoWithAlias> incompleteBillings = billingRepo.findByCustomerIdAndStatus(customerId, 2, maxRow); // 2=Incomplete
+                                                                                                                        // transaction
+                                                                                                                        // status
 
           int incompleteCount = incompleteBillings.size();
-          int availableRecentBillCount = maxRow - incompleteCount; // number of completed transaction to show; max 20 rows
+          int availableRecentBillCount = maxRow - incompleteCount; // number of completed transaction to show; max 20
+                                                                   // rows
 
-          //get billing records with complete status
-          List<BillingEntity> recentBillings = billingRepo.findByCustomerIdAndStatus(customerId, 1, availableRecentBillCount); //1 = Complete transaction status
+          // get billing records with complete status
+          List<BillingInfoWithAlias> recentBillings = billingRepo.findByCustomerIdAndStatus(customerId, 1,
+                    availableRecentBillCount); // 1 = Complete transaction
+                                               // status
 
-          List<BillingDto> billing = new ArrayList<BillingDto>();
+          List<BillingInfoWithAlias> billing = new ArrayList<BillingInfoWithAlias>();
 
-          billing.addAll(mapper.toDtoList(incompleteBillings));
-          billing.addAll(mapper.toDtoList(recentBillings));
+          billing.addAll(incompleteBillings);
+          billing.addAll(recentBillings);
 
           return billing;
      }
-     
+
      @Override
-     public List<BillingDto> getUnpaidBillingByCustomerId(String customerId) throws Exception {
-          List<BillingEntity> incompleteBillings = billingRepo.findByCustomerIdAndStatus(customerId, 2, 20);
-          return mapper.toDtoList(incompleteBillings);
+     public List<BillingInfoWithAlias> getUnpaidBillingByCustomerId(String customerId) throws Exception {
+          List<BillingInfoWithAlias> incompleteBillings = billingRepo.findByCustomerIdAndStatus(customerId, 2, 20);
+          return incompleteBillings;
      }
-     
+
      @Override
      public String generateReadingNo() {
           return generateControlNumber();
@@ -210,29 +214,28 @@ public class BillingServiceImpl implements BillingService  {
           entity.setTotalAmount(payload.getTotalAmount());
           entity.setDateUpdated(dateUpdated);
           BillingDto billingUpdated = mapper.toDto(this.billingRepo.save(entity));
-          
+
           return billingUpdated;
 
      }
 
-
      @Override
-     public PaginationResponse<BillingTableListResponse> searchBilling(String keyword, int pageNumber, int pageSize) throws Exception {
+     public PaginationResponse<BillingTableListResponse> searchBilling(String keyword, int pageNumber, int pageSize)
+               throws Exception {
           PageRequest pageable = PageRequest.of(pageNumber, pageSize);
-          
-          Page<BillingTableListInterfaceProjection> billingProjection = billingRepo.search(keyword, keyword, keyword, keyword, pageable);
-          
+
+          Page<BillingTableListInterfaceProjection> billingProjection = billingRepo.search(keyword, keyword, keyword,
+                    keyword, pageable);
+
           Page<BillingTableListResponse> billingResponse = billingProjection.map(this::convertProjectionToDto);
 
-
           return new PaginationResponse<BillingTableListResponse>(
-               billingResponse.getContent(),
-               billingResponse.getNumber(),
-               billingResponse.getSize(),
-               billingResponse.getTotalPages(),
-               billingResponse.getTotalElements()
-          );
-          
+                    billingResponse.getContent(),
+                    billingResponse.getNumber(),
+                    billingResponse.getSize(),
+                    billingResponse.getTotalPages(),
+                    billingResponse.getTotalElements());
+
      }
 
      @Override
@@ -242,8 +245,8 @@ public class BillingServiceImpl implements BillingService  {
           System.out.println("======================================================");
           System.out.println("BILLIN INFO: " + billingEntity.toString());
           System.out.println("======================================================");
-          
-          billingEntity.setStatus(4); //4 = void
+
+          billingEntity.setStatus(4); // 4 = void
           billingEntity.setUpdatedBy(updatedBy);
           billingEntity.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
 
@@ -257,7 +260,7 @@ public class BillingServiceImpl implements BillingService  {
      public BillingDto deleteBilling(String billingId, String updatedBy) throws Exception {
 
           BillingEntity billingEntity = billingRepo.findById(billingId).orElseThrow();
-          billingEntity.setStatus(9); //9 = deleted
+          billingEntity.setStatus(9); // 9 = deleted
           billingEntity.setUpdatedBy(updatedBy);
           billingEntity.setDateUpdated(new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
 
@@ -268,7 +271,8 @@ public class BillingServiceImpl implements BillingService  {
      }
 
      private void revertCustomerMeter(BillingEntity billingEntity, String updatedBy) {
-          if (billingEntity == null || billingEntity.getMeterNo() == null || billingEntity.getMeterNo().trim().isEmpty()) {
+          if (billingEntity == null || billingEntity.getMeterNo() == null
+                    || billingEntity.getMeterNo().trim().isEmpty()) {
                return;
           }
 
@@ -321,16 +325,15 @@ public class BillingServiceImpl implements BillingService  {
           meterService.updateCustomerMeter(meter);
      }
 
-
      ///////////
-     //HELPERS//
+     // HELPERS//
      ///////////
      private String generateControlNumber() {
-          String datePrefix  = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-          String lastReadingNo = billingRepo.findLastReadingNo("R"+datePrefix);
+          String datePrefix = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+          String lastReadingNo = billingRepo.findLastReadingNo("R" + datePrefix);
 
           int sequence = 1;
-          if(lastReadingNo != null) {
+          if (lastReadingNo != null) {
                int lastSequence = Integer.parseInt(lastReadingNo.substring(9));
                sequence = lastSequence + 1;
           }
@@ -339,7 +342,7 @@ public class BillingServiceImpl implements BillingService  {
      }
 
      private BillingTableListResponse convertProjectionToDto(BillingTableListInterfaceProjection projection) {
-          
+
           BillingTableListResponse billing = new BillingTableListResponse();
 
           billing.setId(projection.getId());

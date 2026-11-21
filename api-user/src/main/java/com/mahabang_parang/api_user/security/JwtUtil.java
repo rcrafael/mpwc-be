@@ -46,7 +46,9 @@ public class JwtUtil {
                     : "";
 
           if ("superadmin".equalsIgnoreCase(roleName)) {
-               effectivePages.addAll(com.mahabang_parang.api_user.model.constant.PageConstants.ALL_PAGES);
+               if (com.mahabang_parang.api_user.model.constant.PageConstants.ALL_PAGES != null) {
+                    effectivePages.addAll(com.mahabang_parang.api_user.model.constant.PageConstants.ALL_PAGES);
+               }
           } else if (userDetails.getPageAccess() != null) {
                effectivePages = userDetails.getPageAccess().stream()
                          .map(com.mahabang_parang.api_user.model.entity.UserPageAccessEntity::getPageCode)

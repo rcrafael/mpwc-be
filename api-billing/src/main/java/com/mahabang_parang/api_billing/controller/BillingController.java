@@ -22,6 +22,7 @@ import com.mahabang_parang.api_billing.model.ApiResponse;
 import com.mahabang_parang.api_billing.model.PaginationResponse;
 import com.mahabang_parang.api_billing.model.dto.BillingDto;
 import com.mahabang_parang.api_billing.model.dto.BillingWithCustomerInfoDto;
+import com.mahabang_parang.api_billing.model.interfaces.BillingInfoWithAlias;
 import com.mahabang_parang.api_billing.model.payload.UpdateBillingPayload;
 import com.mahabang_parang.api_billing.model.response.BillingTableListResponse;
 import com.mahabang_parang.api_billing.service.BillingService;
@@ -31,8 +32,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
-
 @RestController
 @RequestMapping("api/billing")
 public class BillingController {
@@ -40,27 +39,26 @@ public class BillingController {
      @Autowired
      private BillingService billingSvc;
 
-
      @GetMapping("/{pageNo}/{pageSize}")
-     public ResponseEntity<ApiResponse> getBilling(@PathVariable int pageNo, 
-                                                  @PathVariable int pageSize) throws Exception {
+     public ResponseEntity<ApiResponse> getBilling(@PathVariable int pageNo,
+               @PathVariable int pageSize) throws Exception {
           ApiResponse response = new ApiResponse();
 
           try {
                System.out.println("===============================================================================");
                System.out.println("GET BILLING API TRIGGERED!");
                System.out.println("===============================================================================");
-               PaginationResponse<BillingTableListResponse> billing = billingSvc.getBilling(pageNo,pageSize);
-               
+               PaginationResponse<BillingTableListResponse> billing = billingSvc.getBilling(pageNo, pageSize);
+
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(billing);
                return ResponseEntity.ok(response);
           } catch (Exception e) {
-               
+
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
 
@@ -68,12 +66,12 @@ public class BillingController {
 
      @GetMapping("customer/{customerId}/{pageNo}/{pageSize}")
      public ResponseEntity<ApiResponse> getBillingByCustomer(@PathVariable String customerId,
-                                                  @PathVariable int pageNo, 
-                                                  @PathVariable int pageSize) throws Exception {
-          
+               @PathVariable int pageNo,
+               @PathVariable int pageSize) throws Exception {
+
           ApiResponse response = new ApiResponse();
           try {
-               PaginationResponse<BillingDto> billing = billingSvc.getBillingByCustId(customerId,pageNo,pageSize);
+               PaginationResponse<BillingDto> billing = billingSvc.getBillingByCustId(customerId, pageNo, pageSize);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(billing);
@@ -81,7 +79,7 @@ public class BillingController {
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
 
@@ -89,7 +87,7 @@ public class BillingController {
 
      @GetMapping("id/{billingId}")
      public ResponseEntity<ApiResponse> getBillingById(@PathVariable String billingId) throws Exception {
-          
+
           ApiResponse response = new ApiResponse();
           try {
                BillingWithCustomerInfoDto billing = billingSvc.getBillingWithCustomerInfoById(billingId);
@@ -100,13 +98,12 @@ public class BillingController {
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
 
      }
 
-     
      @PostMapping()
      public ResponseEntity<ApiResponse> createBilling(@RequestBody BillingDto billing) throws Exception {
           ApiResponse response = new ApiResponse();
@@ -114,12 +111,12 @@ public class BillingController {
                BillingDto bill = billingSvc.create(billing);
                response.setStatusCode(HttpStatus.CREATED);
                response.setMessage("success");
-               response.setResult(bill );
+               response.setResult(bill);
                return ResponseEntity.status(HttpStatus.CREATED).body(response);
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
@@ -138,16 +135,16 @@ public class BillingController {
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
-     
+
      @GetMapping("get-recent-billings")
      public ResponseEntity<ApiResponse> getRecentBillings(@RequestParam() String customerId) {
           ApiResponse response = new ApiResponse();
           try {
-               List<BillingDto> billing = billingSvc.getRecentBillingByCustomerId(customerId);
+               List<BillingInfoWithAlias> billing = billingSvc.getRecentBillingByCustomerId(customerId);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(billing);
@@ -155,7 +152,7 @@ public class BillingController {
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
@@ -164,7 +161,7 @@ public class BillingController {
      public ResponseEntity<ApiResponse> getUnpaidBillingByCustomerId(@RequestParam String customerId) {
           ApiResponse response = new ApiResponse();
           try {
-               List<BillingDto> billing = billingSvc.getUnpaidBillingByCustomerId(customerId);
+               List<BillingInfoWithAlias> billing = billingSvc.getUnpaidBillingByCustomerId(customerId);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(billing);
@@ -172,35 +169,37 @@ public class BillingController {
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
-     
-     
+
      @PutMapping()
-     public ResponseEntity<ApiResponse> update(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UpdateBillingPayload payload) {
+     public ResponseEntity<ApiResponse> update(@AuthenticationPrincipal UserDetails userDetails,
+               @RequestBody UpdateBillingPayload payload) {
           ApiResponse response = new ApiResponse();
           try {
                BillingDto bill = billingSvc.update(payload);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
-               response.setResult(bill );
+               response.setResult(bill);
                return ResponseEntity.status(HttpStatus.OK).body(response);
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
 
      @GetMapping("search/{pageNo}/{pageSize}")
-     public ResponseEntity<ApiResponse> searchBilling(@RequestParam String keyword, @PathVariable int pageNo, @PathVariable int pageSize) {
-         ApiResponse response = new ApiResponse();
+     public ResponseEntity<ApiResponse> searchBilling(@RequestParam String keyword, @PathVariable int pageNo,
+               @PathVariable int pageSize) {
+          ApiResponse response = new ApiResponse();
 
           try {
-               PaginationResponse<BillingTableListResponse> billing = billingSvc.searchBilling(keyword, pageNo, pageSize);
+               PaginationResponse<BillingTableListResponse> billing = billingSvc.searchBilling(keyword, pageNo,
+                         pageSize);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
                response.setResult(billing);
@@ -208,7 +207,7 @@ public class BillingController {
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
 
@@ -224,16 +223,15 @@ public class BillingController {
                BillingDto bill = billingSvc.deleteBilling(id, updatedBy);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
-               response.setResult(bill );
+               response.setResult(bill);
                return ResponseEntity.status(HttpStatus.OK).body(response);
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
-     
 
      @DeleteMapping("void/{id}")
      public ResponseEntity<ApiResponse> voidBilling(HttpServletRequest request, @PathVariable String id) {
@@ -250,12 +248,12 @@ public class BillingController {
                BillingDto bill = billingSvc.voidBilling(id, updatedBy);
                response.setStatusCode(HttpStatus.OK);
                response.setMessage("success");
-               response.setResult(bill );
+               response.setResult(bill);
                return ResponseEntity.status(HttpStatus.OK).body(response);
           } catch (Exception e) {
                response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                response.setMessage("Internal Server Error: " + e.getMessage());
-               
+
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
           }
      }
@@ -268,16 +266,15 @@ public class BillingController {
                String[] tokenParts = token.split("\\.");
                String payload = "";
 
-               if(tokenParts.length > 0) {
+               if (tokenParts.length > 0) {
                     payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]));
                }
 
                ObjectMapper mapper = new ObjectMapper();
                return mapper.readValue(payload, Map.class);
           } catch (Exception e) {
-               throw new RuntimeException("Failed to decode token: " + e.getMessage(), e); 
+               throw new RuntimeException("Failed to decode token: " + e.getMessage(), e);
           }
      }
-     
 
 }
