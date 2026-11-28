@@ -4,6 +4,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -109,7 +110,8 @@ public class CustomerMeterServiceImpl implements CustomerMeterService {
 
      @Override
      public List<CustomerMeterDto> getCustomerMetersByCustomerId(String customerId) {
-          List<CustomerMeterEntity> meters = custMeterRepo.findByCustomerIdAndStatus(customerId, 6);
+          List<CustomerMeterEntity> meters = custMeterRepo.findByCustomerIdAndStatus(customerId, 6,
+                    Sort.by("alias").ascending());
           return mapper.toDtoList(meters);
      }
 
